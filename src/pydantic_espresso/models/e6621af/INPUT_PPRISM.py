@@ -1,0 +1,26 @@
+"""Pydantic model for the input of `pprism.x` version `e6621af`.
+
+This file has been generated automatically. Do not edit it manually.
+"""
+
+# ruff: noqa
+
+from pydantic import Field
+from typing import Annotated, Literal
+from pydantic_espresso.models.template import EspressoInputTemplate
+
+
+class PPRISMEspressoInput(EspressoInputTemplate):
+    """Pydantic model for the input of `pprism.x.`"""
+
+    prefix: str = Field(" 'pwscf'
+         ", description="prefix of files saved by program pw.x")
+    outdir: str = Field("
+value of the ", description="directory containing the input data, i.e. the same as in pw.x")
+    filplot: str = Field(" "", description="file 'filplot' contains solvent's quantities (can be saved for further processing)")
+    lpunch: bool = Field(False, description="punch solvent's quantities to")
+    iflag: int = Field(..., description="0 1D plot of the spherical average 1 1D plot 2 2D plot 3 3D plot 4 2D polar plot on a sphere")
+    output_format: int = Field(..., description="(ignored on 1D plot)  0  = format suitable for gnuplot   (1D)  1  = obsolete format no longer supported  2  = format suitable for plotrho   (2D)  3  = format suitable for XCRYSDEN  (2D or user-supplied 3D region)  4  = obsolete format no longer supported  5  = format suitable for XCRYSDEN  (3D, using entire FFT grid)  6  = format as gaussian cube file  (3D)      (can be read by many programs)  7  = format suitable for gnuplot   (2D) x, y, f(x,y)")
+    fileout: str = Field(" "", description="name of the file to which the plot is written")
+    interpolation: Literal["'fourier'", "'bspline'"] = Field(" 'fourier'
+         ", description="Type of interpolation:")
