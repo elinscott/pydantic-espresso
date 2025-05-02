@@ -5,13 +5,7 @@ import pytest
 from pydantic_espresso.models import versions
 
 
-from pydantic_espresso.models.template import EspressoInput
-
-
-@pytest.mark.parametrize(
-    "version",
-    versions
-)
+@pytest.mark.parametrize("version", versions)
 def test_pw_espresso_input(version: str) -> None:
     """Test if the PWEspressoInput model can be instantiated."""
     # Import the model dynamically from pydantic_espresso.models.<version>.pw
@@ -20,7 +14,7 @@ def test_pw_espresso_input(version: str) -> None:
     except ModuleNotFoundError:
         pytest.skip(f"Module for version {version} not found.")
         return
-    model = getattr(module, "PWEspressoInput")
+    model = module.PWEspressoInput
 
     # Instantiate the model
     inp = model()
@@ -39,19 +33,23 @@ def test_pw_espresso_input(version: str) -> None:
     # Check the string representation now shows the calculation value
     assert "bands" in str(inp)
 
+
 @pytest.mark.parametrize(
-    "version",
-    versions
+    "executable",
+    ["bands", "cp", "dos", "hp", "kcw", "magnon", "neb", "ph", "projwfc", "pw2wannier90"],
 )
-def test_ph_espresso_input(version: str) -> None:
-    """Test if the PHEspressoInput model can be instantiated."""
-    # Import the model dynamically from pydantic_espresso.models.<version>.ph
+@pytest.mark.parametrize("version", versions)
+def test_espresso_input(executable: str, version: str) -> None:
+    """Test if the model can be instantiated."""
+    # Import the model dynamically from pydantic_espresso.models.<version>.<executable>
     try:
-        module = __import__(f"pydantic_espresso.models.{version}.ph", fromlist=["PHEspressoInput"])
+        module = __import__(
+            f"pydantic_espresso.models.{version}.{executable}", fromlist=[executable]
+        )
     except ModuleNotFoundError:
         pytest.skip(f"Module for version {version} not found.")
         return
-    model = getattr(module, "PHEspressoInput")
+    model = getattr(module, f"{executable.upper().replace('_', '')}EspressoInput")
 
     # Instantiate the model
-    inp = model()
+    inp = model()  # noqa: F841
