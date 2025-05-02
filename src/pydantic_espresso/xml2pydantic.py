@@ -175,7 +175,7 @@ def _get_var_description(
         [line.strip() for line in description.strip(" \n'" + '"').replace('"', "'").split("\n")]
     )
 
-    description = description.replace(r"\p", "p")
+    description = description.replace(r"\p", "p").replace(r"\l", "l")
 
     return description
 
@@ -395,7 +395,9 @@ def _generate_model_string(
     version: str,
 ) -> str:
     """Convert a dictionary of class definitions to raw python code defining a Pydantic model."""
-    executable_str = executable.upper().replace(".X", "").replace(" ", "_").replace("-", "_")
+    executable_str = executable.upper().replace(".X", "")
+    for char in " -_":
+        executable_str = executable_str.replace(char, "")
 
     header = (
         '"""'

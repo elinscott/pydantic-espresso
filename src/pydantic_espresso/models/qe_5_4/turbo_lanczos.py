@@ -114,7 +114,7 @@ class Lr_postNamelist(Namelist):
     )
 
 
-class TURBO_LANCZOSEspressoInput(EspressoInput):
+class TURBOLANCZOSEspressoInput(EspressoInput):
     """Pydantic model for the input of `turbo_lanczos.x.`"""
 
     lr_input: Lr_inputNamelist = Field(default_factory=lambda: Lr_inputNamelist())

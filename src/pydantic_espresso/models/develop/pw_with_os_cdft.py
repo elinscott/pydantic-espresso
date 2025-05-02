@@ -121,7 +121,7 @@ class OscdftNamelist(Namelist):
     )
 
 
-class PW_WITH_OS_CDFTEspressoInput(EspressoInput):
+class PWWITHOSCDFTEspressoInput(EspressoInput):
     """Pydantic model for the input of `pw.x with OS-CDFT.`"""
 
     oscdft: OscdftNamelist = Field(default_factory=lambda: OscdftNamelist())

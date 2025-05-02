@@ -25,7 +25,7 @@ class PpacfNamelist(Namelist):
     )
     n_lambda: int = Field(
         1,
-        description="Number of fragments in coupling-constant scaling curve. In the default case, only $\lambda=0$ and $\lambda=1$ ends are calculated.",
+        description="Number of fragments in coupling-constant scaling curve. In the default case, only $lambda=0$ and $lambda=1$ ends are calculated.",
     )
     lplot: bool = Field(
         False,

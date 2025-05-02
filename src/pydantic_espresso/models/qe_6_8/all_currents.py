@@ -95,7 +95,7 @@ class Energy_currentNamelist(Namelist):
     )
 
 
-class ALL_CURRENTSEspressoInput(EspressoInput):
+class ALLCURRENTSEspressoInput(EspressoInput):
     """Pydantic model for the input of `all_currents.x.`"""
 
     energy_current: Energy_currentNamelist = Field(default_factory=lambda: Energy_currentNamelist())

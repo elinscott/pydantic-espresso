@@ -59,7 +59,7 @@ class Lr_controlNamelist(Namelist):
     )
 
 
-class TURBO_MAGNONSEspressoInput(EspressoInput):
+class TURBOMAGNONSEspressoInput(EspressoInput):
     """Pydantic model for the input of `turbo_magnons.x.`"""
 
     lr_input: Lr_inputNamelist = Field(default_factory=lambda: Lr_inputNamelist())

@@ -69,7 +69,7 @@ class Lr_inputNamelist(Namelist):
     )
 
 
-class TURBO_SPECTRUMEspressoInput(EspressoInput):
+class TURBOSPECTRUMEspressoInput(EspressoInput):
     """Pydantic model for the input of `turbo_spectrum.x.`"""
 
     lr_input: Lr_inputNamelist = Field(default_factory=lambda: Lr_inputNamelist())

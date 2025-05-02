@@ -141,7 +141,7 @@ class Lr_davNamelist(Namelist):
     )
 
 
-class TURBO_DAVIDSONEspressoInput(EspressoInput):
+class TURBODAVIDSONEspressoInput(EspressoInput):
     """Pydantic model for the input of `turbo_davidson.x.`"""
 
     lr_input: Lr_inputNamelist = Field(default_factory=lambda: Lr_inputNamelist())
