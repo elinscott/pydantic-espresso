@@ -2,16 +2,13 @@
 
 import base64
 import os
-import shutil
 import warnings
-from collections.abc import Iterable
-
 from pathlib import Path
+
 import gitlab
-from gitlab.v4.objects import Project, ProjectCommit, ProjectTag
+from gitlab.v4.objects import Project, ProjectCommit
 
 from pydantic_espresso.def_files import directory as def_directory
-
 
 OWNER = "QEF"
 REPO = "q-e"
@@ -19,7 +16,9 @@ TOKEN = os.getenv("GITLAB_TOKEN")
 URL = os.getenv("GITLAB_URL", "https://gitlab.com")
 
 
-def create_gitlab_session(token: str | None = None, url: str = "https://gitlab.com") -> gitlab.Gitlab:
+def create_gitlab_session(
+    token: str | None = None, url: str = "https://gitlab.com"
+) -> gitlab.Gitlab:
     """Create a GitLab session with optional authentication."""
     if token is None:
         gl = gitlab.Gitlab(url)
@@ -29,15 +28,8 @@ def create_gitlab_session(token: str | None = None, url: str = "https://gitlab.c
     return gl
 
 
-def download_file(
-    project: Project,
-    ref: str,
-    file_path: str,
-    folder: str
-) -> None:
+def download_file(project: Project, ref: str, file_path: str, folder: Path) -> None:
     """Download a specific file from a given GitLab repository at a specified tag."""
-    print(f"Downloading {file_path} from {ref}...")
-
     # Fetch the file content
     file_content = project.files.get(file_path=file_path, ref=ref)
 
@@ -51,21 +43,25 @@ def download_file(
             f.write(decoded_content)
 
 
-def fetch_defs(project, ref, folder):
+def fetch_defs(project: Project, ref: str, folder: Path) -> None:
+    """Fetch the xsl and def files for a particular commit or tag from the GitLab repo."""
     # First, try to get the xsl file
     try:
-        file = project.files.get(file_path="dev-tools/input_xx.xsl", ref=ref)
-        download_file(project, ref, file.file_path, folder)
+        xsl_file = project.files.get(file_path="dev-tools/input_xx.xsl", ref=ref)
+        download_file(project, ref, xsl_file.file_path, folder)
     except gitlab.exceptions.GitlabGetError:
         # Without an xsl file, we cannot convert the def files to XML
-        print("No xsl file found for {ref}. Skipping...")
+        warnings.warn(f"No xsl file found for {ref}. Skipping...", stacklevel=2)
         return
 
     for file in project.repository_tree(ref=ref, recursive=True, get_all=True, iterator=True):
-        if file['path'].endswith(".def"):
+        if not isinstance(file, dict):
+            raise TypeError("Expected a dictionary for the file object.")
+        if "path" not in file:
+            raise KeyError("Expected 'path' key in the file dictionary.")
+        if file["path"].endswith(".def"):
             # Download the file
-            download_file(project, ref, file['path'], folder)
-
+            download_file(project, ref, file["path"], folder)
 
 
 def fetch_all_defs() -> None:
@@ -75,18 +71,18 @@ def fetch_all_defs() -> None:
     project: Project = session.projects.get(f"{OWNER}/{REPO}")
 
     # Download *.def files for the latest commit
-    latest_commit = project.commits.list(ref=project.default_branch, per_page=1, get_all=False)[0]
-    fetch_defs(project, ref=latest_commit.id, folder = def_directory / latest_commit.id[:7])
+    commit_list = project.commits.list(ref=project.default_branch, per_page=1, get_all=False)
+    if isinstance(commit_list, list):
+        latest_commit = commit_list[0]
+    else:
+        latest_commit = commit_list.next()
+    if not isinstance(latest_commit, ProjectCommit):
+        raise TypeError("Expected a ProjectCommit object.")
+    fetch_defs(project, ref=latest_commit.id, folder=def_directory / "develop")
 
     # Download all *.def files for all tags
     for tag in project.tags.list(get_all=True):
-        # Find all *.def files in the tag
-        fetch_defs(project, ref=tag.name, folder=def_directory / tag.name)
-
-    # Copy the latest commit to the folder "latest"
-    src = def_directory / latest_commit.id[:7]
-    dst = def_directory / "latest"
-    if dst.exists():
-        # Remove the existing folder
-        shutil.rmtree(dst)
-    shutil.copy(src, dst)
+        existing_tags = [t.name for t in def_directory.iterdir() if t.is_dir()]
+        if tag.name not in existing_tags:
+            # Find all *.def files in the tag
+            fetch_defs(project, ref=tag.name, folder=def_directory / tag.name)

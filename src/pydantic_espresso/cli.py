@@ -17,6 +17,8 @@ import json
 
 import click
 
+from pydantic_espresso.models import versions
+
 __all__ = [
     "main",
 ]
@@ -31,9 +33,14 @@ def main() -> None:
 @main.command()
 def fetch_def() -> None:
     """Download the latest XML files."""
-    from pydantic_espresso.fetch import fetch_def
+    from pydantic_espresso.fetch import fetch_all_defs
 
-    fetch_def()
+    fetch_all_defs()
+
+    click.echo(
+        "The next step is to convert the .def files to .xml. This is done with "
+        "an accompanying shell script, not the `pydantic_espresso` CLI."
+    )
 
 
 @main.command()
@@ -45,21 +52,36 @@ def xml2pydantic() -> None:
 
 
 @main.command()
-def update() -> None:
-    """Download the latest XML files and update the pydantic models accordingly."""
-    from pydantic_espresso.fetch import fetch_xml
-    from pydantic_espresso.generate import generate_models
+@click.argument(
+    "executable",
+    required=True,
+)
+@click.option(
+    "--version",
+    default="latest",
+    type=click.Choice(versions, case_sensitive=False),
+)
+def schema(executable: str, version: str) -> None:
+    """Print the JSON schema of the specified executable model."""
+    try:
+        # Try to find the module from which to import the model
+        module = __import__(
+            f"pydantic_espresso.models.{version}.{executable}", fromlist=[executable]
+        )
+    except ImportError:
+        click.echo(f"Models for {executable} not found for version {version}.")
+        return
 
-    fetch_xml()
-    generate_models()
+    try:
+        # Try to import the model class
+        model_class = getattr(module, f"{executable.upper()}EspressoInput")
+    except AttributeError:
+        click.echo(
+            f"Model class {executable.upper()}EspressoInput not found for version {version}."
+        )
+        return
 
-
-@main.command
-def schema() -> None:
-    """Print the JSON schema of the latest Wannier90Input model."""
-    from pydantic_espresso.models.latest import Wannier90Input
-
-    print(json.dumps(Wannier90Input.model_json_schema(), indent=2))  # noqa: T201
+    click.echo(json.dumps(model_class.model_json_schema(), indent=2))
 
 
 if __name__ == "__main__":

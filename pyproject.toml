@@ -55,12 +55,14 @@ dependencies = [
     "more_click",
     "typing-extensions",
     "pydantic",
-    "python-gitlab",
-    "defusedxml",
 ]
 
 # see https://peps.python.org/pep-0735/ and https://docs.astral.sh/uv/concepts/dependencies/#dependency-groups
 [dependency-groups]
+cli = [
+    "python-gitlab",
+    "defusedxml",
+]
 tests = [
     "pytest",
     "coverage[toml]",
@@ -220,6 +222,8 @@ ignore = [
 "docs/source/conf.py" = ["ERA001"]
 # Prints are okay in notebooks
 "notebooks/**/*.ipynb" = ["T201"]
+# Asserts are okay in tests
+"**/test_*.py" = ["S101"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "pep257"
