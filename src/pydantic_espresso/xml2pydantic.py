@@ -10,6 +10,7 @@ from xml.etree.ElementTree import Element, ParseError
 
 from defusedxml.ElementTree import parse
 
+from pydantic_espresso.models import directory as model_directory
 from pydantic_espresso.models.inputs import import_parameter_models
 from pydantic_espresso.xml_files import directory as xml_directory
 
@@ -64,7 +65,9 @@ def convert_all_xml_files_to_models() -> None:
     """Convert all XML files in the xml_files directory to Pydantic models."""
     for xml_path in xml_directory.rglob("*.xml"):
         try:
-            model_str = convert_xml_file_to_model(xml_path, version=xml_path.parent.name)
+            model_str, executable_str = convert_xml_file_to_model(
+                xml_path, version=xml_path.parent.name
+            )
         except ParseError as e:
             warnings.warn(f"Processing {xml_path} failed: {e}", stacklevel=2)
             continue
@@ -72,16 +75,11 @@ def convert_all_xml_files_to_models() -> None:
             warnings.warn(f"Processing {xml_path} failed: {e}", stacklevel=2)
             continue
 
-        model_file = str(xml_path)
-        for old, new in [
-            (".", "_"),
-            ("-", "_"),
-            ("_xml", ".py"),
-            ("xml_files", "models"),
-            ("INPUT_", ""),
-        ]:
-            model_file = model_file.replace(old, new)
-        model_file = model_file.lower()
+        model_file = (
+            model_directory
+            / xml_path.parent.name.replace(".", "_").replace("-", "_")
+            / f"{executable_str}.py"
+        )
         model_dir = Path(model_file).parent
         if not model_dir.exists():
             model_dir.mkdir(parents=True, exist_ok=True)
@@ -95,7 +93,7 @@ def convert_all_xml_files_to_models() -> None:
             f.write(model_str)
 
 
-def convert_xml_file_to_model(xml_file: Path, version: str = "latest") -> str:
+def convert_xml_file_to_model(xml_file: Path, version: str = "latest") -> tuple[str, str]:
     """Convert an XML file to raw python code that defines the corresponding Pydantic model."""
     # Sanitize the XML file
     sanitized_xml = sanitize_xml(xml_file)
@@ -107,7 +105,9 @@ def convert_xml_file_to_model(xml_file: Path, version: str = "latest") -> str:
         sanitized_xml.unlink(missing_ok=True)
 
     root = tree.getroot()
-    return convert_xml_tree_to_model(root, version=version)
+    executable_name = root.attrib["program"].lower()
+    executable_name = executable_name.replace(".x", "").replace("-", "_").replace(" ", "_")
+    return convert_xml_tree_to_model(root, version=version), executable_name
 
 
 def convert_xml_tree_to_model(root: Element, version: str = "latest") -> str:
@@ -174,6 +174,8 @@ def _get_var_description(
     description = " ".join(
         [line.strip() for line in description.strip(" \n'" + '"').replace('"', "'").split("\n")]
     )
+
+    description = description.replace(r"\p", "p").replace(r"\l", "l")
 
     return description
 
@@ -393,7 +395,9 @@ def _generate_model_string(
     version: str,
 ) -> str:
     """Convert a dictionary of class definitions to raw python code defining a Pydantic model."""
-    executable_str = executable.upper().replace(".X", "").replace(" ", "_").replace("-", "_")
+    executable_str = executable.upper().replace(".X", "")
+    for char in " -_":
+        executable_str = executable_str.replace(char, "")
 
     header = (
         '"""'

@@ -36,7 +36,7 @@ class InterpolationNamelist(Namelist):
     )
 
 
-class BAND_INTERPOLATIONEspressoInput(EspressoInput):
+class BANDINTERPOLATIONEspressoInput(EspressoInput):
     """Pydantic model for the input of `band_interpolation.x.`"""
 
     interpolation: InterpolationNamelist = Field(default_factory=lambda: InterpolationNamelist())

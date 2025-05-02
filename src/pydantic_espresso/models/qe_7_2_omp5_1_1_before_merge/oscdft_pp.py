@@ -21,7 +21,7 @@ class Oscdft_pp_namelistNamelist(Namelist):
     )
 
 
-class OSCDFT_PPEspressoInput(EspressoInput):
+class OSCDFTPPEspressoInput(EspressoInput):
     """Pydantic model for the input of `oscdft_pp.x.`"""
 
     oscdft_pp_namelist: Oscdft_pp_namelistNamelist = Field(

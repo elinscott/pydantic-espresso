@@ -30,7 +30,7 @@ class Oscdft_et_namelistNamelist(Namelist):
     print_debug: bool = Field(False, description="If .TRUE., prints additional debug informations.")
 
 
-class OSCDFT_ETEspressoInput(EspressoInput):
+class OSCDFTETEspressoInput(EspressoInput):
     """Pydantic model for the input of `oscdft_et.x.`"""
 
     oscdft_et_namelist: Oscdft_et_namelistNamelist = Field(

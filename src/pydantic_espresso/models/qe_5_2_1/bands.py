@@ -41,7 +41,7 @@ class BandsNamelist(Namelist):
     )
     plot_2d: bool = Field(
         False,
-        description="If .true. writes the eigenvalues in the output file in a 2D format readable by gnuplot. Band ordering is not changed. Each band is written in a different file called filband.# with the format: xk, yk, energy xk, yk, energy ..  ..  .. energies are written in eV and xk in units 2\pi/a.",
+        description="If .true. writes the eigenvalues in the output file in a 2D format readable by gnuplot. Band ordering is not changed. Each band is written in a different file called filband.# with the format: xk, yk, energy xk, yk, energy ..  ..  .. energies are written in eV and xk in units 2pi/a.",
     )
 
 

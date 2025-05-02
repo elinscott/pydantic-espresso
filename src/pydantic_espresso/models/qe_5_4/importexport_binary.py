@@ -32,7 +32,7 @@ class InputppNamelist(Namelist):
     )
 
 
-class IMPORTEXPORT_BINARYEspressoInput(EspressoInput):
+class IMPORTEXPORTBINARYEspressoInput(EspressoInput):
     """Pydantic model for the input of `importexport_binary.x.`"""
 
     inputpp: InputppNamelist = Field(default_factory=lambda: InputppNamelist())

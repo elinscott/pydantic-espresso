@@ -39,7 +39,7 @@ class InputppNamelist(Namelist):
     )
 
 
-class PW_EXPORTEspressoInput(EspressoInput):
+class PWEXPORTEspressoInput(EspressoInput):
     """Pydantic model for the input of `pw_export.x.`"""
 
     inputpp: InputppNamelist = Field(default_factory=lambda: InputppNamelist())
