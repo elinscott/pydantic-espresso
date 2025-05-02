@@ -15,11 +15,20 @@ from pydantic_espresso.utils import get_tmp_dir, get_pseudo_dir
 class InputNamelist(Namelist):
     """Pydantic model for the `Input` namelist."""
 
-
-    fildyn: str | None = Field(None, description="Input file name (must be specified).  'fildyn'0 contains information on the q-point grid  'fildyn'1-N contain force constants C_n = C(q_n), where n = 1,...N, where N is the number of q-points in the irreducible brillouin zone.  Normally this should be the same as specified on input to the phonon code.  In the non collinear/spin-orbit case the files produced by ph.x are in .xml format. In this case fildyn is the same as in the phonon code + the .xml extension.")
-    flfrc: str | None = Field(None, description="Output file containing the IFC in real space (must be specified)")
-    zasr: Literal["no", "simple", "crystal", "one-dim", "zero-dim"] = Field("no", description="Indicates the type of Acoustic Sum Rules used for the Born effective charges.  Allowed values:  Note that in certain cases, not all the rotational asr can be applied (e.g. if there are only 2 atoms in a molecule or if all the atoms are aligned, etc.). In these cases the supplementary asr are cancelled during the orthonormalization procedure (see below).")
-    loto_2d: bool | None = Field(None, description="set to .true. to activate two-dimensional treatment of LO-TO splitting.")
+    fildyn: str | None = Field(
+        None,
+        description="Input file name (must be specified).  'fildyn'0 contains information on the q-point grid  'fildyn'1-N contain force constants C_n = C(q_n), where n = 1,...N, where N is the number of q-points in the irreducible brillouin zone.  Normally this should be the same as specified on input to the phonon code.  In the non collinear/spin-orbit case the files produced by ph.x are in .xml format. In this case fildyn is the same as in the phonon code + the .xml extension.",
+    )
+    flfrc: str | None = Field(
+        None, description="Output file containing the IFC in real space (must be specified)"
+    )
+    zasr: Literal["no", "simple", "crystal", "one-dim", "zero-dim"] = Field(
+        "no",
+        description="Indicates the type of Acoustic Sum Rules used for the Born effective charges.  Allowed values:  Note that in certain cases, not all the rotational asr can be applied (e.g. if there are only 2 atoms in a molecule or if all the atoms are aligned, etc.). In these cases the supplementary asr are cancelled during the orthonormalization procedure (see below).",
+    )
+    loto_2d: bool | None = Field(
+        None, description="set to .true. to activate two-dimensional treatment of LO-TO splitting."
+    )
 
 
 class Q2REspressoInput(EspressoInput):
