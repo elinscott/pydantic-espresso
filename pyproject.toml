@@ -114,6 +114,7 @@ release = [
     { include-group = "build" },
     "uv",
     "keyring",
+    "keyrings.alt",
 ]
 
 # see https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#dependencies-optional-dependencies
