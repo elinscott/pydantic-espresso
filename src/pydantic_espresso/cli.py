@@ -58,7 +58,7 @@ def xml2pydantic() -> None:
 )
 @click.option(
     "--version",
-    default="latest",
+    default="develop",
     type=click.Choice(versions, case_sensitive=False),
 )
 def schema(executable: str, version: str) -> None:
