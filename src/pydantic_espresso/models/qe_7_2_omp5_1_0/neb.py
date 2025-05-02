@@ -12,5 +12,10 @@ from pydantic_espresso.models.template import EspressoInput, Namelist
 from pydantic_espresso.utils import get_tmp_dir, get_pseudo_dir
 
 
+
+
+
 class NEBEspressoInput(EspressoInput):
     """Pydantic model for the input of `neb.x.`"""
+
+

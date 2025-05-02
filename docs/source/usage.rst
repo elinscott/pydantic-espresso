@@ -1,5 +1,5 @@
 Usage
 =====
 
-.. automodule:: pydantic_espresso.api
+.. automodule:: pydantic_espresso.models.develop.pw
     :members:
