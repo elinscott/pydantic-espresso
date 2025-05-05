@@ -95,6 +95,12 @@ def convert_all_xml_files_to_models() -> None:
 
 def convert_xml_file_to_model(xml_file: Path, version: str = "latest") -> tuple[str, str]:
     """Convert an XML file to raw python code that defines the corresponding Pydantic model."""
+
+    # Before sanitizing the XML file, we need to check for blocks (because these are specified in the <intro>
+    # field using <b> tags)
+
+    cards = parse_cards(xml_file)
+
     # Sanitize the XML file
     sanitized_xml = sanitize_xml(xml_file)
 
