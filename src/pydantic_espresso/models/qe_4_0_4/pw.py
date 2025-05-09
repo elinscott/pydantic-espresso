@@ -7,13 +7,20 @@ This file has been generated automatically. Do not edit it manually.
 
 from pathlib import Path
 from pydantic import Field, field_validator
-from typing import Literal
-from pydantic_espresso.models.template import EspressoInput, Namelist
+from typing import Annotated, Literal
+from pydantic_espresso.models.template import EspressoInput
+from pydantic_espresso.namelist import Namelist
 from pydantic_espresso.utils import get_tmp_dir, get_pseudo_dir
+from pydantic_espresso.card.pw.atomic_positions import AtomicPositionsCard
+from pydantic_espresso.card.pw.atomic_species import AtomicSpecies
+from pydantic_espresso.card.pw.cell_parameters import CellParametersCard
+from pydantic_espresso.card.pw.constraints import Constraint
+from pydantic_espresso.card.pw.k_points import KPointsCard
+from pydantic_espresso.card.pw.occupations import PositiveFloat0to1, PositiveFloat0to2
 
 
 class ControlNamelist(Namelist):
-    """Pydantic model for the `Control` namelist."""
+    """Pydantic model for the `CONTROL` namelist."""
 
     calculation: str = Field(
         "scf",
@@ -105,7 +112,7 @@ class ControlNamelist(Namelist):
 
 
 class SystemNamelist(Namelist):
-    """Pydantic model for the `System` namelist."""
+    """Pydantic model for the `SYSTEM` namelist."""
 
     ibrav: Literal[0, 1, 2, 3, -3, 4, 5, -5, 6, 7, 8, 9, -9, 91, 10, 11, 12, -12, 13, -13, 14] = (
         Field(
@@ -230,7 +237,7 @@ class SystemNamelist(Namelist):
 
 
 class ElectronsNamelist(Namelist):
-    """Pydantic model for the `Electrons` namelist."""
+    """Pydantic model for the `ELECTRONS` namelist."""
 
     electron_maxstep: int = Field(100, description="maximum number of iterations in a scf step")
     conv_thr: float = Field(
@@ -289,7 +296,7 @@ class ElectronsNamelist(Namelist):
 
 
 class IonsNamelist(Namelist):
-    """Pydantic model for the `Ions` namelist."""
+    """Pydantic model for the `IONS` namelist."""
 
     ion_dynamics: str | None = Field(
         None,
@@ -314,7 +321,7 @@ class IonsNamelist(Namelist):
 
 
 class CellNamelist(Namelist):
-    """Pydantic model for the `Cell` namelist."""
+    """Pydantic model for the `CELL` namelist."""
 
     cell_dynamics: str | None = Field(
         None,
@@ -342,7 +349,7 @@ class CellNamelist(Namelist):
 
 
 class PhononNamelist(Namelist):
-    """Pydantic model for the `Phonon` namelist."""
+    """Pydantic model for the `PHONON` namelist."""
 
     modenum: int = Field(
         0,
@@ -351,7 +358,7 @@ class PhononNamelist(Namelist):
 
 
 class EeNamelist(Namelist):
-    """Pydantic model for the `Ee` namelist."""
+    """Pydantic model for the `EE` namelist."""
 
     which_compensation: str = Field(
         "none",
@@ -376,7 +383,7 @@ class EeNamelist(Namelist):
 
 
 class PWEspressoInput(EspressoInput):
-    """Pydantic model for the input of `pw.x.`"""
+    """Pydantic model for the input of `pw.x`"""
 
     control: ControlNamelist = Field(default_factory=lambda: ControlNamelist())
     system: SystemNamelist = Field(default_factory=lambda: SystemNamelist())
@@ -385,3 +392,13 @@ class PWEspressoInput(EspressoInput):
     cell: CellNamelist = Field(default_factory=lambda: CellNamelist())
     phonon: PhononNamelist = Field(default_factory=lambda: PhononNamelist())
     ee: EeNamelist = Field(default_factory=lambda: EeNamelist())
+    atomic_species: list[AtomicSpecies] = Field(default_factory=list)
+    atomic_positions: AtomicPositionsCard = Field(...)
+    k_points: KPointsCard = Field(discriminator="kind")
+    cell_parameters: CellParametersCard = Field(...)
+    constraints: list[Constraint] = Field(default_factory=list)
+    occupations: (
+        tuple[list[PositiveFloat0to2]]
+        | tuple[list[PositiveFloat0to1], list[PositiveFloat0to1]]
+        | None
+    ) = Field(None)

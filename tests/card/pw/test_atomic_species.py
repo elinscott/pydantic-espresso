@@ -1,6 +1,9 @@
-from pydantic_espresso.cards.pw.atomic_species import AtomicSpecies
+"""Test `pydantic_espresso.card.pw.atomic_species`."""
 
-def test_atomic_species_card():
+from pydantic_espresso.card.pw.atomic_species import AtomicSpecies
+
+
+def test_atomic_species_card() -> None:
     """Test the AtomicSpecies class."""
     atomic_species = AtomicSpecies(species="H", mass=1.0, pseudopotential="H.upf")
     assert atomic_species.species == "H"

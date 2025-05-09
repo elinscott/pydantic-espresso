@@ -7,13 +7,14 @@ This file has been generated automatically. Do not edit it manually.
 
 from pathlib import Path
 from pydantic import Field, field_validator
-from typing import Literal
-from pydantic_espresso.models.template import EspressoInput, Namelist
+from typing import Annotated, Literal
+from pydantic_espresso.models.template import EspressoInput
+from pydantic_espresso.namelist import Namelist
 from pydantic_espresso.utils import get_tmp_dir, get_pseudo_dir
 
 
 class InputgipawNamelist(Namelist):
-    """Pydantic model for the `Inputgipaw` namelist."""
+    """Pydantic model for the `INPUTGIPAW` namelist."""
 
     job: str = Field(
         "nmr",
@@ -49,6 +50,6 @@ class InputgipawNamelist(Namelist):
 
 
 class GIPAWEspressoInput(EspressoInput):
-    """Pydantic model for the input of `gipaw.x.`"""
+    """Pydantic model for the input of `gipaw.x`"""
 
     inputgipaw: InputgipawNamelist = Field(default_factory=lambda: InputgipawNamelist())

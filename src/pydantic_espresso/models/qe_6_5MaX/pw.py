@@ -7,13 +7,21 @@ This file has been generated automatically. Do not edit it manually.
 
 from pathlib import Path
 from pydantic import Field, field_validator
-from typing import Literal
-from pydantic_espresso.models.template import EspressoInput, Namelist
+from typing import Annotated, Literal
+from pydantic_espresso.models.template import EspressoInput
+from pydantic_espresso.namelist import Namelist
 from pydantic_espresso.utils import get_tmp_dir, get_pseudo_dir
+from pydantic_espresso.card.pw.atomic_forces import AtomicForce
+from pydantic_espresso.card.pw.atomic_positions import AtomicPositionsCard
+from pydantic_espresso.card.pw.atomic_species import AtomicSpecies
+from pydantic_espresso.card.pw.cell_parameters import CellParametersCard
+from pydantic_espresso.card.pw.constraints import Constraint
+from pydantic_espresso.card.pw.k_points import KPointsCard
+from pydantic_espresso.card.pw.occupations import PositiveFloat0to1, PositiveFloat0to2
 
 
 class ControlNamelist(Namelist):
-    """Pydantic model for the `Control` namelist."""
+    """Pydantic model for the `CONTROL` namelist."""
 
     calculation: Literal["scf", "nscf", "bands", "relax", "md", "vc-relax", "vc-md"] = Field(
         "scf",
@@ -125,7 +133,7 @@ class ControlNamelist(Namelist):
 
 
 class SystemNamelist(Namelist):
-    """Pydantic model for the `System` namelist."""
+    """Pydantic model for the `SYSTEM` namelist."""
 
     @field_validator("smearing", mode="before")
     def map_smearing(cls, v: str) -> str:
@@ -422,7 +430,7 @@ class SystemNamelist(Namelist):
 
 
 class ElectronsNamelist(Namelist):
-    """Pydantic model for the `Electrons` namelist."""
+    """Pydantic model for the `ELECTRONS` namelist."""
 
     @field_validator("diagonalization", mode="before")
     def map_diagonalization(cls, v: str) -> str:
@@ -504,7 +512,7 @@ class ElectronsNamelist(Namelist):
 
 
 class IonsNamelist(Namelist):
-    """Pydantic model for the `Ions` namelist."""
+    """Pydantic model for the `IONS` namelist."""
 
     ion_dynamics: Literal[
         None, "bfgs", "damp", "verlet", "langevin", "langevin-smc", "bfgs", "damp", "beeman"
@@ -530,7 +538,7 @@ class IonsNamelist(Namelist):
 
 
 class CellNamelist(Namelist):
-    """Pydantic model for the `Cell` namelist."""
+    """Pydantic model for the `CELL` namelist."""
 
     cell_dynamics: Literal[None, "none", "sd", "damp-pr", "damp-w", "bfgs", "none", "pr", "w"] = (
         Field(
@@ -577,10 +585,21 @@ class CellNamelist(Namelist):
 
 
 class PWEspressoInput(EspressoInput):
-    """Pydantic model for the input of `pw.x.`"""
+    """Pydantic model for the input of `pw.x`"""
 
     control: ControlNamelist = Field(default_factory=lambda: ControlNamelist())
     system: SystemNamelist = Field(default_factory=lambda: SystemNamelist())
     electrons: ElectronsNamelist = Field(default_factory=lambda: ElectronsNamelist())
     ions: IonsNamelist = Field(default_factory=lambda: IonsNamelist())
     cell: CellNamelist = Field(default_factory=lambda: CellNamelist())
+    atomic_species: list[AtomicSpecies] = Field(default_factory=list)
+    atomic_positions: AtomicPositionsCard = Field(...)
+    k_points: KPointsCard = Field(discriminator="kind")
+    cell_parameters: CellParametersCard = Field(...)
+    constraints: list[Constraint] = Field(default_factory=list)
+    occupations: (
+        tuple[list[PositiveFloat0to2]]
+        | tuple[list[PositiveFloat0to1], list[PositiveFloat0to1]]
+        | None
+    ) = Field(None)
+    atomic_forces: list[AtomicForce] = Field(default_factory=list)

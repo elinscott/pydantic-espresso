@@ -7,13 +7,14 @@ This file has been generated automatically. Do not edit it manually.
 
 from pathlib import Path
 from pydantic import Field, field_validator
-from typing import Literal
-from pydantic_espresso.models.template import EspressoInput, Namelist
+from typing import Annotated, Literal
+from pydantic_espresso.models.template import EspressoInput
+from pydantic_espresso.namelist import Namelist
 from pydantic_espresso.utils import get_tmp_dir, get_pseudo_dir
 
 
 class PpacfNamelist(Namelist):
-    """Pydantic model for the `Ppacf` namelist."""
+    """Pydantic model for the `PPACF` namelist."""
 
     prefix: str | None = Field(
         None,
@@ -46,6 +47,6 @@ class PpacfNamelist(Namelist):
 
 
 class PPACFEspressoInput(EspressoInput):
-    """Pydantic model for the input of `ppacf.x.`"""
+    """Pydantic model for the input of `ppacf.x`"""
 
     ppacf: PpacfNamelist = Field(default_factory=lambda: PpacfNamelist())

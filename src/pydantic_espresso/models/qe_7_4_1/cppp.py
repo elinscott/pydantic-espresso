@@ -7,13 +7,14 @@ This file has been generated automatically. Do not edit it manually.
 
 from pathlib import Path
 from pydantic import Field, field_validator
-from typing import Literal
-from pydantic_espresso.models.template import EspressoInput, Namelist
+from typing import Annotated, Literal
+from pydantic_espresso.models.template import EspressoInput
+from pydantic_espresso.namelist import Namelist
 from pydantic_espresso.utils import get_tmp_dir, get_pseudo_dir
 
 
 class InputppNamelist(Namelist):
-    """Pydantic model for the `Inputpp` namelist."""
+    """Pydantic model for the `INPUTPP` namelist."""
 
     prefix: str = Field(
         "cp", description="basename prepended to cp.x output filenames: cp.evp, cp.pos ...."
@@ -53,6 +54,6 @@ class InputppNamelist(Namelist):
 
 
 class CPPPEspressoInput(EspressoInput):
-    """Pydantic model for the input of `cppp.x.`"""
+    """Pydantic model for the input of `cppp.x`"""
 
     inputpp: InputppNamelist = Field(default_factory=lambda: InputppNamelist())

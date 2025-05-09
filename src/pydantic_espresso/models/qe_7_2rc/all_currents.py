@@ -7,13 +7,14 @@ This file has been generated automatically. Do not edit it manually.
 
 from pathlib import Path
 from pydantic import Field, field_validator
-from typing import Literal
-from pydantic_espresso.models.template import EspressoInput, Namelist
+from typing import Annotated, Literal
+from pydantic_espresso.models.template import EspressoInput
+from pydantic_espresso.namelist import Namelist
 from pydantic_espresso.utils import get_tmp_dir, get_pseudo_dir
 
 
-class Energy_currentNamelist(Namelist):
-    """Pydantic model for the `Energy_current` namelist."""
+class EnergyCurrentNamelist(Namelist):
+    """Pydantic model for the `ENERGY_CURRENT` namelist."""
 
     delta_t: float = Field(
         1.0e0,
@@ -105,6 +106,6 @@ class Energy_currentNamelist(Namelist):
 
 
 class ALLCURRENTSEspressoInput(EspressoInput):
-    """Pydantic model for the input of `all_currents.x.`"""
+    """Pydantic model for the input of `all_currents.x`"""
 
-    energy_current: Energy_currentNamelist = Field(default_factory=lambda: Energy_currentNamelist())
+    energy_current: EnergyCurrentNamelist = Field(default_factory=lambda: EnergyCurrentNamelist())

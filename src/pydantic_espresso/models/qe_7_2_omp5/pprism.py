@@ -7,13 +7,14 @@ This file has been generated automatically. Do not edit it manually.
 
 from pathlib import Path
 from pydantic import Field, field_validator
-from typing import Literal
-from pydantic_espresso.models.template import EspressoInput, Namelist
+from typing import Annotated, Literal
+from pydantic_espresso.models.template import EspressoInput
+from pydantic_espresso.namelist import Namelist
 from pydantic_espresso.utils import get_tmp_dir, get_pseudo_dir
 
 
 class InputppNamelist(Namelist):
-    """Pydantic model for the `Inputpp` namelist."""
+    """Pydantic model for the `INPUTPP` namelist."""
 
     prefix: str = Field("pwscf", description="prefix of files saved by program pw.x")
     outdir: Path = Field(
@@ -28,7 +29,7 @@ class InputppNamelist(Namelist):
 
 
 class PlotNamelist(Namelist):
-    """Pydantic model for the `Plot` namelist."""
+    """Pydantic model for the `PLOT` namelist."""
 
     iflag: int | None = Field(
         None,
@@ -45,7 +46,7 @@ class PlotNamelist(Namelist):
 
 
 class PPRISMEspressoInput(EspressoInput):
-    """Pydantic model for the input of `pprism.x.`"""
+    """Pydantic model for the input of `pprism.x`"""
 
     inputpp: InputppNamelist = Field(default_factory=lambda: InputppNamelist())
     plot: PlotNamelist = Field(default_factory=lambda: PlotNamelist())

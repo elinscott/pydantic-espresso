@@ -7,13 +7,14 @@ This file has been generated automatically. Do not edit it manually.
 
 from pathlib import Path
 from pydantic import Field, field_validator
-from typing import Literal
-from pydantic_espresso.models.template import EspressoInput, Namelist
+from typing import Annotated, Literal
+from pydantic_espresso.models.template import EspressoInput
+from pydantic_espresso.namelist import Namelist
 from pydantic_espresso.utils import get_tmp_dir, get_pseudo_dir
 
 
-class Lr_inputNamelist(Namelist):
-    """Pydantic model for the `Lr_input` namelist."""
+class LrInputNamelist(Namelist):
+    """Pydantic model for the `lr_input` namelist."""
 
     prefix: str = Field(
         "pwscf",
@@ -45,8 +46,8 @@ class Lr_inputNamelist(Namelist):
     )
 
 
-class Lr_davNamelist(Namelist):
-    """Pydantic model for the `Lr_dav` namelist."""
+class LrDavNamelist(Namelist):
+    """Pydantic model for the `lr_dav` namelist."""
 
     num_eign: int = Field(1, description="Number of eigenstates to be calculated.")
     num_init: int = Field(
@@ -142,7 +143,7 @@ class Lr_davNamelist(Namelist):
 
 
 class TURBODAVIDSONEspressoInput(EspressoInput):
-    """Pydantic model for the input of `turbo_davidson.x.`"""
+    """Pydantic model for the input of `turbo_davidson.x`"""
 
-    lr_input: Lr_inputNamelist = Field(default_factory=lambda: Lr_inputNamelist())
-    lr_dav: Lr_davNamelist = Field(default_factory=lambda: Lr_davNamelist())
+    lr_input: LrInputNamelist = Field(default_factory=lambda: LrInputNamelist())
+    lr_dav: LrDavNamelist = Field(default_factory=lambda: LrDavNamelist())

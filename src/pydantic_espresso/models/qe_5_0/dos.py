@@ -7,13 +7,14 @@ This file has been generated automatically. Do not edit it manually.
 
 from pathlib import Path
 from pydantic import Field, field_validator
-from typing import Literal
-from pydantic_espresso.models.template import EspressoInput, Namelist
+from typing import Annotated, Literal
+from pydantic_espresso.models.template import EspressoInput
+from pydantic_espresso.namelist import Namelist
 from pydantic_espresso.utils import get_tmp_dir, get_pseudo_dir
 
 
 class DosNamelist(Namelist):
-    """Pydantic model for the `Dos` namelist."""
+    """Pydantic model for the `DOS` namelist."""
 
     prefix: str = Field(
         "pwscf", description="prefix of input file produced by pw.x (wavefunctions are not needed)"
@@ -31,6 +32,6 @@ class DosNamelist(Namelist):
 
 
 class DOSEspressoInput(EspressoInput):
-    """Pydantic model for the input of `dos.x.`"""
+    """Pydantic model for the input of `dos.x`"""
 
     dos: DosNamelist = Field(default_factory=lambda: DosNamelist())

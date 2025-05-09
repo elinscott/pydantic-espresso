@@ -1,12 +1,29 @@
-"""Testing qe_7_3_1 models."""
+"""Testing the models."""
 
+from typing import Any
+
+import numpy as np
 import pytest
 
 from pydantic_espresso.models import versions
 
 
 @pytest.mark.parametrize("version", versions)
-def test_pw_espresso_input(version: str) -> None:
+@pytest.mark.parametrize(
+    "k_points",
+    [
+        {"kind": "gamma"},
+        {"kind": "automatic", "grid": [2, 2, 2], "offset": [0, 0, 1]},
+        {
+            "kind": "crystal",
+            "k_points": [
+                {"coordinate": [0.0, 0.0, 0.0], "weight": 1.0},
+                {"coordinate": [0.5, 0.5, 0.5], "weight": 2.0},
+            ],
+        },
+    ],
+)
+def test_pw_espresso_input(version: str, k_points: dict[str, Any]) -> None:
     """Test if the PWEspressoInput model can be instantiated."""
     # Import the model dynamically from pydantic_espresso.models.<version>.pw
     try:
@@ -17,7 +34,15 @@ def test_pw_espresso_input(version: str) -> None:
     model = module.PWEspressoInput
 
     # Instantiate the model
-    inp = model()
+    inp = model(
+        cell_parameters={"units": "alat", "vectors": np.identity(3)},
+        atomic_positions={
+            "units": "alat",
+            "positions": [{"species": "H", "position": [0.0, 0.0, 0.0]}],
+        },
+        k_points=k_points,
+        occupations=[[2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0]],
+    )
 
     # Check the string representation of the input is empty
     assert "scf" not in str(inp)
@@ -32,6 +57,9 @@ def test_pw_espresso_input(version: str) -> None:
 
     # Check the string representation now shows the calculation value
     assert "bands" in str(inp)
+
+    # Check that the occupations are not printed over too many lines
+    assert max([len(x.split()) for x in str(inp).split("\n")]) <= 10
 
 
 @pytest.mark.parametrize(
@@ -64,7 +92,6 @@ def test_pw_espresso_input(version: str) -> None:
         "pw2gw",
         "pw2wannier90",
         "pwcond",
-        "pw",
         "pw_with_os_cdft",
         "q2r",
         "turbo_davidson",

@@ -7,13 +7,14 @@ This file has been generated automatically. Do not edit it manually.
 
 from pathlib import Path
 from pydantic import Field, field_validator
-from typing import Literal
-from pydantic_espresso.models.template import EspressoInput, Namelist
+from typing import Annotated, Literal
+from pydantic_espresso.models.template import EspressoInput
+from pydantic_espresso.namelist import Namelist
 from pydantic_espresso.utils import get_tmp_dir, get_pseudo_dir
 
 
 class InputcondNamelist(Namelist):
-    """Pydantic model for the `Inputcond` namelist."""
+    """Pydantic model for the `INPUTCOND` namelist."""
 
     outdir: Path | None = Field(None, description="temporary directory (as in PWscf)")
     prefixt: str | None = Field(
@@ -96,6 +97,6 @@ class InputcondNamelist(Namelist):
 
 
 class PWCONDEspressoInput(EspressoInput):
-    """Pydantic model for the input of `pwcond.x.`"""
+    """Pydantic model for the input of `pwcond.x`"""
 
     inputcond: InputcondNamelist = Field(default_factory=lambda: InputcondNamelist())

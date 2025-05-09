@@ -7,13 +7,14 @@ This file has been generated automatically. Do not edit it manually.
 
 from pathlib import Path
 from pydantic import Field, field_validator
-from typing import Literal
-from pydantic_espresso.models.template import EspressoInput, Namelist
+from typing import Annotated, Literal
+from pydantic_espresso.models.template import EspressoInput
+from pydantic_espresso.namelist import Namelist
 from pydantic_espresso.utils import get_tmp_dir, get_pseudo_dir
 
 
 class InputNamelist(Namelist):
-    """Pydantic model for the `Input` namelist."""
+    """Pydantic model for the `INPUT` namelist."""
 
     title: str | None = Field(None, description="A string describing the job.")
     beta: float = Field(0.2, description="parameter for potential mixing")
@@ -87,7 +88,7 @@ class InputNamelist(Namelist):
 
 
 class InputpNamelist(Namelist):
-    """Pydantic model for the `Inputp` namelist."""
+    """Pydantic model for the `INPUTP` namelist."""
 
     zval: float | None = Field(
         None,
@@ -165,7 +166,7 @@ class InputpNamelist(Namelist):
 
 
 class TestNamelist(Namelist):
-    """Pydantic model for the `Test` namelist."""
+    """Pydantic model for the `TEST` namelist."""
 
     nconf: int = Field(
         1, description="the number of configurations to be tested. For iswitch = 4 nconf=2"
@@ -188,7 +189,7 @@ class TestNamelist(Namelist):
 
 
 class LD1EspressoInput(EspressoInput):
-    """Pydantic model for the input of `ld1.x.`"""
+    """Pydantic model for the input of `ld1.x`"""
 
     input: InputNamelist = Field(default_factory=lambda: InputNamelist())
     inputp: InputpNamelist = Field(default_factory=lambda: InputpNamelist())

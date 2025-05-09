@@ -7,13 +7,14 @@ This file has been generated automatically. Do not edit it manually.
 
 from pathlib import Path
 from pydantic import Field, field_validator
-from typing import Literal
-from pydantic_espresso.models.template import EspressoInput, Namelist
+from typing import Annotated, Literal
+from pydantic_espresso.models.template import EspressoInput
+from pydantic_espresso.namelist import Namelist
 from pydantic_espresso.utils import get_tmp_dir, get_pseudo_dir
 
 
-class Lr_inputNamelist(Namelist):
-    """Pydantic model for the `Lr_input` namelist."""
+class LrInputNamelist(Namelist):
+    """Pydantic model for the `LR_INPUT` namelist."""
 
     prefix: str = Field(
         "pwscf",
@@ -45,8 +46,8 @@ class Lr_inputNamelist(Namelist):
     )
 
 
-class Lr_controlNamelist(Namelist):
-    """Pydantic model for the `Lr_control` namelist."""
+class LrControlNamelist(Namelist):
+    """Pydantic model for the `LR_CONTROL` namelist."""
 
     itermax: int = Field(500, description="Number of Lanczos iterations to be performed.")
     ipol: int = Field(
@@ -88,8 +89,8 @@ class Lr_controlNamelist(Namelist):
     )
 
 
-class Lr_postNamelist(Namelist):
-    """Pydantic model for the `Lr_post` namelist."""
+class LrPostNamelist(Namelist):
+    """Pydantic model for the `LR_POST` namelist."""
 
     omeg: float = Field(
         0.0,
@@ -111,8 +112,8 @@ class Lr_postNamelist(Namelist):
 
 
 class TURBOLANCZOSEspressoInput(EspressoInput):
-    """Pydantic model for the input of `turbo_lanczos.x.`"""
+    """Pydantic model for the input of `turbo_lanczos.x`"""
 
-    lr_input: Lr_inputNamelist = Field(default_factory=lambda: Lr_inputNamelist())
-    lr_control: Lr_controlNamelist = Field(default_factory=lambda: Lr_controlNamelist())
-    lr_post: Lr_postNamelist = Field(default_factory=lambda: Lr_postNamelist())
+    lr_input: LrInputNamelist = Field(default_factory=lambda: LrInputNamelist())
+    lr_control: LrControlNamelist = Field(default_factory=lambda: LrControlNamelist())
+    lr_post: LrPostNamelist = Field(default_factory=lambda: LrPostNamelist())

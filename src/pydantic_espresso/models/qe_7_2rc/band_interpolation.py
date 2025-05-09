@@ -7,13 +7,14 @@ This file has been generated automatically. Do not edit it manually.
 
 from pathlib import Path
 from pydantic import Field, field_validator
-from typing import Literal
-from pydantic_espresso.models.template import EspressoInput, Namelist
+from typing import Annotated, Literal
+from pydantic_espresso.models.template import EspressoInput
+from pydantic_espresso.namelist import Namelist
 from pydantic_espresso.utils import get_tmp_dir, get_pseudo_dir
 
 
 class InterpolationNamelist(Namelist):
-    """Pydantic model for the `Interpolation` namelist."""
+    """Pydantic model for the `INTERPOLATION` namelist."""
 
     method: Literal["fourier-diff", "fourier", "idw", "idw-sphere"] = Field(
         "fourier-diff", description="The interpolation method to be used Available options are:"
@@ -37,6 +38,6 @@ class InterpolationNamelist(Namelist):
 
 
 class BANDINTERPOLATIONEspressoInput(EspressoInput):
-    """Pydantic model for the input of `band_interpolation.x.`"""
+    """Pydantic model for the input of `band_interpolation.x`"""
 
     interpolation: InterpolationNamelist = Field(default_factory=lambda: InterpolationNamelist())

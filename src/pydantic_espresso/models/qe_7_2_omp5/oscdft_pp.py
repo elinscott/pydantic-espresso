@@ -7,13 +7,14 @@ This file has been generated automatically. Do not edit it manually.
 
 from pathlib import Path
 from pydantic import Field, field_validator
-from typing import Literal
-from pydantic_espresso.models.template import EspressoInput, Namelist
+from typing import Annotated, Literal
+from pydantic_espresso.models.template import EspressoInput
+from pydantic_espresso.namelist import Namelist
 from pydantic_espresso.utils import get_tmp_dir, get_pseudo_dir
 
 
-class Oscdft_pp_namelistNamelist(Namelist):
-    """Pydantic model for the `Oscdft_pp_namelist` namelist."""
+class OscdftPpNamelistNamelist(Namelist):
+    """Pydantic model for the `OSCDFT_PP_NAMELIST` namelist."""
 
     prefix: str | None = Field(None, description="prefix of the pw.x calculation.")
     outdir: Path | None = Field(
@@ -22,8 +23,8 @@ class Oscdft_pp_namelistNamelist(Namelist):
 
 
 class OSCDFTPPEspressoInput(EspressoInput):
-    """Pydantic model for the input of `oscdft_pp.x.`"""
+    """Pydantic model for the input of `oscdft_pp.x`"""
 
-    oscdft_pp_namelist: Oscdft_pp_namelistNamelist = Field(
-        default_factory=lambda: Oscdft_pp_namelistNamelist()
+    oscdft_pp_namelist: OscdftPpNamelistNamelist = Field(
+        default_factory=lambda: OscdftPpNamelistNamelist()
     )

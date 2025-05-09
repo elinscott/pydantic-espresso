@@ -7,13 +7,14 @@ This file has been generated automatically. Do not edit it manually.
 
 from pathlib import Path
 from pydantic import Field, field_validator
-from typing import Literal
-from pydantic_espresso.models.template import EspressoInput, Namelist
+from typing import Annotated, Literal
+from pydantic_espresso.models.template import EspressoInput
+from pydantic_espresso.namelist import Namelist
 from pydantic_espresso.utils import get_tmp_dir, get_pseudo_dir
 
 
 class ControlNamelist(Namelist):
-    """Pydantic model for the `Control` namelist."""
+    """Pydantic model for the `CONTROL` namelist."""
 
     @field_validator("assume_isolated", mode="before")
     def map_assume_isolated(cls, v: str) -> str:
@@ -90,7 +91,7 @@ class ControlNamelist(Namelist):
 
 
 class WannierNamelist(Namelist):
-    """Pydantic model for the `Wannier` namelist."""
+    """Pydantic model for the `WANNIER` namelist."""
 
     seedname: str = Field(
         "wann",
@@ -123,7 +124,7 @@ class WannierNamelist(Namelist):
 
 
 class ScreenNamelist(Namelist):
-    """Pydantic model for the `Screen` namelist."""
+    """Pydantic model for the `SCREEN` namelist."""
 
     niter: int | None = Field(
         None,
@@ -146,7 +147,7 @@ class ScreenNamelist(Namelist):
 
 
 class HamNamelist(Namelist):
-    """Pydantic model for the `Ham` namelist."""
+    """Pydantic model for the `HAM` namelist."""
 
     do_bands: bool = Field(
         False,
@@ -167,7 +168,7 @@ class HamNamelist(Namelist):
 
 
 class KCWEspressoInput(EspressoInput):
-    """Pydantic model for the input of `kcw.x.`"""
+    """Pydantic model for the input of `kcw.x`"""
 
     control: ControlNamelist = Field(default_factory=lambda: ControlNamelist())
     wannier: WannierNamelist = Field(default_factory=lambda: WannierNamelist())
