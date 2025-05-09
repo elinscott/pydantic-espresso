@@ -65,7 +65,7 @@ def sanitize_xml(xml_path: Path) -> Path:
 
 def convert_all_xml_files_to_models() -> None:
     """Convert all XML files in the xml_files directory to Pydantic models."""
-    for xml_path in xml_directory.rglob("*.xml"):
+    for xml_path in xml_directory.rglob("*kcw.xml"):
         try:
             model_str, executable_str = convert_xml_file_to_model(
                 xml_path, version=xml_path.parent.name

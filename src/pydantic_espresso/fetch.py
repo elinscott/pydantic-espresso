@@ -7,6 +7,7 @@ from pathlib import Path
 
 import gitlab
 from gitlab.v4.objects import Project, ProjectCommit
+from packaging.version import Version
 
 from pydantic_espresso.def_files import directory as def_directory
 
@@ -80,8 +81,13 @@ def fetch_all_defs() -> None:
         raise TypeError("Expected a ProjectCommit object.")
     fetch_defs(project, ref=latest_commit.id, folder=def_directory / "develop")
 
-    # Download all *.def files for all tags
+    # Download all *.def files for all tags with clean version numbering
     for tag in project.tags.list(get_all=True):
+        try:
+            # Check that we can convert the tag to a Version object
+            Version(tag.name[3:])
+        except ValueError:
+            continue
         existing_tags = [t.name for t in def_directory.iterdir() if t.is_dir()]
         if tag.name not in existing_tags:
             # Find all *.def files in the tag

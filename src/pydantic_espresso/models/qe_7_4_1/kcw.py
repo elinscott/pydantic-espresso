@@ -11,6 +11,7 @@ from typing import Annotated, Literal
 from pydantic_espresso.models.template import EspressoInput
 from pydantic_espresso.namelist import Namelist
 from pydantic_espresso.utils import get_tmp_dir, get_pseudo_dir
+from pydantic_espresso.card.pw.k_points import KPointsCard
 
 
 class ControlNamelist(Namelist):
@@ -155,3 +156,4 @@ class KCWEspressoInput(EspressoInput):
     wannier: WannierNamelist = Field(default_factory=lambda: WannierNamelist())
     screen: ScreenNamelist = Field(default_factory=lambda: ScreenNamelist())
     ham: HamNamelist = Field(default_factory=lambda: HamNamelist())
+    k_points: KPointsCard = Field(discriminator="kind")

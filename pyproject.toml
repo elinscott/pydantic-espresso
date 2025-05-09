@@ -58,10 +58,6 @@ dependencies = [
 
 # see https://peps.python.org/pep-0735/ and https://docs.astral.sh/uv/concepts/dependencies/#dependency-groups
 [dependency-groups]
-cli = [
-    "python-gitlab",
-    "defusedxml",
-]
 tests = [
     "pytest",
     "coverage[toml]",
@@ -116,7 +112,11 @@ release = [
 ]
 
 # see https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#dependencies-optional-dependencies
-# [project.optional-dependencies]
+[project.optional-dependencies]
+fetch = [
+     "python-gitlab",
+     "defusedxml"
+]
 
 
 # See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#urls
