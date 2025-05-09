@@ -27,8 +27,6 @@ classifiers = [
     "Framework :: Sphinx",
     "Natural Language :: English",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3 :: Only",
@@ -47,7 +45,7 @@ license-files = [
     "LICENSE",
 ]
 
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 dependencies = [
     "more_itertools", # missing from itertools in stdlib
     "tqdm", # progress bars
@@ -55,14 +53,11 @@ dependencies = [
     "more_click",
     "typing-extensions",
     "pydantic",
+    "numpy"
 ]
 
 # see https://peps.python.org/pep-0735/ and https://docs.astral.sh/uv/concepts/dependencies/#dependency-groups
 [dependency-groups]
-cli = [
-    "python-gitlab",
-    "defusedxml",
-]
 tests = [
     "pytest",
     "coverage[toml]",
@@ -118,7 +113,11 @@ release = [
 ]
 
 # see https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#dependencies-optional-dependencies
-# [project.optional-dependencies]
+[project.optional-dependencies]
+fetch = [
+     "python-gitlab",
+     "defusedxml"
+]
 
 
 # See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#urls

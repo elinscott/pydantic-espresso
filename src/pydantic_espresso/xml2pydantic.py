@@ -11,7 +11,6 @@ from xml.etree.ElementTree import Element, ParseError
 from defusedxml.ElementTree import parse
 
 from pydantic_espresso.models import directory as model_directory
-from pydantic_espresso.models.inputs import import_parameter_models
 from pydantic_espresso.xml_files import directory as xml_directory
 
 type_mapping = {
@@ -28,6 +27,9 @@ type_mapping = {
     "DOUBLE": float,
     "CHARATER": str,
 }
+
+
+INDENT = "    "
 
 
 class InvalidXMLStructureError(Exception):
@@ -63,7 +65,7 @@ def sanitize_xml(xml_path: Path) -> Path:
 
 def convert_all_xml_files_to_models() -> None:
     """Convert all XML files in the xml_files directory to Pydantic models."""
-    for xml_path in xml_directory.rglob("*.xml"):
+    for xml_path in xml_directory.rglob("*kcw.xml"):
         try:
             model_str, executable_str = convert_xml_file_to_model(
                 xml_path, version=xml_path.parent.name
@@ -93,7 +95,7 @@ def convert_all_xml_files_to_models() -> None:
             f.write(model_str)
 
 
-def convert_xml_file_to_model(xml_file: Path, version: str = "latest") -> tuple[str, str]:
+def convert_xml_file_to_model(xml_file: Path, version: str = "develop") -> tuple[str, str]:
     """Convert an XML file to raw python code that defines the corresponding Pydantic model."""
     # Sanitize the XML file
     sanitized_xml = sanitize_xml(xml_file)
@@ -110,37 +112,95 @@ def convert_xml_file_to_model(xml_file: Path, version: str = "latest") -> tuple[
     return convert_xml_tree_to_model(root, version=version), executable_name
 
 
-def convert_xml_tree_to_model(root: Element, version: str = "latest") -> str:
+def convert_xml_tree_to_model(root: Element, version: str = "develop") -> str:
     """Convert an XML tree to raw python code that defines the corresponding Pydantic model."""
-    field_definitions: dict[str, list[str]] = {}
-    field_validators: dict[str, list[str]] = {}
+    program = root.attrib["program"][:-2]
+
+    fields = []
+    subclasses = []
+    imports = set()
     for namelist in root.findall("namelist"):
-        namelist_name = namelist.attrib["name"].capitalize()
-        field_definitions[namelist_name] = []
-        field_validators[namelist_name] = []
+        namelist_field_definitions: list[str] = []
+        namelist_field_validators: list[list[str]] = []
         for var in namelist.findall("var"):
             field_definition, field_validator = _parse_var(var)
 
             if field_definition is None:
                 continue
 
-            # Manually fixes to duplicate entries
+            # Manual fixes to duplicate entries
             if field_definition.startswith("abivol:") and any(
-                x.startswith("abivol:") for x in field_definitions[namelist_name]
+                x.startswith("abivol:") for x in namelist_field_definitions
             ):
                 continue
             elif field_definition.startswith("restart:") and any(
-                x.startswith("restart:") for x in field_definitions[namelist_name]
+                x.startswith("restart:") for x in namelist_field_definitions
             ):
                 field_definition = field_definition.replace("restart:", "restart_step:")
 
-            field_definitions[namelist_name].append(field_definition)
+            namelist_field_definitions.append(field_definition)
 
             if field_validator:
-                field_validators[namelist_name].append(field_validator)
+                namelist_field_validators.append(field_validator)
+
+        # Construct the namelist
+        name = namelist.attrib["name"]
+
+        fields.append(
+            f"{name.lower()}: {camel_case(name)}Namelist "
+            f"= Field(default_factory=lambda: {camel_case(name)}Namelist())"
+        )
+        subclasses += _generate_namelist(
+            name, namelist_field_definitions, namelist_field_validators
+        )
+
+    for card in root.findall("card"):
+        try:
+            field_def, import_str = load_prebuilt_card(card, program)
+            fields.append(field_def)
+            imports.add(import_str)
+        except ImportError as e:
+            warnings.warn(f"Failed to load prebuilt card: {e}", stacklevel=2)
 
     return _generate_model_string(
-        root.attrib["program"], field_definitions, field_validators, version=version
+        root.attrib["program"], fields, subclasses, imports, version=version
+    )
+
+
+def camel_case(value: str) -> str:
+    """Convert a string to camel case."""
+    return "".join([s.capitalize() for s in value.replace("_", " ").split()])
+
+
+def load_prebuilt_card(card: Element, program: str) -> tuple[str, str]:
+    """Load a prebuilt card."""
+    name = card.attrib["name"].lower()
+    card_module = __import__(f"pydantic_espresso.card.{program}", fromlist=[program])
+    prebuilt_cards = getattr(card_module, "prebuilt_cards", None)
+    if prebuilt_cards is None:
+        raise ImportError(f"No prebuilt cards found for {program}.")
+    card_dct = prebuilt_cards.get(name, None)
+    if card_dct is None:
+        raise ImportError(f"No prebuilt card found for {name} in {program}.")
+
+    type_ = card_dct["type"]
+    default = card_dct["default"]
+    import_str = card_dct["import_str"]
+
+    return f"{name}: {type_} = {default}", import_str
+
+
+def _generate_namelist(name: str, fields: list[str], validators: list[list[str]]) -> list[str]:
+    """Convert a dictionary of fields into a Namelist class definition."""
+    return (
+        [
+            f"class {camel_case(name)}Namelist(Namelist):",
+            INDENT + '"""' + f"Pydantic model for the `{name}` namelist." + '"""',
+        ]
+        + [""]
+        + [INDENT + row for v in validators for row in v]
+        + [INDENT + f for f in fields]
+        + [""]
     )
 
 
@@ -180,7 +240,7 @@ def _get_var_description(
     return description
 
 
-def _parse_var(var: Element) -> tuple[str | None, str]:
+def _parse_var(var: Element) -> tuple[str | None, list[str]]:
     name = var.attrib["name"]
     description_element = var.find("info")
 
@@ -192,9 +252,9 @@ def _parse_var(var: Element) -> tuple[str | None, str]:
 
     description = _get_var_description(name, description_element, options)
     if description in ["OBSOLETE - NO LONGER IMPLEMENTED"]:
-        return None, ""
+        return None, []
 
-    type_str, validator_str = _get_type_str(name, python_type, options)
+    type_str, validator = _get_type_str(name, python_type, options)
 
     if "(" in name:
         # Getting rid of the keyword(i) notation
@@ -219,10 +279,10 @@ def _parse_var(var: Element) -> tuple[str | None, str]:
         # Avoid nameclash with the lambda function in Python
         name = "Lambda"
 
-    return f'{name}: {type_str} = Field({default_str}, description="{description}")', validator_str
+    return f'{name}: {type_str} = Field({default_str}, description="{description}")', validator
 
 
-def _get_type_str(name: str, python_type: type, options: Element | None) -> tuple[str, str]:
+def _get_type_str(name: str, python_type: type, options: Element | None) -> tuple[str, list[str]]:
     """Determine the string to add for the type of the field."""
     if options:
         type_str, mapping = _get_options_str_and_mapping(options, python_type)
@@ -240,26 +300,26 @@ def _get_type_str(name: str, python_type: type, options: Element | None) -> tupl
         type_str = type_str.replace("Literal[", 'Literal["none", ')
         mapping["none"] = "none"
 
-    validator_str = _get_validator_str(name, mapping, python_type)
+    validator = _get_validator(name, mapping, python_type)
 
-    return type_str, validator_str
+    return type_str, validator
 
 
-def _get_validator_str(name: str, mapping: dict[str, str], python_type: type) -> str:
+def _get_validator(name: str, mapping: dict[str, str], python_type: type) -> list[str]:
     """Generate a field validator that converts the value following the mapping."""
     if not mapping:
-        return ""
+        return []
     mapping_str = "{" + ", ".join([f'"{k}": "{v}"' for k, v in mapping.items()]) + "}"
-    return (
-        f"""
-    @field_validator("{name}", mode="before")
-    def map_{name}(cls, v: {python_type.__name__}) -> {python_type.__name__}:\n"""
-        + f'        """Map equivalent values for {name} to the same string so that comparisons '
-        + 'work as expected."""'
-        + f"""
-        mapping = {mapping_str}
-        return mapping.get(v, v)"""
-    )
+    return [
+        f"@field_validator('{name}', mode='before')",
+        f"def map_{name}(cls, v: {python_type.__name__}) -> {python_type.__name__}:",
+        INDENT
+        + f'"""Map equivalent values for {name} to the same string so that comparisons '
+        + 'work as expected."""',
+        INDENT + "mapping = " + mapping_str,
+        INDENT + "return mapping.get(v, v)",
+        "",
+    ]
 
 
 def _get_options_str_and_mapping(options: Element, python_type: type) -> tuple[str, dict[str, str]]:
@@ -319,12 +379,17 @@ def _sanitize_string(text: str) -> str:
 def _sanitize_numeric(text: str, python_type: type) -> str:
     if python_type is float and "d" in text.lower():
         # Convert Fortran double precision to Python float
-        text = text.lower().replace("d", "e")
+        sanitized_text = text.lower().replace("d", "e")
+    else:
+        sanitized_text = text
     try:
-        python_type(text)
-        default_str = text
+        python_type(sanitized_text)
+        default_str = sanitized_text
     except ValueError:
-        warnings.warn(f"Failed to parse {text}; defaulting to None.", stacklevel=2)
+        warnings.warn(
+            f'Failed to convert "{text}" to a {python_type.__name__}; defaulting to None.',
+            stacklevel=2,
+        )
         default_str = "None"
     return default_str
 
@@ -375,23 +440,11 @@ def _get_default_str(name: str, python_type: type, default: Element | None) -> s
     return default_str
 
 
-def _generate_namelist_string(name: str, fields: list[str], validators: list[str]) -> str:
-    """Convert a dictionary of fields into a Namelist class definition."""
-    return (
-        f"class {name}Namelist(Namelist):\n    "
-        + '"""'
-        + f"Pydantic model for the `{name}` namelist."
-        + '"""\n'
-        + "\n".join(validators)
-        + "\n\n"
-        + "\n".join([f"    {f}" for f in fields])
-    )
-
-
 def _generate_model_string(
     executable: str,
-    field_definitions: dict[str, list[str]],
-    field_validators: dict[str, list[str]],
+    fields: list[str],
+    subclasses: list[str],
+    imports: set[str],
     version: str,
 ) -> str:
     """Convert a dictionary of class definitions to raw python code defining a Pydantic model."""
@@ -412,41 +465,24 @@ This file has been generated automatically. Do not edit it manually.
 
 from pathlib import Path
 from pydantic import Field, field_validator
-from typing import Literal
-from pydantic_espresso.models.template import EspressoInput, Namelist
+from typing import Annotated, Literal
+from pydantic_espresso.models.template import EspressoInput
+from pydantic_espresso.namelist import Namelist
 from pydantic_espresso.utils import get_tmp_dir, get_pseudo_dir
-{import_parameter_models}
+{"\n".join(sorted(imports))}
 
 """
     )
+    input_header = [
+        f"class {executable_str}EspressoInput(EspressoInput):",
+        INDENT + f'"""Pydantic model for the input of `{executable}`"""',
+        "",
+        "",
+    ]
 
-    namelists = """
-
-
-""".join(
-        _generate_namelist_string(name, fields, field_validators[name])
-        for name, fields in field_definitions.items()
-    )
-
-    input_definition = (
-        f"""
-
-
-class {executable_str}EspressoInput(EspressoInput):
-    """
-        + '"""'
-        + f"Pydantic model for the input of `{executable}.`"
-        + '"""'
-        + """
-
-"""
-        + "\n".join(
-            [
-                f"    {k.lower()}: {k}Namelist = Field(default_factory=lambda: {k}Namelist())"
-                for k in field_definitions.keys()
-            ]
-        )
+    return (
+        header
+        + "\n".join(subclasses + input_header)
+        + "\n".join([INDENT + f for f in fields])
         + "\n"
     )
-
-    return header + namelists + input_definition

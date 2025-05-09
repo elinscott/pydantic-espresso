@@ -7,13 +7,14 @@ This file has been generated automatically. Do not edit it manually.
 
 from pathlib import Path
 from pydantic import Field, field_validator
-from typing import Literal
-from pydantic_espresso.models.template import EspressoInput, Namelist
+from typing import Annotated, Literal
+from pydantic_espresso.models.template import EspressoInput
+from pydantic_espresso.namelist import Namelist
 from pydantic_espresso.utils import get_tmp_dir, get_pseudo_dir
 
 
-class Lr_inputNamelist(Namelist):
-    """Pydantic model for the `Lr_input` namelist."""
+class LrInputNamelist(Namelist):
+    """Pydantic model for the `lr_input` namelist."""
 
     prefix: str = Field(
         "pwscf",
@@ -74,6 +75,6 @@ class Lr_inputNamelist(Namelist):
 
 
 class TURBOSPECTRUMEspressoInput(EspressoInput):
-    """Pydantic model for the input of `turbo_spectrum.x.`"""
+    """Pydantic model for the input of `turbo_spectrum.x`"""
 
-    lr_input: Lr_inputNamelist = Field(default_factory=lambda: Lr_inputNamelist())
+    lr_input: LrInputNamelist = Field(default_factory=lambda: LrInputNamelist())

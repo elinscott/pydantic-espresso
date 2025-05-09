@@ -7,13 +7,14 @@ This file has been generated automatically. Do not edit it manually.
 
 from pathlib import Path
 from pydantic import Field, field_validator
-from typing import Literal
-from pydantic_espresso.models.template import EspressoInput, Namelist
+from typing import Annotated, Literal
+from pydantic_espresso.models.template import EspressoInput
+from pydantic_espresso.namelist import Namelist
 from pydantic_espresso.utils import get_tmp_dir, get_pseudo_dir
 
 
 class OscdftNamelist(Namelist):
-    """Pydantic model for the `Oscdft` namelist."""
+    """Pydantic model for the `OSCDFT` namelist."""
 
     n_oscdft: int | None = Field(
         None, description="Number of entries of the TARGET_OCCUPATION_NUMBERS card."
@@ -99,6 +100,6 @@ class OscdftNamelist(Namelist):
 
 
 class PWWITHOSCDFTEspressoInput(EspressoInput):
-    """Pydantic model for the input of `pw.x with OS-CDFT.`"""
+    """Pydantic model for the input of `pw.x with OS-CDFT`"""
 
     oscdft: OscdftNamelist = Field(default_factory=lambda: OscdftNamelist())

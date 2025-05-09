@@ -17,7 +17,7 @@ import json
 
 import click
 
-from pydantic_espresso.models import versions
+from pydantic_espresso.models import get_module, versions
 
 __all__ = [
     "main",
@@ -59,15 +59,15 @@ def xml2pydantic() -> None:
 @click.option(
     "--version",
     default="develop",
-    type=click.Choice(versions, case_sensitive=False),
+    type=click.Choice(
+        ["develop" if v.is_devrelease else str(v) for v in versions], case_sensitive=False
+    ),
 )
 def schema(executable: str, version: str) -> None:
     """Print the JSON schema of the specified executable model."""
     try:
         # Try to find the module from which to import the model
-        module = __import__(
-            f"pydantic_espresso.models.{version}.{executable}", fromlist=[executable]
-        )
+        module = get_module(version=version, executable=executable)
     except ImportError:
         click.echo(f"Models for {executable} not found for version {version}.")
         return

@@ -7,13 +7,14 @@ This file has been generated automatically. Do not edit it manually.
 
 from pathlib import Path
 from pydantic import Field, field_validator
-from typing import Literal
-from pydantic_espresso.models.template import EspressoInput, Namelist
+from typing import Annotated, Literal
+from pydantic_espresso.models.template import EspressoInput
+from pydantic_espresso.namelist import Namelist
 from pydantic_espresso.utils import get_tmp_dir, get_pseudo_dir
 
 
 class BandsNamelist(Namelist):
-    """Pydantic model for the `Bands` namelist."""
+    """Pydantic model for the `BANDS` namelist."""
 
     prefix: str | None = Field(None, description="prefix of files saved by program pw.x")
     outdir: Path = Field(
@@ -39,6 +40,6 @@ class BandsNamelist(Namelist):
 
 
 class BANDSEspressoInput(EspressoInput):
-    """Pydantic model for the input of `bands.x.`"""
+    """Pydantic model for the input of `bands.x`"""
 
     bands: BandsNamelist = Field(default_factory=lambda: BandsNamelist())

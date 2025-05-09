@@ -7,13 +7,14 @@ This file has been generated automatically. Do not edit it manually.
 
 from pathlib import Path
 from pydantic import Field, field_validator
-from typing import Literal
-from pydantic_espresso.models.template import EspressoInput, Namelist
+from typing import Annotated, Literal
+from pydantic_espresso.models.template import EspressoInput
+from pydantic_espresso.namelist import Namelist
 from pydantic_espresso.utils import get_tmp_dir, get_pseudo_dir
 
 
 class InputphNamelist(Namelist):
-    """Pydantic model for the `Inputph` namelist."""
+    """Pydantic model for the `INPUTPH` namelist."""
 
     @field_validator("verbosity", mode="before")
     def map_verbosity(cls, v: str) -> str:
@@ -176,6 +177,6 @@ class InputphNamelist(Namelist):
 
 
 class PHEspressoInput(EspressoInput):
-    """Pydantic model for the input of `ph.x.`"""
+    """Pydantic model for the input of `ph.x`"""
 
     inputph: InputphNamelist = Field(default_factory=lambda: InputphNamelist())

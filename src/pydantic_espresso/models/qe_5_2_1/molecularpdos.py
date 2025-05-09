@@ -7,13 +7,14 @@ This file has been generated automatically. Do not edit it manually.
 
 from pathlib import Path
 from pydantic import Field, field_validator
-from typing import Literal
-from pydantic_espresso.models.template import EspressoInput, Namelist
+from typing import Annotated, Literal
+from pydantic_espresso.models.template import EspressoInput
+from pydantic_espresso.namelist import Namelist
 from pydantic_espresso.utils import get_tmp_dir, get_pseudo_dir
 
 
 class InputmopdosNamelist(Namelist):
-    """Pydantic model for the `Inputmopdos` namelist."""
+    """Pydantic model for the `INPUTMOPDOS` namelist."""
 
     i_atmwfc_beg_full: int = Field(
         1, description="first atomic wavefunction of the full system considered for the projection"
@@ -58,6 +59,6 @@ class InputmopdosNamelist(Namelist):
 
 
 class MOLECULARPDOSEspressoInput(EspressoInput):
-    """Pydantic model for the input of `molecularpdos.x.`"""
+    """Pydantic model for the input of `molecularpdos.x`"""
 
     inputmopdos: InputmopdosNamelist = Field(default_factory=lambda: InputmopdosNamelist())

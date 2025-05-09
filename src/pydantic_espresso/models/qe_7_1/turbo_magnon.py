@@ -7,13 +7,14 @@ This file has been generated automatically. Do not edit it manually.
 
 from pathlib import Path
 from pydantic import Field, field_validator
-from typing import Literal
-from pydantic_espresso.models.template import EspressoInput, Namelist
+from typing import Annotated, Literal
+from pydantic_espresso.models.template import EspressoInput
+from pydantic_espresso.namelist import Namelist
 from pydantic_espresso.utils import get_tmp_dir, get_pseudo_dir
 
 
-class Lr_inputNamelist(Namelist):
-    """Pydantic model for the `Lr_input` namelist."""
+class LrInputNamelist(Namelist):
+    """Pydantic model for the `LR_INPUT` namelist."""
 
     prefix: str = Field(
         "pwscf",
@@ -41,8 +42,8 @@ class Lr_inputNamelist(Namelist):
     )
 
 
-class Lr_controlNamelist(Namelist):
-    """Pydantic model for the `Lr_control` namelist."""
+class LrControlNamelist(Namelist):
+    """Pydantic model for the `LR_CONTROL` namelist."""
 
     itermax: int = Field(500, description="Number of Lanczos iterations to be performed.")
     pseudo_hermitian: bool = Field(
@@ -60,7 +61,7 @@ class Lr_controlNamelist(Namelist):
 
 
 class TURBOMAGNONEspressoInput(EspressoInput):
-    """Pydantic model for the input of `turbo_magnon.x.`"""
+    """Pydantic model for the input of `turbo_magnon.x`"""
 
-    lr_input: Lr_inputNamelist = Field(default_factory=lambda: Lr_inputNamelist())
-    lr_control: Lr_controlNamelist = Field(default_factory=lambda: Lr_controlNamelist())
+    lr_input: LrInputNamelist = Field(default_factory=lambda: LrInputNamelist())
+    lr_control: LrControlNamelist = Field(default_factory=lambda: LrControlNamelist())

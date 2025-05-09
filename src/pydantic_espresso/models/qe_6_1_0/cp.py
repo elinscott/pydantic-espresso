@@ -7,13 +7,14 @@ This file has been generated automatically. Do not edit it manually.
 
 from pathlib import Path
 from pydantic import Field, field_validator
-from typing import Literal
-from pydantic_espresso.models.template import EspressoInput, Namelist
+from typing import Annotated, Literal
+from pydantic_espresso.models.template import EspressoInput
+from pydantic_espresso.namelist import Namelist
 from pydantic_espresso.utils import get_tmp_dir, get_pseudo_dir
 
 
 class ControlNamelist(Namelist):
-    """Pydantic model for the `Control` namelist."""
+    """Pydantic model for the `CONTROL` namelist."""
 
     calculation: str = Field(
         "cp",
@@ -98,7 +99,7 @@ class ControlNamelist(Namelist):
 
 
 class SystemNamelist(Namelist):
-    """Pydantic model for the `System` namelist."""
+    """Pydantic model for the `SYSTEM` namelist."""
 
     ibrav: Literal[0, 1, 2, 3, -3, 4, 5, -5, 6, 7, 8, 9, -9, 91, 10, 11, 12, -12, 13, -13, 14] = (
         Field(
@@ -183,7 +184,7 @@ class SystemNamelist(Namelist):
 
 
 class ElectronsNamelist(Namelist):
-    """Pydantic model for the `Electrons` namelist."""
+    """Pydantic model for the `ELECTRONS` namelist."""
 
     electron_maxstep: int = Field(100, description="maximum number of iterations in a scf step")
     electron_dynamics: str = Field(
@@ -286,7 +287,7 @@ class ElectronsNamelist(Namelist):
 
 
 class IonsNamelist(Namelist):
-    """Pydantic model for the `Ions` namelist."""
+    """Pydantic model for the `IONS` namelist."""
 
     ion_dynamics: str | None = Field(
         None,
@@ -345,7 +346,7 @@ class IonsNamelist(Namelist):
 
 
 class CellNamelist(Namelist):
-    """Pydantic model for the `Cell` namelist."""
+    """Pydantic model for the `CELL` namelist."""
 
     cell_parameters: str | None = Field(
         None,
@@ -393,8 +394,8 @@ class CellNamelist(Namelist):
     )
 
 
-class Press_aiNamelist(Namelist):
-    """Pydantic model for the `Press_ai` namelist."""
+class PressAiNamelist(Namelist):
+    """Pydantic model for the `PRESS_AI` namelist."""
 
     abivol: bool = Field(False, description=".true. for finite pressure calculations")
     P_ext: float = Field(0.0e0, description="external pressure in GPa")
@@ -422,7 +423,7 @@ class Press_aiNamelist(Namelist):
 
 
 class WannierNamelist(Namelist):
-    """Pydantic model for the `Wannier` namelist."""
+    """Pydantic model for the `WANNIER` namelist."""
 
     wf_efield: bool = Field(
         False, description="If dynamics will be done in the presence of a field"
@@ -506,12 +507,12 @@ class WannierNamelist(Namelist):
 
 
 class CPEspressoInput(EspressoInput):
-    """Pydantic model for the input of `cp.x.`"""
+    """Pydantic model for the input of `cp.x`"""
 
     control: ControlNamelist = Field(default_factory=lambda: ControlNamelist())
     system: SystemNamelist = Field(default_factory=lambda: SystemNamelist())
     electrons: ElectronsNamelist = Field(default_factory=lambda: ElectronsNamelist())
     ions: IonsNamelist = Field(default_factory=lambda: IonsNamelist())
     cell: CellNamelist = Field(default_factory=lambda: CellNamelist())
-    press_ai: Press_aiNamelist = Field(default_factory=lambda: Press_aiNamelist())
+    press_ai: PressAiNamelist = Field(default_factory=lambda: PressAiNamelist())
     wannier: WannierNamelist = Field(default_factory=lambda: WannierNamelist())

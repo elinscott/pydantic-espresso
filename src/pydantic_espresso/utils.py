@@ -2,6 +2,20 @@
 
 import os
 from pathlib import Path
+from typing import Annotated
+
+from pydantic import BaseModel as _BaseModel
+from pydantic import ConfigDict, Field
+
+type PositiveFloat = Annotated[float, Field(gt=0)]
+type PositiveInt = Annotated[int, Field(gt=0)]
+INDENT = " " * 2
+
+
+class BaseModel(_BaseModel):
+    """Base model with pre-set configuration."""
+
+    model_config = ConfigDict(validate_assignment=True, extra="forbid")
 
 
 def get_tmp_dir() -> Path:

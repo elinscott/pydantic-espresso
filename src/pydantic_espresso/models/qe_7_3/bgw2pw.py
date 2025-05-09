@@ -7,13 +7,14 @@ This file has been generated automatically. Do not edit it manually.
 
 from pathlib import Path
 from pydantic import Field, field_validator
-from typing import Literal
-from pydantic_espresso.models.template import EspressoInput, Namelist
+from typing import Annotated, Literal
+from pydantic_espresso.models.template import EspressoInput
+from pydantic_espresso.namelist import Namelist
 from pydantic_espresso.utils import get_tmp_dir, get_pseudo_dir
 
 
-class Input_bgw2pwNamelist(Namelist):
-    """Pydantic model for the `Input_bgw2pw` namelist."""
+class InputBgw2pwNamelist(Namelist):
+    """Pydantic model for the `INPUT_BGW2PW` namelist."""
 
     prefix: str | None = Field(None, description="prefix of files saved by program pw.x")
     outdir: Path = Field(
@@ -41,6 +42,6 @@ class Input_bgw2pwNamelist(Namelist):
 
 
 class BGW2PWEspressoInput(EspressoInput):
-    """Pydantic model for the input of `bgw2pw.x.`"""
+    """Pydantic model for the input of `bgw2pw.x`"""
 
-    input_bgw2pw: Input_bgw2pwNamelist = Field(default_factory=lambda: Input_bgw2pwNamelist())
+    input_bgw2pw: InputBgw2pwNamelist = Field(default_factory=lambda: InputBgw2pwNamelist())
