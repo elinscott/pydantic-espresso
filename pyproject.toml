@@ -188,6 +188,7 @@ exclude_lines = [
 [tool.ruff]
 line-length = 100
 extend-include = ["*.ipynb"]
+exclude = ["q-e"]
 
 [tool.ruff.lint]
 # See https://docs.astral.sh/ruff/rules
@@ -224,6 +225,8 @@ ignore = [
 "notebooks/**/*.ipynb" = ["T201"]
 # Asserts are okay in tests
 "**/test_*.py" = ["S101"]
+# Ignore security issues in def2xml.py, which are inconsistent
+"src/pydantic_espresso/def2xml.py" = ["S603", "S607"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "pep257"
