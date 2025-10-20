@@ -29,6 +29,7 @@ def main() -> None:
     """CLI for pydantic_espresso."""
     pass
 
+
 @main.command()
 def download_defs() -> None:
     """Download the latest XML files."""
@@ -52,6 +53,7 @@ def xml2pydantic() -> None:
 
     convert_all_xml_files_to_models()
 
+
 @main.command()
 @click.pass_context
 def update(ctx: click.Context) -> None:
@@ -59,6 +61,7 @@ def update(ctx: click.Context) -> None:
     ctx.invoke(download_defs)
     ctx.invoke(def2xml)
     ctx.invoke(xml2pydantic)
+
 
 @main.command()
 @click.argument(
