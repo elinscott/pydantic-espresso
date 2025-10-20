@@ -29,18 +29,20 @@ def main() -> None:
     """CLI for pydantic_espresso."""
     pass
 
-
 @main.command()
-def fetch_def() -> None:
+def download_defs() -> None:
     """Download the latest XML files."""
     from pydantic_espresso.fetch import fetch_all_defs
 
     fetch_all_defs()
 
-    click.echo(
-        "The next step is to convert the .def files to .xml. This is done with "
-        "an accompanying shell script, not the `pydantic_espresso` CLI."
-    )
+
+@main.command()
+def def2xml() -> None:
+    """Convert the .def files to .xml files."""
+    from pydantic_espresso.def2xml import defs_to_xmls
+
+    defs_to_xmls()
 
 
 @main.command()
@@ -50,6 +52,13 @@ def xml2pydantic() -> None:
 
     convert_all_xml_files_to_models()
 
+@main.command()
+@click.pass_context
+def update(ctx: click.Context) -> None:
+    """Update all the pydantic models."""
+    ctx.invoke(download_defs)
+    ctx.invoke(def2xml)
+    ctx.invoke(xml2pydantic)
 
 @main.command()
 @click.argument(

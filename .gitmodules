@@ -1,0 +1,3 @@
+[submodule "q-e"]
+	path = q-e
+	url = https://gitlab.com/QEF/q-e.git
