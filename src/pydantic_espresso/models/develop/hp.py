@@ -111,6 +111,18 @@ class InputhpNamelist(Namelist):
         False,
         description="If .true. the metallic response term at q=0 is ignored (i.e. the last term in Eq. (22) in PRB 103, 045141 (2021) (https://journals.aps.org/prb/abstract/10.1103/PhysRevB.103.045141)). This is useful for magnetic insulators to avoid the divergence of the calculation.",
     )
+    skip_type: list[bool] | None = Field(
+        None,
+        description="skip_type(i), where i runs over types of atoms. If skip_type(i)=.true. then no linear-response calculation will be performed for the i-th atomic type: in this case equiv_type(i) must be specified, otherwise the HP code will stop. This option is useful if the system has atoms of the same type but opposite spin pollarizations (anti-ferromagnetic case). This keyword cannot be used when find_atpert = 1. (start = 1, end = ntyp)",
+    )
+    equiv_type: list[int] | None = Field(
+        None,
+        description="equiv_type(i), where i runs over types of atoms. equiv_type(i)=j, will make type i equivalent to type j (useful when nspin=2). Such a merging of types is done only at the post-processing stage. This keyword cannot be used when find_atpert = 1. (start = 1, end = ntyp)",
+    )
+    perturb_only_atom: list[bool] | None = Field(
+        None,
+        description="If perturb_only_atom(i)=.true. then only the i-th atom will be perturbed and considered in the run. This variable is useful when one wants to split the whole calculation on parts.  Note: this variable has a higher priority than skip_type. (start = 1, end = ntyp)",
+    )
 
 
 class HPEspressoInput(EspressoInput):

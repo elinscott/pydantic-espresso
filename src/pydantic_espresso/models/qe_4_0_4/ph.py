@@ -83,6 +83,10 @@ class InputphNamelist(Namelist):
         False,
         description="If .true. the run calculates phonons for a grid of q-points specified by nq1, nq2, nq3 - for direct calculation of the entire phonon dispersion. The pw.x data file should not be produced using 'calculation='phonon'' in this case.",
     )
+    amass: list[float] = Field(
+        default_factory=list,
+        description="Atomic mass [amu] of each atomic type. If not specified, masses are read from data file. (start = 1, end = ntyp)",
+    )
 
 
 class PHEspressoInput(EspressoInput):

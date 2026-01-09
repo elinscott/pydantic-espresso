@@ -45,6 +45,13 @@ class InputNamelist(Namelist):
     loto_2d: bool = Field(
         False, description="set to .true. to activate two-dimensional treatment of LO-TO splitting."
     )
+    q: tuple[float, float, float] | None = Field(
+        None,
+        description="calculate LO modes (add non-analytic terms) along the direction q (Cartesian axis)",
+    )
+    amass: list[float] | None = Field(
+        None, description="mass for each atom type (start = 1, end = ntyp)"
+    )
 
 
 class DYNMATEspressoInput(EspressoInput):

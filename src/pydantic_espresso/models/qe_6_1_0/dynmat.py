@@ -42,6 +42,13 @@ class InputNamelist(Namelist):
     )
     filmol: str = Field("dynmat.mold", description="as above, in a format suitable for molden")
     filxsf: str = Field("dynmat.axsf", description="as above, in axsf format suitable for xcrysden")
+    q: tuple[float, float, float] | None = Field(
+        None,
+        description="calculate LO modes (add non-analytic terms) along the direction q (Cartesian axis)",
+    )
+    amass: list[float] | None = Field(
+        None, description="mass for each atom type (start = 1, end = ntyp)"
+    )
 
 
 class DYNMATEspressoInput(EspressoInput):

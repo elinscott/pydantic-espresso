@@ -30,6 +30,10 @@ class BandsNamelist(Namelist):
         False,
         description="If .true. writes the eigenvalues in the output file without changing their order.",
     )
+    lsigma: tuple[bool, bool, bool] | None = Field(
+        None,
+        description="If true writes a file filband.i with the expectation values of the spin operator on the spinor wave-functions. (only in the noncollinear case).",
+    )
 
 
 class BANDSEspressoInput(EspressoInput):

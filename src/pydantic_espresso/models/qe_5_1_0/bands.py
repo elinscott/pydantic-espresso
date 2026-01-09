@@ -37,6 +37,10 @@ class BandsNamelist(Namelist):
         False,
         description="If .true. writes the eigenvalues in the output file in a 2D format readable by gnuplot. Band ordering is not changed. Each band is written in a different file called filband.# with the format: xk, yk, energy xk, yk, energy ..  ..  .. energies are written in eV and xk in units 2pi/a.",
     )
+    lsigma: tuple[bool, bool, bool] | None = Field(
+        None,
+        description="If true writes a file filband.i with the expectation values of the spin operator on the spinor wave-functions. (only in the noncollinear case).",
+    )
 
 
 class BANDSEspressoInput(EspressoInput):

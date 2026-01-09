@@ -53,6 +53,13 @@ class InputNamelist(Namelist):
         None,
         description="The spacing of double-delta smearing values used in an electron-phonon coupling calculation.",
     )
+    q: tuple[float, float, float] | None = Field(
+        None,
+        description="calculate LO modes (add non-analytic terms) along the direction q (Cartesian axis)",
+    )
+    amass: list[float] | None = Field(
+        None, description="mass for each atom type (start = 1, end = ntyp)"
+    )
 
 
 class DYNMATEspressoInput(EspressoInput):

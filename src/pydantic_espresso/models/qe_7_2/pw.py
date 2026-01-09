@@ -479,6 +479,42 @@ class SystemNamelist(Namelist):
         0,
         description="Number of activated external ionic force fields. See Doc/ExternalForceFields.tex for further explanation and parameterizations",
     )
+    starting_charge: list[float] = Field(
+        default_factory=list,
+        description="starting charge on atomic type 'i', to create starting potential with startingpot = 'atomic'. (start = 1, end = ntyp)",
+    )
+    starting_magnetization: list[float] = Field(
+        default_factory=list,
+        description="Starting spin polarization on atomic type 'i' in a spin polarized (LSDA or noncollinear/spin-orbit) calculation. For non-constrained calculations, the allowed values range between -1 (all spins down for the valence electrons of atom type 'i') to 1 (all spins up). If you expect a nonzero magnetization in your ground state, you MUST either specify a nonzero value for at least one atomic type, or constrain the magnetization using variable tot_magnetization for LSDA, constrained_magnetization for noncollinear/spin-orbit calculations. If you don't, you will get a nonmagnetic (zero magnetization) state. In order to perform LSDA calculations for an antiferromagnetic state, define two different atomic species corresponding to sublattices of the same atomic type.  NOTE 1: starting_magnetization is ignored in most BUT NOT ALL cases in non-scf calculations: it is safe to keep the same values for the scf and subsequent non-scf calculation.  NOTE 2: If you fix the magnetization with tot_magnetization, do not specify starting_magnetization.  NOTE 3: In the noncollinear/spin-orbit case, starting with zero starting_magnetization on all atoms imposes time reversal symmetry. The magnetization is never calculated and is set to zero (the internal variable domag is set to .FALSE.). (start = 1, end = ntyp)",
+    )
+    Hubbard_alpha: list[float] | None = Field(
+        None,
+        description="Hubbard_alpha(i) is the perturbation (on atom i, in eV) used to compute U (and V) with the linear-response method of Cococcioni and de Gironcoli, PRB 71, 035105 (2005) (https://journals.aps.org/prb/abstract/10.1103/PhysRevB.71.035105) (only for DFT+U or DFT+U+V).  Note: Hubbard U and V can be computed using the HP code which is based on density-functional perturbation theory, and it gives exactly the same result as the method of Cococcioni and de Gironcoli. (start = 1, end = ntyp)",
+    )
+    Hubbard_beta: list[float] | None = Field(
+        None,
+        description="Hubbard_beta(i) is the perturbation (on atom i, in eV) used to compute J0 with the linear-response method of Cococcioni and de Gironcoli, PRB 71, 035105 (2005) (https://journals.aps.org/prb/abstract/10.1103/PhysRevB.71.035105) (only for DFT+U or DFT+U+V). See also PRB 84, 115108 (2011) (https://journals.aps.org/prb/abstract/10.1103/PhysRevB.84.115108). (start = 1, end = ntyp)",
+    )
+    angle1: list[float] | None = Field(
+        None,
+        description="The angle expressed in degrees between the initial magnetization and the z-axis. For noncollinear calculations only; index i runs over the atom types. (start = 1, end = ntyp)",
+    )
+    angle2: list[float] | None = Field(
+        None,
+        description="The angle expressed in degrees between the projection of the initial magnetization on x-y plane and the x-axis. For noncollinear calculations only. (start = 1, end = ntyp)",
+    )
+    fixed_magnetization: tuple[float, float, float] = Field(
+        (0.0e0, 0.0e0, 0.0e0),
+        description="total magnetization vector (x,y,z components) to be kept fixed when constrained_magnetization=='total",
+    )
+    london_c6: list[float] | None = Field(
+        None,
+        description="atomic C6 coefficient of each atom type  ( if not specified default values from S. Grimme, J. Comp. Chem. 27, 1787 (2006), doi:10.1002/jcc.20495 (https://doi.org/10.1002/jcc.20495) are used; see file Modules/mm_dispersion.f90 ) (start = 1, end = ntyp)",
+    )
+    london_rvdw: list[float] | None = Field(
+        None,
+        description="atomic vdw radii of each atom type  ( if not specified default values from S. Grimme, J. Comp. Chem. 27, 1787 (2006), doi:10.1002/jcc.20495 (https://doi.org/10.1002/jcc.20495) are used; see file Modules/mm_dispersion.f90 ) (start = 1, end = ntyp)",
+    )
 
 
 class ElectronsNamelist(Namelist):
@@ -586,6 +622,10 @@ class ElectronsNamelist(Namelist):
     real_space: bool = Field(
         False,
         description="If .true., exploit real-space localization to compute matrix elements for nonlocal projectors. Faster and in principle better scaling than the default G-space algorithm, but numerically less accurate, may lead to some loss of translational invariance. Use with care and after testing!",
+    )
+    efield_cart: tuple[float, float, float] | None = Field(
+        None,
+        description="Finite electric field (in Ry a.u.=36.3609*10^10 V/m) in cartesian axis. Used only if lelfield==.TRUE. and if k-points (K_POINTS card) are automatic.",
     )
 
 
@@ -795,6 +835,15 @@ class RismNamelist(Namelist):
     laue_wall_lj6: bool = Field(
         False,
         description="If .TRUE., the attractive term -(1/r)^6 of Lennard-Jones potential is added. This is only for Laue-RISM and laue_wall /= 'none' .",
+    )
+    solute_lj: list[str] = Field(default_factory=list, description="(start = 1, end = ntyp)")
+    solute_epsilon: list[float] | None = Field(
+        None,
+        description="The Lennard-Jones potential of solute on atomic type 'i'. Here, you can set the parameter 'epsilon' (kcal/mol). (start = 1, end = ntyp)",
+    )
+    solute_sigma: list[float] | None = Field(
+        None,
+        description="The Lennard-Jones potential of solute on atomic type 'i'. Here, you can set the parameter 'sigma' (Angstrom). (start = 1, end = ntyp)",
     )
 
 

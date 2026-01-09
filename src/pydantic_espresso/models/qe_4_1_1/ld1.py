@@ -160,6 +160,14 @@ class TestNamelist(Namelist):
         False,
         description="If .true. only the core wavefunctions of the first configuration are calculated. The eigenvalues, orbitals and energies of the other configurations are calculated with the core of the first configuration. The first configuration must be spin-unpolarized.",
     )
+    configts: list[str] | None = Field(
+        None,
+        description="A string containing the test valence electronic configuration nc, nc=1,nconf. Same syntax as for 'config'. If configts(i) is not set, the electron configuration is read from the cards following the namelist. (start = 1, end = nconf)",
+    )
+    lsdts: list[int] = Field(
+        default_factory=list,
+        description="0 or 1. It is the value of lsd used in the i-th test. Allows to make simultaneously spin-polarized and spin-unpolarized tests. (start = 1, end = nconf)",
+    )
 
 
 class LD1EspressoInput(EspressoInput):

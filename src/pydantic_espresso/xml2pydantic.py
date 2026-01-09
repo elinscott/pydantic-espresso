@@ -65,7 +65,7 @@ def sanitize_xml(xml_path: Path) -> Path:
 
 def convert_all_xml_files_to_models() -> None:
     """Convert all XML files in the xml_files directory to Pydantic models."""
-    for xml_path in xml_directory.rglob("*kcw.xml"):
+    for xml_path in xml_directory.rglob("*.xml"):
         try:
             model_str, executable_str = convert_xml_file_to_model(
                 xml_path, version=xml_path.parent.name
@@ -143,6 +143,10 @@ def convert_xml_tree_to_model(root: Element, version: str = "develop") -> str:
             if field_validator:
                 namelist_field_validators.append(field_validator)
 
+        for dim in namelist.findall("dimension"):
+            field_definition = _parse_dimension(dim)
+            namelist_field_definitions.append(field_definition)
+
         # Construct the namelist
         name = namelist.attrib["name"]
 
@@ -211,7 +215,7 @@ def _get_var_type(name: str, var: Element) -> type:
         raise InvalidXMLStructureError(f"`{name}` is missing the `type` field.")
     python_type = type_mapping[xml_type_str]
     # Manual patching of directories
-    if name in ["pseudo_dir", "outdir", "wfcdir"]:
+    if name in ["pseudo_dir", "outdir", "wfcdir", "atom_proj_dir"]:
         python_type = Path
     return python_type
 
@@ -280,6 +284,34 @@ def _parse_var(var: Element) -> tuple[str | None, list[str]]:
         name = "Lambda"
 
     return f'{name}: {type_str} = Field({default_str}, description="{description}")', validator
+
+
+def _parse_dimension(dim: Element) -> str:
+    name = dim.attrib["name"]
+    python_type = _get_var_type(name, dim)
+    start = dim.attrib["start"]
+    end = dim.attrib["end"]
+    description = _get_var_description(name, dim.find("info"), None)
+    try:
+        length = int(end) - int(start) + 1
+        type_str = "tuple[" + ", ".join([python_type.__name__ for _ in range(length)]) + "]"
+    except ValueError:
+        length = None
+        type_str = f"list[{python_type.__name__}]"
+        description += f" (start = {start}, end = {end})"
+
+    default = dim.find("default", None)
+    default_str = _get_default_str(name, python_type, default)
+
+    # Adapting type_str if the default value is None
+    if default_str == "None":
+        type_str += " | None"
+    elif length is not None:
+        default_str = f"({', '.join([default_str for _ in range(length)])})"
+    else:
+        default_str = "default_factory=list"
+
+    return f'{name}: {type_str} = Field({default_str}, description="{description.strip()}")'
 
 
 def _get_type_str(name: str, python_type: type, options: Element | None) -> tuple[str, list[str]]:
@@ -459,7 +491,7 @@ def _generate_model_string(
 This file has been generated automatically. Do not edit it manually.
 """
         + '"""'
-        + f"""
+        + """
 
 # ruff: noqa
 
@@ -469,9 +501,9 @@ from typing import Annotated, Literal
 from pydantic_espresso.models.template import EspressoInput
 from pydantic_espresso.namelist import Namelist
 from pydantic_espresso.utils import get_tmp_dir, get_pseudo_dir
-{"\n".join(sorted(imports))}
-
 """
+        + "\n".join(sorted(imports))
+        + "\n\n\n"
     )
     input_header = [
         f"class {executable_str}EspressoInput(EspressoInput):",
@@ -485,4 +517,4 @@ from pydantic_espresso.utils import get_tmp_dir, get_pseudo_dir
         + "\n".join(subclasses + input_header)
         + "\n".join([INDENT + f for f in fields])
         + "\n"
-    )
+    ).strip("\n") + "\n"

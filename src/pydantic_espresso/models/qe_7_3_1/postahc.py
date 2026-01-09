@@ -60,6 +60,10 @@ class InputNamelist(Namelist):
         False,
         description="If .true., skip calculation of the Debye-Waller self-energy. If .false., ahc_dw.bin file must be present in ahc_dir.",
     )
+    amass_amu: list[float] | None = Field(
+        None,
+        description="Mass for each atom in atomic mass unit. In postahc.x, amass_amu must be set for each atom, not for each atom type as in other programs. (start = 1, end = nat)",
+    )
 
 
 class POSTAHCEspressoInput(EspressoInput):
