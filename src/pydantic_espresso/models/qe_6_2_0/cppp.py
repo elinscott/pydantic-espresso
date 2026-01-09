@@ -61,6 +61,10 @@ class InputppNamelist(Namelist):
         True,
         description="specify the file format of the wave function files to be read and plotted",
     )
+    atomic_number: list[int] = Field(
+        default_factory=list,
+        description="Specify the atomic number of the species in CP trajectory and restart file.  atomic_number(1)  specify the atomic number of the first specie atomic_number(2)  specify the atomic number of the second specie .... (start = 1, end = ntyp)",
+    )
 
 
 class CPPPEspressoInput(EspressoInput):

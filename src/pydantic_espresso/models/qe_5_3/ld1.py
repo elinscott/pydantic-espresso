@@ -186,6 +186,14 @@ class TestNamelist(Namelist):
         -1.0,
         description="Cutoff distance (CUT) for the inclusion of LDA-1/2 potential. Needed (mandatory) only if iswitch = 4",
     )
+    configts: list[str] | None = Field(
+        None,
+        description="A string containing the test valence electronic configuration nc, nc=1,nconf. Same syntax as for 'config'. If configts(i) is not set, the electron configuration is read from the cards following the namelist. (start = 1, end = nconf)",
+    )
+    lsdts: list[int] = Field(
+        default_factory=list,
+        description="0 or 1. It is the value of lsd used in the i-th test. Allows to make simultaneously spin-polarized and spin-unpolarized tests. (start = 1, end = nconf)",
+    )
 
 
 class LD1EspressoInput(EspressoInput):

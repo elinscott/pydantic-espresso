@@ -437,6 +437,50 @@ class SystemNamelist(Namelist):
         True,
         description="Used only for rhombohedral space groups. When .TRUE. the coordinates of the inequivalent atoms are given with respect to the rhombohedral axes, when .FALSE. the coordinates of the inequivalent atoms are given with respect to the hexagonal axes. They are converted internally to the rhombohedral axes and ibrav=5 is used in both cases.",
     )
+    starting_charge: list[float] = Field(
+        default_factory=list,
+        description="starting charge on atomic type 'i', to create starting potential with startingpot = 'atomic'. (start = 1, end = ntyp)",
+    )
+    starting_magnetization: list[float] | None = Field(
+        None,
+        description="Starting spin polarization on atomic type 'i' in a spin polarized calculation. Values range between -1 (all spins down for the valence electrons of atom type 'i') to 1 (all spins up). Breaks the symmetry and provides a starting point for self-consistency. The default value is zero, BUT a value MUST be specified for AT LEAST one atomic type in spin polarized calculations, unless you constrain the magnetization (see tot_magnetization and constrained_magnetization). Note that if you start from zero initial magnetization, you will invariably end up in a nonmagnetic (zero magnetization) state. If you want to start from an antiferromagnetic state, you may need to define two different atomic species corresponding to sublattices of the same atomic type. starting_magnetization is ignored if you are performing a non-scf calculation, if you are restarting from a previous run, or restarting from an interrupted run. If you fix the magnetization with tot_magnetization, you should not specify starting_magnetization. In the spin-orbit case starting with zero starting_magnetization on all atoms imposes time reversal symmetry. The magnetization is never calculated and kept zero (the internal variable domag is .FALSE.). (start = 1, end = ntyp)",
+    )
+    Hubbard_U: list[float] | None = Field(
+        None,
+        description="Hubbard_U(i): U parameter (eV) for species i, DFT+U calculation (start = 1, end = ntyp)",
+    )
+    Hubbard_J0: list[float] | None = Field(
+        None,
+        description="Hubbard_J0(i): J0 parameter (eV) for species i, DFT+U+J calculation, see PRB 84, 115108 (2011) (https://journals.aps.org/prb/abstract/10.1103/PhysRevB.84.115108) for details. (start = 1, end = ntype)",
+    )
+    Hubbard_alpha: list[float] | None = Field(
+        None,
+        description="Hubbard_alpha(i) is the perturbation (on atom i, in eV) used to compute U with the linear-response method of Cococcioni and de Gironcoli, PRB 71, 035105 (2005) (https://journals.aps.org/prb/abstract/10.1103/PhysRevB.71.035105) (only for lda_plus_u_kind=0) (start = 1, end = ntyp)",
+    )
+    Hubbard_beta: list[float] | None = Field(
+        None,
+        description="Hubbard_beta(i) is the perturbation (on atom i, in eV) used to compute J0 with the linear-response method of Cococcioni and de Gironcoli, PRB 71, 035105 (2005) (https://journals.aps.org/prb/abstract/10.1103/PhysRevB.71.035105) (only for lda_plus_u_kind=0). See also PRB 84, 115108 (2011) (https://journals.aps.org/prb/abstract/10.1103/PhysRevB.84.115108). (start = 1, end = ntyp)",
+    )
+    angle1: list[float] | None = Field(
+        None,
+        description="The angle expressed in degrees between the initial magnetization and the z-axis. For noncollinear calculations only; index i runs over the atom types. (start = 1, end = ntyp)",
+    )
+    angle2: list[float] | None = Field(
+        None,
+        description="The angle expressed in degrees between the projection of the initial magnetization on x-y plane and the x-axis. For noncollinear calculations only. (start = 1, end = ntyp)",
+    )
+    fixed_magnetization: tuple[float, float, float] = Field(
+        (0.0e0, 0.0e0, 0.0e0),
+        description="total magnetization vector (x,y,z components) to be kept fixed when constrained_magnetization=='total",
+    )
+    london_c6: list[float] | None = Field(
+        None,
+        description="atomic C6 coefficient of each atom type  ( if not specified default values from S. Grimme, J. Comp. Chem. 27, 1787 (2006), doi:10.1002/jcc.20495 (https://doi.org/10.1002/jcc.20495) are used; see file Modules/mm_dispersion.f90 ) (start = 1, end = ntyp)",
+    )
+    london_rvdw: list[float] | None = Field(
+        None,
+        description="atomic vdw radii of each atom type  ( if not specified default values from S. Grimme, J. Comp. Chem. 27, 1787 (2006), doi:10.1002/jcc.20495 (https://doi.org/10.1002/jcc.20495) are used; see file Modules/mm_dispersion.f90 ) (start = 1, end = ntyp)",
+    )
 
 
 class ElectronsNamelist(Namelist):
@@ -517,6 +561,10 @@ class ElectronsNamelist(Namelist):
     real_space: bool = Field(
         False,
         description="If .true., exploit real-space localization to compute matrix elements for nonlocal projectors. Faster and in principle better scaling than the default G-space algorithm, but numerically less accurate, may lead to some loss of translational invariance. Use with care and after testing!",
+    )
+    efield_cart: tuple[float, float, float] | None = Field(
+        None,
+        description="Finite electric field (in Ry a.u.=36.3609*10^10 V/m) in cartesian axis. Used only if lelfield==.TRUE. and if k-points (K_POINTS card) are automatic.",
     )
 
 

@@ -170,6 +170,10 @@ class InputphNamelist(Namelist):
         False,
         description="If .true., use Fourier interpolation of phonon potential to compute the induced part of phonon potential at each q point. Results of a dvscf_q2r.x run is needed. Requires trans = .false..",
     )
+    amass: list[float] = Field(
+        default_factory=list,
+        description="Atomic mass [amu] of each atomic type. If not specified, masses are read from data file. (start = 1, end = ntyp)",
+    )
 
 
 class PHEspressoInput(EspressoInput):

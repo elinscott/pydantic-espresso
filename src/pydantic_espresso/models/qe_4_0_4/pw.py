@@ -234,6 +234,35 @@ class SystemNamelist(Namelist):
         False,
         description="if .TRUE. the system is embedded the electrostatic environment described in the EE namelist.",
     )
+    celldm: tuple[float, float, float, float, float, float] | None = Field(
+        None,
+        description="Crystallographic constants - see description of ibrav variable.  * alat = celldm(1) is the lattice parameter 'a' (in BOHR) * only needed celldm (depending on ibrav) must be specified * if ibrav=0 only alat = celldm(1) is used (if present)",
+    )
+    starting_magnetization: list[float] | None = Field(
+        None,
+        description="starting spin polarization (values between -1 and 1) on atomic type 'i' in a spin-polarized calculation. Breaks the symmetry and provides a starting point for self-consistency. The default value is zero, BUT a value MUST be specified for AT LEAST one atomic type in spin polarized calculations. Note that if start from zero initial magnetization, you will get zero final magnetization in any case. If you desire to start from an antiferromagnetic state, you may need to define two different atomic species corresponding to sublattices of the same atomic type. If you fix the magnetization with 'nelup/neldw' or with 'multiplicity' or with 'tot_magnetization', you should not specify starting_magnetization. If you are restarting from a previous run, or from an interrupted run, starting_magnetization is ignored. (start = 1, end = ntyp)",
+    )
+    Hubbard_alpha: list[float] | None = Field(None, description="(start = 1, end = ntyp)")
+    Hubbard_U: list[float] | None = Field(
+        None,
+        description="lda_plus_u, Hubbard_alpha(i), Hubbard_U(i): parameters for LDA+U calculations If lda_plus_u = .TRUE. you must specify, for species i, the parameters U and (optionally) alpha of the Hubbard model (both in eV). See: Anisimov, Zaanen, and Andersen, PRB 44, 943 (1991) (https://journals.aps.org/prb/abstract/10.1103/PhysRevB.44.943); Anisimov et al., PRB 48, 16929 (1993) (https://journals.aps.org/prb/abstract/10.1103/PhysRevB.48.16929); Liechtenstein, Anisimov, and Zaanen, PRB 52, R5467 (1994) (https://journals.aps.org/prb/abstract/10.1103/PhysRevB.52.R5467); Cococcioni and de Gironcoli, PRB 71, 035105 (2005) (https://journals.aps.org/prb/abstract/10.1103/PhysRevB.71.035105). (start = 1, end = ntyp)",
+    )
+    angle1: list[float] | None = Field(
+        None,
+        description="The angle expressed in degrees between the initial magnetization and the z-axis. For noncollinear calculations only; index i runs over the atom types. (start = 1, end = ntyp)",
+    )
+    angle2: list[float] | None = Field(
+        None,
+        description="The angle expressed in degrees between the projection of the initial magnetization on x-y plane and the x-axis. For noncollinear calculations only. (start = 1, end = ntyp)",
+    )
+    fixed_magnetization: tuple[float, float, float] = Field(
+        (0.0e0, 0.0e0, 0.0e0),
+        description="value of the total magnetization to be maintained fixed when constrained_magnetization='total",
+    )
+    B_field: tuple[float, float, float] = Field(
+        (0.0e0, 0.0e0, 0.0e0),
+        description="A fixed magnetic field defined by the vector B_field is added to the exchange and correlation magnetic field. The three components of the magnetic field are given in Ry. Only B_field(3) can be used if nspin=2.  In all calculations with a finite magnetic field, we print the total energy WITHOUT the B dot M term. In the calculations with the penalty functional we write only the total energy, NOT the penalty functional.",
+    )
 
 
 class ElectronsNamelist(Namelist):
@@ -354,6 +383,9 @@ class PhononNamelist(Namelist):
     modenum: int = Field(
         0,
         description="For single-mode phonon calculation : modenum is the index of the irreducible representation (irrep) into which the reducible representation formed by the 3*nat atomic displacements are decomposed in order to perform the phonon calculation.",
+    )
+    xqq: tuple[float, float, float] | None = Field(
+        None, description="q-point (units 2pi/a) for phonon calculation."
     )
 
 

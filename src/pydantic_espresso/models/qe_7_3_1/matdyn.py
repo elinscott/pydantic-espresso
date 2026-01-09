@@ -93,6 +93,10 @@ class InputNamelist(Namelist):
         None,
         description="if .true. write force constants with asr imposed into file. The filename would be flfrc+'.matdyn'. The long-range part of force constants will be not written.",
     )
+    amass: list[float] | None = Field(
+        None,
+        description="masses of atoms in the supercell (a.m.u.), one per atom type (default: use masses read from file (start = 1, end = ntyp)",
+    )
 
 
 class MATDYNEspressoInput(EspressoInput):

@@ -47,6 +47,10 @@ class InputgipawNamelist(Namelist):
         True,
         description="interpolate pseudopotentials with cubic splines (better accuracy of the chemical shifts)",
     )
+    file_reconstruction: list[str] | None = Field(
+        None,
+        description="for each pseudopotential, the file name with reconstruction data (start = 1, end = ntyp)",
+    )
 
 
 class GIPAWEspressoInput(EspressoInput):

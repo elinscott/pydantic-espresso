@@ -158,6 +158,10 @@ class InputphNamelist(Namelist):
         False,
         description="If .true. the PH code tries to read three files in the DFPT+U calculation: dns_orth, dns_bare, d2ns_bare. dns_orth and dns_bare are the first-order variations of the occupation matrix, while d2ns_bare is the second-order variation of the occupation matrix. These matrices are computed only once during the DFPT+U calculation. However, their calculation (especially of d2ns_bare) is computationally expensive, this is why they are written to file and then can be read (e.g. for restart) in order to save time.",
     )
+    amass: list[float] = Field(
+        default_factory=list,
+        description="Atomic mass [amu] of each atomic type. If not specified, masses are read from data file. (start = 1, end = ntyp)",
+    )
 
 
 class PHEspressoInput(EspressoInput):

@@ -187,6 +187,10 @@ class SystemNamelist(Namelist):
         "none",
         description="Used to perform calculation assuming the system to be isolated (a molecule of a clustr in a 3D supercell).  Currently available choices:  'none' (default): regular periodic calculation w/o any correction.  'makov-payne', 'm-p', 'mp' : the Makov-Payne correction to the total energy is computed. Theory: G.Makov, and M.C.Payne, 'Periodic boundary conditions in ab initio calculations' , Phys.Rev.B 51, 4014 (1995)",
     )
+    Hubbard_U: list[float] | None = Field(
+        None,
+        description="Hubbard_U(i): parameter U (in eV) for LDA+U calculations. Currently only the simpler, one-parameter LDA+U is implemented (no 'alpha' or 'J' terms) (start = 1, end = ntyp)",
+    )
 
 
 class ElectronsNamelist(Namelist):
@@ -349,6 +353,26 @@ class IonsNamelist(Namelist):
         description="number of degrees of freedom used for temperature calculation ndega <= 0 sets the number of degrees of freedom to [3*nat-abs(ndega)], ndega > 0 is used as the target number",
     )
     greasp: float = Field(1.0e0, description="same as 'grease', for ionic damped dynamics.")
+    ion_radius: list[float] | None = Field(
+        None,
+        description="ion_radius(i): pseudo-atomic radius of the i-th atomic species used in Ewald summation. Typical values: between 0.5 and 2. Results should NOT depend upon such parameters if their values are properly chosen. See also 'iesr'. (start = 1, end = ntyp)",
+    )
+    nhgrp: list[int] = Field(
+        default_factory=list,
+        description="specifies which thermostat group to use for given atomic type when >0 assigns all the atoms in this type to thermostat labeled nhgrp(i), when =0 each atom in the type gets its own thermostat. Finally, when <0, then this atomic type will have temperature 'not controlled'. Example: HCOOLi, with types H (1), C(2), O(3), Li(4); setting nhgrp={2 2 0 -1} will add a common thermostat for both H & C, one thermostat per each O (2 in total), and a non-updated thermostat for Li which will effectively make temperature for Li 'not controlled (start = 1, end = ntyp)",
+    )
+    fnhscl: list[float] | None = Field(
+        None,
+        description="these are the scaling factors to be used together with nhptyp=3 and nhgrp(i) in order to take care of possible reduction in the degrees of freedom due to constraints. Suppose that with the previous example HCOOLi, C-H bond is constrained. Then, these 2 atoms will have 5 degrees of freedom in total instead of 6, and one can set fnhscl={5/6 5/6 1. 1.}. This way the target kinetic energy for H&C will become 6(kT/2)*5/6 = 5(kT/2). This option is to be used for simulations with many constraints, such as rigid water with something else in there (start = 1, end = ntyp)",
+    )
+    tranp: list[bool] = Field(
+        default_factory=list,
+        description="If .TRUE. randomize ionic positions for the atomic type corresponding to the index. (start = 1, end = ntyp)",
+    )
+    amprp: list[float] = Field(
+        default_factory=list,
+        description="amplitude of the randomization for the atomic type corresponding to the index i ( allowed values: 0.0 - 1.0 ). meaningful only if ' tranp(i) = .TRUE.'. (start = 1, end = ntyp)",
+    )
 
 
 class CellNamelist(Namelist):

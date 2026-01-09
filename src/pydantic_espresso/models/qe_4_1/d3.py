@@ -35,6 +35,10 @@ class InputphNamelist(Namelist):
         description="If this number is set different from zero the program will stop after the specified routine and will write the partial result in the recover file.",
     )
     iverbosity: int = Field(0, description="type of printing ( 0 few, 1 all )")
+    q0mode_todo: list[int] = Field(
+        default_factory=list,
+        description="This array contains the list of the q=0 modes that will be computed. If q0mode_todo(1).eq.0 the program will compute every q=0 mode. (start = 1, end = 3*nat)",
+    )
 
 
 class D3EspressoInput(EspressoInput):

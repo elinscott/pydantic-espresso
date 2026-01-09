@@ -85,8 +85,10 @@ def fetch_all_defs() -> None:
     for tag in project.tags.list(get_all=True):
         try:
             # Check that we can convert the tag to a Version object
-            Version(tag.name[3:])
+            version = Version(tag.name[3:])
         except ValueError:
+            continue
+        if version.is_devrelease:
             continue
         existing_tags = [t.name for t in def_directory.iterdir() if t.is_dir()]
         if tag.name not in existing_tags:

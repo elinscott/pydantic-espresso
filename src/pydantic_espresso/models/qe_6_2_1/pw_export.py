@@ -38,6 +38,10 @@ class InputppNamelist(Namelist):
         False,
         description="when using USPP,  if set .TRUE. the code writes S | psi > and | psi > vectors separately in the output file.",
     )
+    psfile: list[str] | None = Field(
+        None,
+        description="files containing i-th pseudopotential, where i=1, ntyp. PP numbering must follow the ordering defined in the input of pw.x (start = 1, end = ntyp)",
+    )
 
 
 class PWEXPORTEspressoInput(EspressoInput):

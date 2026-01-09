@@ -242,6 +242,31 @@ class SystemNamelist(Namelist):
         0.75, description="global scaling parameter for DFT-D. Default is good for PBE."
     )
     london_rcut: float = Field(200, description="cutoff radius (a.u.) for dispersion interactions")
+    celldm: tuple[float, float, float, float, float, float] | None = Field(
+        None,
+        description="Crystallographic constants - see description of ibrav variable.  * alat = celldm(1) is the lattice parameter 'a' (in BOHR) * only needed celldm (depending on ibrav) must be specified * if ibrav=0 only alat = celldm(1) is used (if present)",
+    )
+    starting_magnetization: list[float] | None = Field(
+        None,
+        description="starting spin polarization (values between -1 and 1) on atomic type 'i' in a spin-polarized calculation. Breaks the symmetry and provides a starting point for self-consistency. The default value is zero, BUT a value MUST be specified for AT LEAST one atomic type in spin polarized calculations. Note that if start from zero initial magnetization, you will get zero final magnetization in any case. If you desire to start from an antiferromagnetic state, you may need to define two different atomic species corresponding to sublattices of the same atomic type. If you fix the magnetization with 'multiplicity' or with 'tot_magnetization', you should not specify starting_magnetization. If you are restarting from a previous run, or from an interrupted run, starting_magnetization is ignored. (start = 1, end = ntyp)",
+    )
+    Hubbard_alpha: list[float] | None = Field(None, description="(start = 1, end = ntyp)")
+    Hubbard_U: list[float] | None = Field(
+        None,
+        description="lda_plus_u, Hubbard_alpha(i), Hubbard_U(i): parameters for LDA+U calculations If lda_plus_u = .TRUE. you must specify, for species i, the parameters U and (optionally) alpha of the Hubbard model (both in eV). See: Anisimov, Zaanen, and Andersen, PRB 44, 943 (1991) (https://journals.aps.org/prb/abstract/10.1103/PhysRevB.44.943); Anisimov et al., PRB 48, 16929 (1993) (https://journals.aps.org/prb/abstract/10.1103/PhysRevB.48.16929); Liechtenstein, Anisimov, and Zaanen, PRB 52, R5467 (1994) (https://journals.aps.org/prb/abstract/10.1103/PhysRevB.52.R5467); Cococcioni and de Gironcoli, PRB 71, 035105 (2005) (https://journals.aps.org/prb/abstract/10.1103/PhysRevB.71.035105). (start = 1, end = ntyp)",
+    )
+    angle1: list[float] | None = Field(
+        None,
+        description="The angle expressed in degrees between the initial magnetization and the z-axis. For noncollinear calculations only; index i runs over the atom types. (start = 1, end = ntyp)",
+    )
+    angle2: list[float] | None = Field(
+        None,
+        description="The angle expressed in degrees between the projection of the initial magnetization on x-y plane and the x-axis. For noncollinear calculations only. (start = 1, end = ntyp)",
+    )
+    fixed_magnetization: tuple[float, float, float] = Field(
+        (0.0e0, 0.0e0, 0.0e0),
+        description="value of the total magnetization to be maintained fixed when constrained_magnetization='total",
+    )
 
 
 class ElectronsNamelist(Namelist):
@@ -300,6 +325,10 @@ class ElectronsNamelist(Namelist):
     tqr: bool = Field(
         False,
         description="If .true., use the real-space algorithm for augmentation charges in ultrasoft pseudopotentials. Must faster execution of ultrasoft-related calculations, but numerically less accurate than the default algorithm. Use with care and after testing!",
+    )
+    efield_cart: tuple[float, float, float] | None = Field(
+        None,
+        description="Finite electric field (in Ry a.u.=36.3609*10^10 V/m) in cartesian axis  Used only if lelfield=.TRUE. and if k-points (K_POINTS card) are automatic.",
     )
 
 

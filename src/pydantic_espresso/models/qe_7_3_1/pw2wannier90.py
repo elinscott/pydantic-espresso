@@ -70,7 +70,7 @@ class InputppNamelist(Namelist):
         False,
         description="Set to .true. to use the external pseudo-atomic wavefunctions from the files stored in atom_proj_dir as the initial projection. Only relevant if atom_proj = .true.",
     )
-    atom_proj_dir: str | None = Field(
+    atom_proj_dir: Path | None = Field(
         None,
         description="Set to the directory containing the external pseudo-atomic wavefunctions. The file names should be of the form SPECIES.dat, where SPECIES is the species name of the atom. For more details, see the wannier90 user guide and examples. Only relevant if atom_proj_ext = .true.",
     )
@@ -132,6 +132,10 @@ class InputppNamelist(Namelist):
     read_sym: bool = Field(
         False,
         description="Set to .true. to customize symmetry operations to be used in symmetry-adapted mode. When read_sym = .true., an additional input seedname.sym is required. Only relevant if write_dmn = .true.",
+    )
+    atom_proj_exclude: list[int] | None = Field(
+        None,
+        description="Set to the index of the pseudo-atomic wavefunctions to be excluded from the initial projection. This is useful for excluding the semicore states from the initial projection. Only relevant if atom_proj = .true. (start = 1, end = n_exclude_proj)",
     )
 
 

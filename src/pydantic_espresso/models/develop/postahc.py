@@ -66,6 +66,9 @@ class InputNamelist(Namelist):
         False,
         description="If .true., use the adiabatic approximation when computing the Fan self-energy by ignoring the phonon frequency in the denominator. This approximation is known to be inaccurate and even divergent in some materials (S. PoncÃ© et al., J. Chem. Phys. 143, 102813 (2015)). Therefore, this keyword should be used only for experimental or debugging purposes.",
     )
+    amass_amu: list[float] | None = Field(
+        None, description="Mass for each atom type in atomic mass unit. (start = 1, end = ntyp)"
+    )
 
 
 class POSTAHCEspressoInput(EspressoInput):

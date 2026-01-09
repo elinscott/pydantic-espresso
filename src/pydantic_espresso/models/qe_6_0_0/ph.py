@@ -134,6 +134,10 @@ class InputphNamelist(Namelist):
     search_sym: bool = Field(
         True, description="Set it to .false. if you want to disable the mode symmetry analysis."
     )
+    amass: list[float] = Field(
+        default_factory=list,
+        description="Atomic mass [amu] of each atomic type. If not specified, masses are read from data file. (start = 1, end = ntyp)",
+    )
 
 
 class PHEspressoInput(EspressoInput):

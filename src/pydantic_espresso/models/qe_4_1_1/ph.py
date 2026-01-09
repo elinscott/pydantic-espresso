@@ -87,6 +87,10 @@ class InputphNamelist(Namelist):
         False,
         description="If .true. disable the 'gamma_gamma' trick used to speed up calculations at q=0 (phonon wavevector) if the sum over the Brillouin Zone includes k=0 only. The gamma_gamma trick exploits symmetry and acoustic sum rule to reduce the number of linear response calculations to the strict minimum, as it is done in code phcg.x. This option MUST BE USED if a run with ph.x is to be followed by a run with d3.x for third-order terms calculation.",
     )
+    amass: list[float] = Field(
+        default_factory=list,
+        description="Atomic mass [amu] of each atomic type. If not specified, masses are read from data file. (start = 1, end = ntyp)",
+    )
 
 
 class PHEspressoInput(EspressoInput):

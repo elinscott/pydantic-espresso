@@ -81,6 +81,10 @@ class InputNamelist(Namelist):
     loto_disable: bool | None = Field(
         None, description="if .true. do not apply LO-TO splitting for q=0 (default:"
     )
+    amass: list[float] | None = Field(
+        None,
+        description="masses of atoms in the supercell (a.m.u.), one per atom type (default: use masses read from file (start = 1, end = ntyp)",
+    )
 
 
 class MATDYNEspressoInput(EspressoInput):

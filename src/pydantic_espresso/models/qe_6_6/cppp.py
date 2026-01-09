@@ -51,6 +51,10 @@ class InputppNamelist(Namelist):
         1, description="number of MD step to be read to build the trajectory CURRENTLY MUST BE > 1"
     )
     ndr: int = Field(51, description="CP restart file number to post process")
+    atomic_number: list[int] = Field(
+        default_factory=list,
+        description="Specify the atomic number of the species in CP trajectory and restart file.  atomic_number(1)  specify the atomic number of the first specie atomic_number(2)  specify the atomic number of the second specie .... (start = 1, end = ntyp)",
+    )
 
 
 class CPPPEspressoInput(EspressoInput):
