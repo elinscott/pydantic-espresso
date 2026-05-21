@@ -2042,7 +2042,7 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program pw.x 
         var gcscf_mu -type REAL {
             dimensionality { energy }
             units { eV }
-            status { REQUIRED }
+            status { REQUIRED if @ref lgcscf is .TRUE. }
             info {
                 The target Fermi energy of GC-SCF. One can start
                 with appropriate total charge of the system by giving @ref tot_charge .

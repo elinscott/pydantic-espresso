@@ -1287,8 +1287,8 @@ class SystemNamelist(Namelist):
             .TRUE. ."""
         ),
     )
-    gcscf_mu: Annotated[float, Quantity(units="eV", dimensionality="energy")] = Field(
-        ...,
+    gcscf_mu: Annotated[float | None, Quantity(units="eV", dimensionality="energy")] = Field(
+        None,
         description=dedent(
             """\
             The target Fermi energy of GC-SCF. One can start with appropriate total charge of the

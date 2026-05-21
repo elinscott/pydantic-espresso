@@ -2039,7 +2039,7 @@ NB:
          </dimensionality>
          <units> eV
          </units>
-         <status> REQUIRED
+         <status> REQUIRED if <ref>lgcscf</ref> is .TRUE.
          </status>
          <info>
 The target Fermi energy of GC-SCF. One can start
