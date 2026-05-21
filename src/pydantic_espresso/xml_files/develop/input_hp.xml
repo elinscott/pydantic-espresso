@@ -25,9 +25,11 @@ used in the calculation of unperturbed system.
          </info>
       </var>
       <var name="outdir" type="CHARACTER" >
-         <default>
-value of the <tt>ESPRESSO_TMPDIR</tt> environment variable if set;
-<br/> current directory (&apos;./&apos;) otherwise
+         <default kind="conditional" >
+            <case test="ESPRESSO_TMPDIR is set" > from_environment
+            </case>
+            <case> &apos;./&apos;
+            </case>
          </default>
          <info>
 Directory containing input, output, and scratch files;
@@ -52,6 +54,10 @@ the unperturbed system.
       <var name="max_seconds" type="REAL" >
          <default> 1.d7
          </default>
+         <dimensionality> time
+         </dimensionality>
+         <units> s
+         </units>
          <info>
 Maximum allowed run time before the job stops smoothly.
          </info>
@@ -128,6 +134,8 @@ Method for searching of atoms which must be perturbed.
       <var name="docc_thr" type="REAL" >
          <default> 5.D-5
          </default>
+         <dimensionality> dimensionless
+         </dimensionality>
          <info>
 Threshold for a comparison of unperturbed occupations
 which is needed for the selection of atoms which must
@@ -135,7 +143,7 @@ be perturbed. Can be used only when <ref>find_atpert</ref> = 1.
          </info>
       </var>
       <dimension name="skip_type" start="1" end="ntyp" type="LOGICAL" >
-         <default> skip_type(i) = .false.
+         <default> .false.
          </default>
          <see> equiv_type
          </see>
@@ -151,7 +159,7 @@ This keyword cannot be used when <ref>find_atpert</ref> = 1.
          </info>
       </dimension>
       <dimension name="equiv_type" start="1" end="ntyp" type="INTEGER" >
-         <default> equiv_type(i) = 0
+         <default> 0
          </default>
          <see> skip_type
          </see>
@@ -164,7 +172,7 @@ This keyword cannot be used when <ref>find_atpert</ref> = 1.
          </info>
       </dimension>
       <dimension name="perturb_only_atom" start="1" end="ntyp" type="LOGICAL" >
-         <default> perturb_only_atom(i) = .false.
+         <default> .false.
          </default>
          <see> compute_hp
          </see>
@@ -190,12 +198,13 @@ the total number of q points found.
          </info>
       </var>
       <var name="last_q" type="INTEGER" >
-         <default> number of q points
+         <default kind="computed" > internal
          </default>
          <see> start_q, sum_pertq
          </see>
          <info>
 Computes only the q points from <ref>start_q</ref> to <ref>last_q</ref>.
+By default it is set internally to the total number of q points.
 
 <b>IMPORTANT:</b> <ref>last_q</ref> must be smaller or equal to
 the total number of q points found.
@@ -233,6 +242,8 @@ calculation was parallelized over perturbations.
       <var name="conv_thr_chi" type="REAL" >
          <default> 1.D-5
          </default>
+         <dimensionality> dimensionless
+         </dimensionality>
          <info>
 Convergence threshold for the response function chi,
 which is defined as a trace of the response
@@ -242,6 +253,8 @@ occupation matrix.
       <var name="thresh_init" type="REAL" >
          <default> 1.D-14
          </default>
+         <dimensionality> dimensionless
+         </dimensionality>
          <info>
 Initial threshold for the solution of the linear
 system (first iteration). Needed to converge the
@@ -253,6 +266,8 @@ number of electrons in the system.
       <var name="ethr_nscf" type="REAL" >
          <default> 1.D-11
          </default>
+         <dimensionality> dimensionless
+         </dimensionality>
          <info>
 Threshold for the convergence of eigenvalues during
 the iterative diagonalization of the Hamiltonian in
@@ -269,8 +284,14 @@ solution of the linear-response Kohn-Sham equations.
          </info>
       </var>
       <var name="alpha_mix(i)" type="REAL" >
-         <default> alpha_mix(1)=0.3
+         <default kind="conditional" >
+            <case test="i==1" > 0.3
+            </case>
+            <case> 0.0
+            </case>
          </default>
+         <dimensionality> dimensionless
+         </dimensionality>
          <info>
 Mixing parameter (for the i-th iteration) for updating
 the response SCF potential using the modified Broyden
@@ -317,8 +338,12 @@ latter will be written to parameters.out.
       <var name="rmax" type="REAL" >
          <default> 100.D0
          </default>
+         <dimensionality> length
+         </dimensionality>
+         <units> bohr
+         </units>
          <info>
-Maximum distance (in Bohr) between two atoms to search
+Maximum distance between two atoms to search
 neighbors (used only at the postprocessing step for
 DFT+U+V). This keyword is useful when there
 are e.g. defects in the system.
@@ -327,8 +352,12 @@ are e.g. defects in the system.
       <var name="dist_thr" type="REAL" >
          <default> 6.D-4
          </default>
+         <dimensionality> length
+         </dimensionality>
+         <units> bohr
+         </units>
          <info>
-Threshold (in Bohr) for comparing inter-atomic distances
+Threshold for comparing inter-atomic distances
 when reconstructing the missing elements of the response
 susceptibility in the post-processing step.
          </info>

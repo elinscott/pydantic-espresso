@@ -1,14 +1,13 @@
 """Test `pydantic_espresso.card.pw.cell_parameters`."""
 
-from pydantic_espresso.card.pw.cell_parameters import CellParametersCard
+from pydantic_espresso.card.pw.cell_parameters import CellParametersAlatCard
 
 
 def test_cell_parameters_card() -> None:
-    """Test the CellParametersCard class."""
-    card = CellParametersCard(
-        vectors=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]], units="alat"
-    )
+    """Test the CellParametersAlatCard variant."""
+    card = CellParametersAlatCard(vectors=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
 
+    assert card.unit == "alat"
     assert card.vectors[0][0] == 1.0
     assert card.vectors[0][1] == 0.0
     assert card.vectors[0][2] == 0.0

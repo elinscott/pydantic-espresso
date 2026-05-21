@@ -3,14 +3,14 @@
 This file has been generated automatically. Do not edit it manually.
 """
 
-# ruff: noqa
-
 from pathlib import Path
-from pydantic import Field, field_validator
 from typing import Annotated, Literal
+
+from pydantic import Field
+
 from pydantic_espresso.models.template import EspressoInput
 from pydantic_espresso.namelist import Namelist
-from pydantic_espresso.utils import get_tmp_dir, get_pseudo_dir
+from pydantic_espresso.quantity import Quantity
 
 
 class DosNamelist(Namelist):
@@ -19,23 +19,45 @@ class DosNamelist(Namelist):
     prefix: str = Field(
         "pwscf", description="prefix of input file produced by pw.x (wavefunctions are not needed)"
     )
-    outdir: Path = Field(
-        Path("value of the"),
+    outdir: Path | None = Field(
+        None,
+        json_schema_extra={
+            "conditional_default": [
+                {"when": "ESPRESSO_TMPDIR is set", "value": "from_environment"},
+                {"when": None, "value": "'./'"},
+            ],
+        },
         description="directory containing the input data, i.e. the same as in pw.x",
     )
     bz_sum: Literal[None, "smearing", "tetrahedra", "tetrahedra_lin", "tetrahedra_opt"] = Field(
-        None, description="Keyword selecting  the method for BZ summation. Available options are:"
+        None,
+        description=(
+            "By default this is set to 'smearing' if degauss is given in input; otherwise the "
+            "method is read from the xml data file. Keyword selecting  the method for BZ "
+            "summation. Available options are:"
+        ),
     )
     ngauss: int = Field(
         0,
-        description="Type of gaussian broadening:  =  0  Simple Gaussian (default)  =  1  Methfessel-Paxton of order 1  = -1  'cold smearing' (Marzari-Vanderbilt-DeVita-Payne)  =-99  Fermi-Dirac function",
+        description=(
+            "Type of gaussian broadening:  =  0  Simple Gaussian  =  1  Methfessel-Paxton of order "
+            "1  = -1  'cold smearing' (Marzari-Vanderbilt-DeVita-Payne)  =-99  Fermi-Dirac function"
+        ),
     )
-    degauss: float | None = Field(None, description="gaussian broadening, Ry (not eV!) (see below)")
-    DeltaE: float | None = Field(None, description="energy grid step (eV)")
-    fildos: str = Field("prefix.dos", description="output file containing DOS(E)")
+    degauss: Annotated[float, Quantity(units="Ry", dimensionality="energy")] = Field(
+        0.0, description="gaussian broadening, Ry (not eV!) (see below)"
+    )
+    DeltaE: Annotated[float, Quantity(units="eV", dimensionality="energy")] = Field(
+        0.01, description="energy grid step"
+    )
+    fildos: str | None = Field(
+        None,
+        json_schema_extra={"default_expr": "prefix // '.dos'"},
+        description="output file containing DOS(E)",
+    )
 
 
 class DOSEspressoInput(EspressoInput):
-    """Pydantic model for the input of `dos.x`"""
+    """Pydantic model for the input of `dos.x`."""
 
     dos: DosNamelist = Field(default_factory=lambda: DosNamelist())

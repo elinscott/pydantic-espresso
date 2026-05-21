@@ -41,7 +41,12 @@ same prefix.
          </info>
       </var>
       <var name="outdir" type="CHARACTER" >
-         <default> &apos;./&apos;
+         <default kind="conditional" >
+            <case test="environment variable ESPRESSO_TMPDIR is set and non-blank" >
+value of the <tt>ESPRESSO_TMPDIR</tt> environment variable
+            </case>
+            <case> &apos;./&apos;
+            </case>
          </default>
          <info>
 The directory that contains the run critical files, which
@@ -60,7 +65,7 @@ previous runs.
          </info>
       </var>
       <var name="restart_step" type="INTEGER" >
-         <default> itermax
+         <default kind="expr" > <ref>itermax</ref> + 1
          </default>
          <info>
 The code writes restart files every restart_step iterations.
@@ -79,11 +84,17 @@ written to standard output.
       <var name="disk_io" type="CHARACTER" >
          <default> &apos;default&apos;
          </default>
-         <info>
-    Fine control of disk usage. Currently only &apos;reduced&apos; is
-supported where no restart files are written, apart from
-the &apos;default&apos; mode.
-         </info>
+         <options>
+            <info> Fine control of disk usage.
+            </info>
+            <opt val="'default'" >
+Standard disk I/O: restart files are written so the
+calculation can be resumed.
+            </opt>
+            <opt val="'reduced'" >
+Reduced disk I/O: no restart files are written.
+            </opt>
+         </options>
       </var>
    </namelist>
    <namelist name="LR_CONTROL" >
@@ -107,13 +118,18 @@ is used (which is two times slower).
       <var name="approximation" type="CHARACTER" >
          <default> &apos;TDDFT&apos;
          </default>
-         <info>
-A string describing a level of theory:
-&apos;TDDFT&apos;            - Time-Dependent Local Density Approximation or
-                     Time-Dependent Generalized Gradient Approximation
-                     (depending on the XC functional),
-&apos;IPA&apos;              - Independent Particle Approximation,
-         </info>
+         <options>
+            <info> A string describing a level of theory:
+            </info>
+            <opt val="'TDDFT'" >
+Time-Dependent Local Density Approximation or
+Time-Dependent Generalized Gradient Approximation
+(depending on the XC functional)
+            </opt>
+            <opt val="'IPA'" >
+Independent Particle Approximation
+            </opt>
+         </options>
       </var>
       <var name="ipol" type="INTEGER" >
          <default> 1
@@ -136,6 +152,10 @@ full susceptibility tensor is computed.
          </var>
          <default> 1.0, 1.0, 1.0
          </default>
+         <dimensionality> length^-1
+         </dimensionality>
+         <units> tpiba
+         </units>
          <info>
 The values of the transferred momentum q = (q1, q2, q3)
 in Cartesian coordinates in units of 2pi/a, where

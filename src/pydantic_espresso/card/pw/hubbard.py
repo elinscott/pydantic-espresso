@@ -3,9 +3,10 @@
 # ruff: noqa
 
 from abc import ABC, abstractmethod
-from typing import ClassVar, Literal
+from typing import Annotated, ClassVar, Literal
 from pydantic import Field
 from pydantic_espresso.card.card import Card
+from pydantic_espresso.quantity import Quantity
 from pydantic_espresso.utils import BaseModel, INDENT, PositiveInt
 
 
@@ -23,7 +24,9 @@ class HubbardParameter(BaseModel, ABC):
     """Pydantic model for a single Hubbard parameter."""
 
     name: ClassVar[str]  # no default -- must be set in subclasses
-    value: float = Field(..., description="value of the Hubbard parameter")
+    value: Annotated[float, Quantity(units="eV", dimensionality="energy")] = Field(
+        ..., description="value of the Hubbard parameter (in eV)"
+    )
 
     @property
     @abstractmethod

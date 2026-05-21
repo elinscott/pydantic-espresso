@@ -49,13 +49,15 @@ prefix of files saved by program pw.x
          <info>
 directory containing the input data, i.e. the same as in pw.x
          </info>
-         <default>
-value of the <tt>ESPRESSO_TMPDIR</tt> environment variable if set;
-current directory (&apos;./&apos;) otherwise
+         <default kind="conditional" >
+            <case test="ESPRESSO_TMPDIR is set" > value of the <tt>ESPRESSO_TMPDIR</tt> environment variable
+            </case>
+            <case> current directory (&apos;./&apos;)
+            </case>
          </default>
       </var>
       <var name="filplot" type="CHARACTER" >
-         <default> &quot;<ref>prefix</ref>&quot;.pprism
+         <default kind="expr" > &quot;<ref>prefix</ref>&quot;.pprism
          </default>
          <info>
 file &quot;filplot&quot; contains solvent&apos;s quantities
@@ -107,7 +109,11 @@ punch solvent&apos;s quantities to <ref>fileplot</ref>, or not
          </info>
       </var>
       <var name="fileout" type="CHARACTER" >
-         <default> &quot;<ref>prefix</ref>&quot;.3drism
+         <default kind="conditional" >
+            <case test="0 &lt;= @ref output_format &lt;= 7" > &quot;<ref>prefix</ref>&quot;.3drism_* with a format-dependent extension
+            </case>
+            <case> &quot;<ref>prefix</ref>&quot;.3drism
+            </case>
          </default>
          <info>
 name of the file to which the plot is written
@@ -131,17 +137,26 @@ Type of interpolation:
             <label> the following variables are REQUIRED:
             </label>
             <dimension name="x0" start="1" end="3" type="REAL" >
+               <default> 0.0
+               </default>
+               <dimensionality> length
+               </dimensionality>
+               <units> alat
+               </units>
                <info>
 3D vector, origin of the line
-(in alat units)
                </info>
             </dimension>
             <var name="nx" type="INTEGER" >
+               <default> 0
+               </default>
                <info>
 number of radial grids
                </info>
             </var>
             <var name="lebedev" type="INTEGER" >
+               <default> 302
+               </default>
                <info>
 number of spherical grids of Lebedev quadrature
 (only for <ref>interpolation</ref> = &apos;bspline&apos;)
@@ -152,14 +167,23 @@ number of spherical grids of Lebedev quadrature
             <label> the following variables are REQUIRED:
             </label>
             <dimension name="e1" start="1" end="3" type="REAL" >
+               <dimensionality> length
+               </dimensionality>
+               <units> alat
+               </units>
                <info>
 3D vector which determines the plotting line
-(in alat units)
                </info>
             </dimension>
             <dimension name="x0" start="1" end="3" type="REAL" >
+               <default> 0.0
+               </default>
+               <dimensionality> length
+               </dimensionality>
+               <units> alat
+               </units>
                <info>
-3D vector, origin of the line (in alat units)
+3D vector, origin of the line
                </info>
             </dimension>
             <var name="nx" type="INTEGER" >
@@ -178,15 +202,25 @@ rho(i) = rho( x0 + e1 * (i-1)/(nx-1) ), i=1, nx
                </dimension>
                <dimension name="e2" >
                </dimension>
+               <dimensionality> length
+               </dimensionality>
+               <units> alat
+               </units>
                <info>
-3D vectors which determine the plotting plane (in alat units)
+3D vectors which determine the plotting plane
 
 BEWARE: <b>e1</b> and <b>e2</b> must be orthogonal
                </info>
             </dimensiongroup>
             <dimension name="x0" start="1" end="3" type="REAL" >
+               <default> 0.0
+               </default>
+               <dimensionality> length
+               </dimensionality>
+               <units> alat
+               </units>
                <info>
-3D vector, origin of the plane (in alat units)
+3D vector, origin of the plane
                </info>
             </dimension>
             <vargroup type="INTEGER" >
@@ -212,18 +246,24 @@ rho(i,j) = rho( x0 + e1 * (i-1)/(nx-1)
                </dimension>
                <dimension name="e3" >
                </dimension>
+               <dimensionality> length
+               </dimensionality>
+               <units> alat
+               </units>
                <info>
 3D vectors which determine the plotting parallelepiped
 (if present, must be orthogonal)
-
-<ref>e1</ref>, <ref>e2</ref>, and <ref>e3</ref> are in alat units !
                </info>
             </dimensiongroup>
             <dimension name="x0" start="1" end="3" type="REAL" >
+               <default> 0.0
+               </default>
+               <dimensionality> length
+               </dimensionality>
+               <units> alat
+               </units>
                <info>
 3D vector, origin of the parallelepiped
-
-<ref>x0</ref> is in alat units !
                </info>
             </dimension>
             <vargroup type="INTEGER" >
@@ -264,8 +304,14 @@ rho(i,j,k) = rho( x0 + e1 * (i-1)/nx
             <label> the following variables are REQUIRED:
             </label>
             <var name="radius" type="REAL" >
+               <default> 1.0
+               </default>
+               <dimensionality> length
+               </dimensionality>
+               <units> alat
+               </units>
                <info>
-Radius of the sphere (alat units), centered at (0,0,0)
+Radius of the sphere, centered at (0,0,0)
                </info>
             </var>
             <vargroup type="INTEGER" >

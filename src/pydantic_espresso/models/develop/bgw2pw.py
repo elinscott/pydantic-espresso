@@ -3,26 +3,38 @@
 This file has been generated automatically. Do not edit it manually.
 """
 
-# ruff: noqa
-
 from pathlib import Path
-from pydantic import Field, field_validator
-from typing import Annotated, Literal
+
+from pydantic import Field
+
 from pydantic_espresso.models.template import EspressoInput
 from pydantic_espresso.namelist import Namelist
-from pydantic_espresso.utils import get_tmp_dir, get_pseudo_dir
 
 
 class InputBgw2pwNamelist(Namelist):
     """Pydantic model for the `INPUT_BGW2PW` namelist."""
 
-    prefix: str | None = Field(None, description="prefix of files saved by program pw.x")
-    outdir: Path = Field(
-        Path("./"), description="the scratch directory where the massive data-files are written"
+    prefix: str = Field("prefix", description="prefix of files saved by program pw.x")
+    outdir: Path | None = Field(
+        None,
+        json_schema_extra={
+            "conditional_default": [
+                {
+                    "when": "ESPRESSO_TMPDIR environment variable is set and non-blank",
+                    "value": "value of the ESPRESSO_TMPDIR environment variable",
+                },
+                {"when": None, "value": "'./'"},
+            ],
+        },
+        description="the scratch directory where the massive data-files are written",
     )
     real_or_complex: int = Field(
         2,
-        description="1 | 2 1 for real flavor of BerkeleyGW (for systems with inversion symmetry and time-reversal symmetry) or 2 for complex flavor of BerkeleyGW (for systems without inversion symmetry and time-reversal symmetry)",
+        description=(
+            "1 | 2 1 for real flavor of BerkeleyGW (for systems with inversion symmetry and "
+            "time-reversal symmetry) or 2 for complex flavor of BerkeleyGW (for systems without "
+            "inversion symmetry and time-reversal symmetry)"
+        ),
     )
     wfng_flag: bool = Field(
         False, description="read wavefunctions in G-space from BerkeleyGW WFN file"
@@ -42,6 +54,6 @@ class InputBgw2pwNamelist(Namelist):
 
 
 class BGW2PWEspressoInput(EspressoInput):
-    """Pydantic model for the input of `bgw2pw.x`"""
+    """Pydantic model for the input of `bgw2pw.x`."""
 
     input_bgw2pw: InputBgw2pwNamelist = Field(default_factory=lambda: InputBgw2pwNamelist())

@@ -19,19 +19,19 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program hp.x 
         var prefix -type CHARACTER {
             default { 'pwscf' }
             info {
-                Prepended to input/output filenames; must be the same 
+                Prepended to input/output filenames; must be the same
                 used in the calculation of unperturbed system.
             }
         }
 
         var outdir -type CHARACTER {
-            default {
-                value of the @tt ESPRESSO_TMPDIR environment variable if set;
-                @br current directory ('./') otherwise
+            default -kind conditional {
+                case -test {ESPRESSO_TMPDIR is set} { from_environment }
+                case { './' }
             }
             info {
-		Directory containing input, output, and scratch files; 
-                must be the same as specified in the calculation of 
+		Directory containing input, output, and scratch files;
+                must be the same as specified in the calculation of
                 the unperturbed system.
             }
         }
@@ -52,6 +52,8 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program hp.x 
 
         var max_seconds  -type REAL {
             default { 1.d7 }
+            dimensionality { time }
+            units { s }
             info {
              Maximum allowed run time before the job stops smoothly.
             }
@@ -123,6 +125,7 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program hp.x 
 
         var docc_thr  -type REAL {
             default { 5.D-5 }
+            dimensionality { dimensionless }
             info {
                 Threshold for a comparison of unperturbed occupations
                 which is needed for the selection of atoms which must 
@@ -131,7 +134,7 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program hp.x 
         }
 
         dimension skip_type -start 1 -end ntyp -type LOGICAL {
-            default { skip_type(i) = .false. }
+            default { .false. }
             see { equiv_type }
             info {
               @ref skip_type(i), where i runs over types of atoms.
@@ -146,7 +149,7 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program hp.x 
         }
 
         dimension equiv_type -start 1 -end ntyp -type INTEGER {
-            default { equiv_type(i) = 0 }
+            default { 0 }
             see { skip_type }
             info {
              @ref equiv_type(i), where i runs over types of atoms.
@@ -158,7 +161,7 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program hp.x 
         }
 
         dimension perturb_only_atom -start 1 -end ntyp -type LOGICAL {
-            default { perturb_only_atom(i) = .false. }
+            default { .false. }
             see { compute_hp }
             info {
              If @ref perturb_only_atom(i)=.true. then only the i-th 
@@ -182,12 +185,13 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program hp.x 
         }
 
         var last_q  -type INTEGER {
-            default { number of q points }
+            default -kind computed { internal }
             see { start_q, sum_pertq }
             info {
                  Computes only the q points from @ref start_q to @ref last_q.
+                 By default it is set internally to the total number of q points.
 
-                 @b IMPORTANT: @ref last_q must be smaller or equal to 
+                 @b IMPORTANT: @ref last_q must be smaller or equal to
                  the total number of q points found.
             }
         }
@@ -221,6 +225,7 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program hp.x 
 
         var conv_thr_chi  -type REAL {
             default { 1.D-5 }
+            dimensionality { dimensionless }
             info {
                 Convergence threshold for the response function chi,
                 which is defined as a trace of the response 
@@ -230,6 +235,7 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program hp.x 
 
         var thresh_init  -type REAL {
             default { 1.D-14 }
+            dimensionality { dimensionless }
             info {
                 Initial threshold for the solution of the linear 
                 system (first iteration). Needed to converge the 
@@ -241,6 +247,7 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program hp.x 
         
         var ethr_nscf  -type REAL {
             default { 1.D-11 }
+            dimensionality { dimensionless }
             info {
                 Threshold for the convergence of eigenvalues during 
                 the iterative diagonalization of the Hamiltonian in 
@@ -249,7 +256,7 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program hp.x 
             }
         }
          
-	var niter_max -type INTEGER { 
+	var niter_max -type INTEGER {
 	    default { 100 }
 	    info {
 		Maximum number of iterations in the iterative
@@ -257,18 +264,22 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program hp.x 
 	    }
 	}
 
-	var alpha_mix(i)  -type REAL { 
-	    default { alpha_mix(1)=0.3 }
-	    info { 
+	var alpha_mix(i)  -type REAL {
+	    default -kind conditional {
+		case -test {i==1} { 0.3 }
+		case { 0.0 }
+	    }
+	    dimensionality { dimensionless }
+	    info {
 		Mixing parameter (for the i-th iteration) for updating 
                 the response SCF potential using the modified Broyden 
                 method. See: D.D. Johnson, PRB 38, 12807 (1988).
 	    }
 	}
 
-	var nmix   -type INTEGER { 
+	var nmix   -type INTEGER {
 	    default { 4 }
-	    info { 
+	    info {
                 Number of iterations used in potential mixing
                 using the modified Broyden method. See:
                 D.D. Johnson, PRB 38, 12807 (1988).
@@ -305,8 +316,10 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program hp.x 
 
         var rmax   -type REAL {
             default { 100.D0 }
+            dimensionality { length }
+            units { bohr }
             info {
-                Maximum distance (in Bohr) between two atoms to search 
+                Maximum distance between two atoms to search
                 neighbors (used only at the postprocessing step for 
                 DFT+U+V). This keyword is useful when there 
                 are e.g. defects in the system.
@@ -315,8 +328,10 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program hp.x 
 
         var dist_thr   -type REAL {
             default { 6.D-4 }
+            dimensionality { length }
+            units { bohr }
             info {
-                Threshold (in Bohr) for comparing inter-atomic distances
+                Threshold for comparing inter-atomic distances
                 when reconstructing the missing elements of the response 
                 susceptibility in the post-processing step.
             }

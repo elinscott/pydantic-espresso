@@ -115,9 +115,11 @@ If .TRUE. a (time consuming) step is performed, to check whether all the Star fu
          <info> The exponent of the distance in the IDW method ( only for <ref>method</ref> == &apos;idw&apos; or &apos;idw-sphere&apos;)
          </info>
       </var>
-      <var name="scale_sphere" type="INTEGER" >
+      <var name="scale_sphere" type="REAL" >
          <default> 4.0d0
          </default>
+         <dimensionality> dimensionless
+         </dimensionality>
          <info>
 The search radius for <ref>method</ref> == &apos;idw-sphere&apos;, is Rmin * scale_sphere, where Rmin is the
                   minimum distance found between the uniform grid of k-points.
@@ -148,8 +150,14 @@ This card can be used to change the roughness functional that is minimized
          <table name="RoughC" >
             <cols start="1" end="RoughN" >
                <rowgroup type="REAL" >
-                  <default> 1.0d0
+                  <default kind="conditional" >
+                     <case test="@ref RoughN &gt; 1" > RoughC(ii) = 1/ii
+                     </case>
+                     <case> 1.0d0
+                     </case>
                   </default>
+                  <dimensionality> dimensionless
+                  </dimensionality>
                   <info>
 Coefficients for the terms included in the roughness functional.
                                 They can be explicitely given or &apos;automatic&apos; can be specified instead of numbers
@@ -178,10 +186,22 @@ Coefficients for the terms included in the roughness functional.
             <rows start="1" end="NUser" >
                <colgroup type="REAL" >
                   <col name="vec_x" >
+                     <dimensionality> length
+                     </dimensionality>
+                     <units> alat
+                     </units>
                   </col>
                   <col name="vec_y" >
+                     <dimensionality> length
+                     </dimensionality>
+                     <units> alat
+                     </units>
                   </col>
                   <col name="vec_z" >
+                     <dimensionality> length
+                     </dimensionality>
+                     <units> alat
+                     </units>
                   </col>
                   <info>
 Additional user-defined Star vectors that are added to the
@@ -229,12 +249,26 @@ points of the line where N is the weight of the first point.
                   <rows start="1" end="nks" >
                      <colgroup type="REAL" >
                         <col name="xk_x" >
+                           <dimensionality> length^-1
+                           </dimensionality>
+                           <units> tpiba
+                           </units>
                         </col>
                         <col name="xk_y" >
+                           <dimensionality> length^-1
+                           </dimensionality>
+                           <units> tpiba
+                           </units>
                         </col>
                         <col name="xk_z" >
+                           <dimensionality> length^-1
+                           </dimensionality>
+                           <units> tpiba
+                           </units>
                         </col>
                         <col name="wk" >
+                           <dimensionality> dimensionless
+                           </dimensionality>
                         </col>
                         <info>
 Special k-points (xk_x/y/z) in the irreducible Brillouin Zone

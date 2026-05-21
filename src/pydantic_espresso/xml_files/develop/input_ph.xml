@@ -35,17 +35,23 @@ Title of the job, i.e., a line that is reprinted on output.
    </linecard>
    <namelist name="INPUTPH" >
       <dimension name="amass" start="1" end="ntyp" type="REAL" >
-         <default> 0.0
+         <default kind="computed" > from_pseudopotential
          </default>
+         <dimensionality> mass
+         </dimensionality>
+         <units> amu
+         </units>
          <info>
-Atomic mass [amu] of each atomic type.
+Atomic mass of each atomic type.
 If not specified, masses are read from data file.
          </info>
       </dimension>
       <var name="outdir" type="CHARACTER" >
-         <default>
-value of the <tt>ESPRESSO_TMPDIR</tt> environment variable if set;
-<br/> current directory (&apos;./&apos;) otherwise
+         <default kind="conditional" >
+            <case test="ESPRESSO_TMPDIR is set" > from_environment
+            </case>
+            <case> &apos;./&apos;
+            </case>
          </default>
          <info>
 Directory containing input, output, and scratch files;
@@ -62,7 +68,7 @@ used in the calculation of unperturbed system.
          </info>
       </var>
       <var name="niter_ph" type="INTEGER" >
-         <default> maxter=100
+         <default kind="ref" > maxter
          </default>
          <info>
 Maximum number of iterations in a scf step. If you want
@@ -72,12 +78,16 @@ more than 100, edit variable &quot;maxter&quot; in PH/phcom.f90
       <var name="tr2_ph" type="REAL" >
          <default> 1e-12
          </default>
+         <dimensionality> dimensionless
+         </dimensionality>
          <info> Threshold for self-consistency.
          </info>
       </var>
       <var name="alpha_mix(niter)" type="REAL" >
-         <default> alpha_mix(1)=0.7
+         <default> 0.7
          </default>
+         <dimensionality> dimensionless
+         </dimensionality>
          <info>
 Mixing factor (for each iteration) for updating
 the scf potential:
@@ -99,9 +109,9 @@ can significantly speed up convergence, at the cost of using more memory.
          <options>
             <info> Options are:
             </info>
-            <opt val="'debug', 'high', 'medium'" > verbose output
+            <opt val="'high'" alias="'debug', 'medium'" > verbose output
             </opt>
-            <opt val="'low', 'default', 'minimal'" > short output
+            <opt val="'low'" alias="'default', 'minimal'" > short output
             </opt>
          </options>
       </var>
@@ -119,11 +129,15 @@ run.
       <var name="max_seconds" type="REAL" >
          <default> 1.d7
          </default>
+         <dimensionality> time
+         </dimensionality>
+         <units> s
+         </units>
          <info> Maximum allowed run time before the job stops smoothly.
          </info>
       </var>
       <var name="dftd3_hess" type="CHARACTER" >
-         <default> &apos;prefix.hess&apos;
+         <default kind="expr" > <ref>prefix</ref> // &apos;.hess&apos;
          </default>
          <info>
 File where the D3 dispersion hessian matrix is read. Set to
@@ -139,7 +153,11 @@ missing.
          </info>
       </var>
       <var name="fildrho" type="CHARACTER" >
-         <default> &apos; &apos;
+         <default kind="conditional" >
+            <case test="@ref lraman .or. @ref elop .or. @ref drho_star%open .or. @ref lmultipole" > &apos;drho&apos;
+            </case>
+            <case> &apos; &apos;
+            </case>
          </default>
          <info>
 File where the charge density responses are written. Note that the file
@@ -149,7 +167,11 @@ corresponding input variables
          </info>
       </var>
       <var name="fildvscf" type="CHARACTER" >
-         <default> &apos; &apos;
+         <default kind="conditional" >
+            <case test="elph_mat .or. @ref dvscf_star%open .or. @ref lmultipole" > &apos;dvscf&apos;
+            </case>
+            <case> &apos; &apos;
+            </case>
          </default>
          <info>
 File where the the potential variation is written
@@ -223,18 +245,24 @@ N.B.:  works only for 3d systems.
          <var name="eth_rps" type="REAL" >
             <default> 1.0d-9
             </default>
+            <dimensionality> dimensionless
+            </dimensionality>
             <info> Threshold for calculation of  Pc R |psi&gt;.
             </info>
          </var>
          <var name="eth_ns" type="REAL" >
             <default> 1.0e-12
             </default>
+            <dimensionality> dimensionless
+            </dimensionality>
             <info> Threshold for non-scf wavefunction calculation.
             </info>
          </var>
          <var name="dek" type="REAL" >
             <default> 1.0e-3
             </default>
+            <dimensionality> dimensionless
+            </dimensionality>
             <info> Delta_xk used for wavefunction derivation wrt k.
             </info>
          </var>
@@ -355,6 +383,10 @@ electron-phonon coupling calculation.
       <var name="el_ph_sigma" type="REAL" >
          <default> 0.02
          </default>
+         <dimensionality> energy
+         </dimensionality>
+         <units> Ry
+         </units>
          <info>
 The spacing between double-delta smearing values used in
 an electron-phonon coupling calculation.
@@ -364,7 +396,7 @@ an electron-phonon coupling calculation.
          <label> Variables for <ref>electron_phonon</ref> = &apos;ahc&apos;:
          </label>
          <var name="ahc_dir" type="CHARACTER" >
-            <default> outdir // &apos;ahc_dir/&apos;
+            <default kind="expr" > <ref>outdir</ref> // &apos;ahc_dir/&apos;
             </default>
             <info>
 Directory where the output binary files are written.
@@ -406,7 +438,7 @@ When this option is set, the q2r.x code cannot be used.
          </info>
       </var>
       <var name="zeu" type="LOGICAL" >
-         <default> zeu=<ref>epsil</ref>
+         <default kind="ref" > epsil
          </default>
          <info>
 If .true. in a q=0 calculation for a non metal the
@@ -550,13 +582,17 @@ with offset determined by <ref>k1</ref>, <ref>k2</ref>, <ref>k3</ref>.
 Diagonalization method for the non-SCF calculations.
             </info>
             <opt val="'david'" >
-Davidson iterative diagonalization with overlap matrix
-(default). Fast, may in some rare cases fail.
+Davidson iterative diagonalization with overlap matrix.
+Fast, may in some rare cases fail.
             </opt>
             <opt val="'cg'" >
 Conjugate-gradient-like band-by-band diagonalization.
 Slower than &apos;david&apos; but uses less memory and is
 (a little bit) more robust.
+            </opt>
+            <opt val="'direct'" >
+Direct diagonalization of the dense Hamiltonian in the plane-wave
+basis. Use ONLY when a large number of unoccupied states are needed.
             </opt>
          </options>
       </var>
@@ -589,7 +625,7 @@ Requires <ref>trans</ref> = .false..
          <label> Optional variables for dvscf interpolation:
          </label>
          <var name="wpot_dir" type="CHARACTER" >
-            <default> outdir // &apos;w_pot/&apos;
+            <default kind="expr" > <ref>outdir</ref> // &apos;w_pot/&apos;
             </default>
             <info>
 Directory where the w_pot binary files are written.
@@ -639,7 +675,11 @@ IMPORTANT:
             </info>
          </var>
          <var name="last_irr" type="INTEGER" >
-            <default> 3*nat
+            <default kind="conditional" >
+               <case test="not specified" > 3*nat
+               </case>
+               <case> -1000
+               </case>
             </default>
             <see> start_irr
             </see>
@@ -654,9 +694,10 @@ IMPORTANT:
             </info>
          </var>
          <var name="nat_todo" type="INTEGER" >
-            <default> 0, i.e. displace all atoms
+            <default> 0
             </default>
             <info>
+The default value 0 means that all atoms are displaced.
 Choose the subset of atoms to be used in the linear response
 calculation: <ref>nat_todo</ref> atoms, specified in input (see below)
 are displaced. Can be used to estimate modes for a molecule
@@ -704,7 +745,11 @@ IMPORTANT:
             </info>
          </var>
          <var name="last_q" type="INTEGER" >
-            <default> number of q points
+            <default kind="conditional" >
+               <case test="not specified" > number of q points (nqs)
+               </case>
+               <case> -1000
+               </case>
             </default>
             <see> start_q
             </see>
@@ -785,6 +830,8 @@ Notice that the defaults are different.
             <list name="xq_list" type="REAL" >
                <format> xq(1)  xq(2)  xq(3)
                </format>
+               <dimensionality> dimensionless
+               </dimensionality>
                <info>
 The phonon wavevector, in units of 2pi/a0
 (a0 = lattice parameter).
@@ -815,10 +862,16 @@ The meaning of these q points and their weights nq depend on the
 flags q2d and q_in_band_form. (NB: nq is integer)
                         </info>
                         <col name="xq1" >
+                           <dimensionality> dimensionless
+                           </dimensionality>
                         </col>
                         <col name="xq2" >
+                           <dimensionality> dimensionless
+                           </dimensionality>
                         </col>
                         <col name="xq3" >
+                           <dimensionality> dimensionless
+                           </dimensionality>
                         </col>
                      </colgroup>
                      <col name="nq" type="INTEGER" >

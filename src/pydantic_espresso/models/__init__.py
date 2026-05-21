@@ -5,11 +5,21 @@ from types import ModuleType
 
 from packaging.version import Version
 
+# Minimum QE version supporting the new INPUT_*.def schema (structured defaults,
+# explicit <units>/<dimensionality>, <opt alias=...>). Older versions are not
+# supported.
+MIN_VERSION = Version("7.6.dev0")
+
 versions = sorted(
-    [Version(p.name[3:].replace("_", ".")) for p in Path(__file__).parent.glob("qe_*")]
+    v
+    for v in (Version(p.name[3:].replace("_", ".")) for p in Path(__file__).parent.glob("qe_*"))
+    if v >= MIN_VERSION
 )
-# Add development version
-versions.append(Version(f"{versions[-1].major}.{versions[-1].minor + 1}.dev0"))
+# Always expose the in-tree development version on top of any tagged ones
+_dev_version = (
+    Version(f"{versions[-1].major}.{versions[-1].minor + 1}.dev0") if versions else MIN_VERSION
+)
+versions.append(_dev_version)
 
 # Create a lookup table of the directory for each version
 version_module_names = {

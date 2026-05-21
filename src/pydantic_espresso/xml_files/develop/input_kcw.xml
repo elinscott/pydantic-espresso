@@ -47,8 +47,12 @@ used in the previous PW calculations.
          </info>
       </var>
       <var name="outdir" type="CHARACTER" >
-         <default>
-current directory (&apos;./&apos;)
+         <default kind="conditional" >
+            <case test="ESPRESSO_TMPDIR environment variable is set" >
+value of the ESPRESSO_TMPDIR environment variable
+            </case>
+            <case> &apos;./&apos;
+            </case>
          </default>
          <info>
 Directory containing input, output, and scratch files;
@@ -113,7 +117,11 @@ from MLWF. Requires &apos;write_hr = .true.&apos; in wannier90.
          </info>
       </var>
       <var name="spread_thr" type="REAL" >
-         <default> 0.0001 Ry
+         <dimensionality> energy
+         </dimensionality>
+         <units> Ry
+         </units>
+         <default> 0.001
          </default>
          <info>
 HARD-CODED FOR NOW. Two or more Wannier functions are considered
@@ -122,7 +130,7 @@ Requires <ref>check_spread</ref> = .true.
          </info>
       </var>
       <var name="homo_only" type="LOGICAL" >
-         <default> FALSE
+         <default> .FALSE.
          </default>
          <info>
 If <ref>kcw_at_ks</ref> = .TRUE. only the screening paramenter for the HOMO is
@@ -131,7 +139,7 @@ Potential in isolated systems.
          </info>
       </var>
       <var name="l_vcut" type="LOGICAL" >
-         <default> FALSE
+         <default> .FALSE.
          </default>
          <info>
 If .TRUE. the Gygi-Baldereschi scheme is used to deal with
@@ -154,9 +162,9 @@ isolated (a molecule or a cluster in a 3D supercell).
 
 Currently available choices:
             </info>
-            <opt val="'none'" > (default): regular periodic calculation w/o any correction.
+            <opt val="'none'" > regular periodic calculation w/o any correction.
             </opt>
-            <opt val="'martyna-tuckerman', 'm-t', 'mt'" >
+            <opt val="'martyna-tuckerman'" alias="'m-t', 'mt'" >
 Martyna-Tuckerman correction
 to both total energy and scf potential. Adapted from:
 G.J. Martyna, and M.E. Tuckerman,
@@ -185,7 +193,7 @@ calculation (see &apos;spin&apos; keyword in Wannier90 documentation)
          </var>
          <var name="mp3" >
          </var>
-         <default> -1,-1,-1
+         <default> -1
          </default>
          <info>
 Parameters of the Monkhorst-Pack grid (no offset).
@@ -236,7 +244,11 @@ to further reduce the number of q points
    </namelist>
    <namelist name="WANNIER" >
       <var name="seedname" type="CHARACTER" >
-         <default> wann
+         <default kind="conditional" >
+            <case test="@ref kcw_at_ks is .TRUE." > value of <ref>prefix</ref>
+            </case>
+            <case> wann
+            </case>
          </default>
          <info>
 The seedname of the previous Wannier90 calculation for occupied states.
@@ -269,7 +281,7 @@ from the previous wannier90 calculation
          </info>
       </var>
       <var name="have_empty" type="LOGICAL" >
-         <default> FALSE
+         <default> .FALSE.
          </default>
          <info>
 If true empty state are computed. Require a previous wannier90
@@ -278,7 +290,7 @@ unitary matrices in the wannier90 file seedname_emp_u.mat
          </info>
       </var>
       <var name="has_disentangle" type="LOGICAL" >
-         <default> FALSE
+         <default> .FALSE.
          </default>
          <info>
 Specify if a disentangle unitary matrix needs to be read. Requires
@@ -286,7 +298,7 @@ a consisten calcuation from the previous wannier90 run.
          </info>
       </var>
       <var name="check_ks" type="LOGICAL" >
-         <default> FALSE
+         <default> .FALSE.
          </default>
          <info>
 Specify if a diagonalization of the KS matrix build using the wannier
@@ -294,7 +306,13 @@ function in input has to be performed. This is mainly for debugging purpose.
          </info>
       </var>
       <var name="alpha_mix(niter)" type="REAL" >
-         <default> alpha_mix(1)=0.7
+         <dimensionality> dimensionless
+         </dimensionality>
+         <default kind="conditional" >
+            <case test="iteration index == 1" > 0.7
+            </case>
+            <case> 0.0
+            </case>
          </default>
          <info>
 Mixing factor (for each iteration) for updating
@@ -306,7 +324,7 @@ vnew(in) = alpha_mix*vold(out) + (1-alpha_mix)*vold(in)
    </namelist>
    <namelist name="SCREEN" >
       <var name="niter" type="INTEGER" >
-         <default> maxter=100
+         <default kind="ref" > maxter (= 100)
          </default>
          <info>
 Maximum number of iterations in a scf step. If you want
@@ -320,6 +338,8 @@ more than 100, edit variable &quot;maxter&quot; in PH/phcom.f90
          </info>
       </var>
       <var name="tr2" type="REAL" >
+         <dimensionality> dimensionless
+         </dimensionality>
          <default> 1e-14
          </default>
          <info> Threshold for self-consistency.
@@ -330,12 +350,14 @@ more than 100, edit variable &quot;maxter&quot; in PH/phcom.f90
          </default>
          <info>
 Perform the screening calculation for a particular orbital.
-If i_orb = -1 (default) all the orbitals are computed.
+If i_orb = -1 all the orbitals are computed.
 Assumes values between 1 and the total number of wannier
 functions.
          </info>
       </var>
       <var name="eps_inf" type="REAL" >
+         <dimensionality> dimensionless
+         </dimensionality>
          <default> 1.d0
          </default>
          <info>

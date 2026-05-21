@@ -44,6 +44,8 @@ It is the same as in the input of <b>q2r.x</b> (+ the .xml extension
 if the dynamical matrices produced by ph.x were in xml
 format). No default value: must be specified.
          </info>
+         <default> &apos; &apos;
+         </default>
       </var>
       <var name="asr" type="CHARACTER" >
          <default> &apos;no&apos;
@@ -55,7 +57,7 @@ Indicates the type of Acoustic Sum Rule imposed.
 Allowed values:
             </info>
             <opt val="'no'" >
-no Acoustic Sum Rules imposed (default)
+no Acoustic Sum Rules imposed
             </opt>
             <opt val="'simple'" >
 previous implementation of the asr used
@@ -109,8 +111,10 @@ using tetrahedra and a uniform q-point grid (see below)
 <b>NB:</b> may not work properly in noncubic materials
 
 if <b>.false.</b> calculate phonon bands from the list of q-points
-supplied in input (default)
+supplied in input
          </info>
+         <default> .false.
+         </default>
       </var>
       <vargroup type="INTEGER" >
          <var name="nk1" >
@@ -123,13 +127,20 @@ supplied in input (default)
 uniform q-point grid for DOS calculation (includes q=0)
 (must be specified if <ref>dos</ref> = .true., ignored otherwise)
          </info>
+         <default> 0
+         </default>
       </vargroup>
       <var name="deltaE" type="REAL" >
          <info>
-energy step, in cm<sup>-1,</sup> for DOS calculation: from min
-to max phonon energy (default: 1 cm<sup>-1</sup> if ndos, see
-below, is not specified)
+energy step for DOS calculation: from min
+to max phonon energy (used if ndos, see below, is not specified)
          </info>
+         <dimensionality> energy
+         </dimensionality>
+         <units> cm-1
+         </units>
+         <default> 1.0
+         </default>
       </var>
       <var name="ndos" type="INTEGER" >
          <info>
@@ -141,46 +152,74 @@ number of energy steps for DOS calculations
          <info>
 DOS broadening in cm<sup>-1</sup>
 
-Default: 0 - meaning use tetrahedra
+A value of 0 means use tetrahedra.
          </info>
+         <dimensionality> energy
+         </dimensionality>
+         <units> cm-1
+         </units>
+         <default> 0.0
+         </default>
       </var>
       <var name="fldos" type="CHARACTER" >
          <info>
-output file for dos (default: <tt>&apos;matdyn.dos&apos;)</tt>
+output file for dos.
 the dos is in states/cm<sup>-1</sup> plotted vs omega in cm(-1)
 and is normalised to 3*nat, i.e. the number of phonons
          </info>
+         <default> &apos;matdyn.dos&apos;
+         </default>
       </var>
       <var name="flfrq" type="CHARACTER" >
          <info>
-output file for frequencies (default: <tt>&apos;matdyn.freq&apos;)</tt>
+output file for frequencies
          </info>
+         <default> &apos;matdyn.freq&apos;
+         </default>
       </var>
       <var name="flvec" type="CHARACTER" >
          <info>
-output file for normalized phonon displacements
-(default: <tt>&apos;matdyn.modes&apos;).</tt> The normalized phonon displacements
+output file for normalized phonon displacements.
+The normalized phonon displacements
 are the eigenvectors divided by the square root of the mass,
 then normalized. As such they are not orthogonal.
          </info>
+         <default> &apos;matdyn.modes&apos;
+         </default>
       </var>
       <var name="fleig" type="CHARACTER" >
          <info>
-output file for phonon eigenvectors (default: <tt>&apos;matdyn.eig&apos;)</tt>
+output file for phonon eigenvectors.
 The phonon eigenvectors are the eigenvectors of the dynamical
 matrix. They are orthogonal.
          </info>
+         <default> &apos; &apos;
+         </default>
       </var>
       <var name="fldyn" type="CHARACTER" >
          <info>
-output file for dynamical matrix (default: &apos; &apos; i.e. not written)
+output file for dynamical matrix (&apos; &apos; means it is not written)
          </info>
+         <default> &apos; &apos;
+         </default>
       </var>
       <multidimension name="at" indexes="i,j" start="1,1" end="3,3" type="REAL" >
          <info>
 supercell lattice vectors - must form a superlattice of the
-original lattice (default: use original cell)
+original lattice
          </info>
+         <dimensionality> length
+         </dimensionality>
+         <units> alat
+         </units>
+         <default kind="conditional" >
+            <case test="@ref at(:,:) == 0.0" >
+original cell lattice vectors
+            </case>
+            <case>
+0.0
+            </case>
+         </default>
       </multidimension>
       <vargroup type="INTEGER" >
          <var name="l1" >
@@ -191,64 +230,98 @@ original lattice (default: use original cell)
          </var>
          <info>
 supercell lattice vectors are original cell vectors times
-l1, l2, l3 respectively (default: 1, ignored if <ref>at</ref> specified)
+l1, l2, l3 respectively (ignored if <ref>at</ref> specified)
          </info>
+         <default> 1
+         </default>
       </vargroup>
       <var name="ntyp" type="INTEGER" >
          <info>
 number of atom types in the supercell
-(default: <ref>ntyp</ref> of the original cell)
          </info>
+         <default kind="conditional" >
+            <case test="@ref ntyp == 0" >
+<ref>ntyp</ref> of the original cell (ntyp_blk)
+            </case>
+            <case>
+0
+            </case>
+         </default>
       </var>
       <dimension name="amass" start="1" end="ntyp" type="REAL" >
          <info>
-masses of atoms in the supercell (a.m.u.), one per atom type
-(default: use masses read from file <tt>flfrc)</tt>
+masses of atoms in the supercell, one per atom type
          </info>
+         <dimensionality> mass
+         </dimensionality>
+         <units> amu
+         </units>
+         <default kind="conditional" >
+            <case test="@ref amass(it) == 0.0" >
+masses read from force-constant file <tt>flfrc</tt>
+            </case>
+            <case>
+0.0
+            </case>
+         </default>
       </dimension>
       <var name="readtau" type="LOGICAL" >
          <info>
 read  atomic positions of the supercell from input
-(used to specify different masses) (default: <tt>.false.)</tt>
+(used to specify different masses)
          </info>
+         <default> .false.
+         </default>
       </var>
       <var name="fltau" type="CHARACTER" >
          <info>
 write atomic positions of the supercell to file <tt>fltau</tt>
-(default: <ref>fltau</ref> = &apos; &apos;, do not write)
+(if <ref>fltau</ref> = &apos; &apos;, do not write)
          </info>
+         <default> &apos; &apos;
+         </default>
       </var>
       <var name="la2F" type="LOGICAL" >
          <info>
 if <b>.true.</b> interpolates also the el-ph coefficients
          </info>
+         <default> .false.
+         </default>
       </var>
       <var name="q_in_band_form" type="LOGICAL" >
          <info>
 if <b>.true.</b> the q points are given in band form:
 only the first and last point of one or more lines
-are given. See below. (default: <tt>.false.).</tt>
+are given. See below.
          </info>
+         <default> .false.
+         </default>
       </var>
       <var name="q_in_cryst_coord" type="LOGICAL" >
          <info>
 if <b>.true.</b> input q points are in crystalline
-coordinates (default: <tt>.false.)</tt>
+coordinates
          </info>
+         <default> .false.
+         </default>
       </var>
       <var name="eigen_similarity" type="LOGICAL" >
          <info>
 use similarity of the displacements to order
-frequencies  (default: <tt>.false.)</tt>
+frequencies
 
 <b>NB:</b> You cannot use this option with the symmetry
 analysis of the modes.
          </info>
+         <default> .false.
+         </default>
       </var>
       <var name="fd" type="LOGICAL" >
          <info>
 if <b>.true.</b> the ifc come from the finite displacement calculation
          </info>
+         <default> .false.
+         </default>
       </var>
       <var name="na_ifc" type="LOGICAL" >
          <info>
@@ -256,22 +329,29 @@ add non analitic contributions to the interatomic force
 constants if finite displacement method is used (as in Wang et al.
 <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.85.224303">PRB 85, 224303 (2012)</a>) [to be used in conjunction with <b>fd.x]</b>
          </info>
+         <default> .false.
+         </default>
       </var>
       <var name="nosym" type="LOGICAL" >
          <info>
 if <b>.true.,</b> no symmetry and no time reversal are imposed
          </info>
+         <default> .false.
+         </default>
       </var>
       <var name="loto_2d" type="LOGICAL" >
          <info>
 set to <b>.true.</b> to activate two-dimensional treatment of LO-TO splitting
          </info>
+         <default> .false.
+         </default>
       </var>
       <var name="loto_disable" type="LOGICAL" >
          <info>
 if <b>.true.</b> do not apply LO-TO splitting for q=0
-(default: <tt>.false.)</tt>
          </info>
+         <default> .false.
+         </default>
       </var>
       <var name="read_lr" type="LOGICAL" >
          <default> <tt>.false.</tt>
@@ -306,10 +386,22 @@ if (<ref>readtau</ref>) atomic positions must be specified as follows:
 X, Y, Z atomic positions
                         </info>
                         <col name="X" >
+                           <dimensionality> length
+                           </dimensionality>
+                           <units> alat
+                           </units>
                         </col>
                         <col name="Y" >
+                           <dimensionality> length
+                           </dimensionality>
+                           <units> alat
+                           </units>
                         </col>
                         <col name="Z" >
+                           <dimensionality> length
+                           </dimensionality>
+                           <units> alat
+                           </units>
                         </col>
                      </colgroup>
                      <col name="ityp" type="INTEGER" >
@@ -354,10 +446,22 @@ coordinates, 2pi/a units (a = lattice parameters)
 coordinates of the Q point
                         </info>
                         <col name="q_x" >
+                           <dimensionality> length^-1
+                           </dimensionality>
+                           <units> tpiba
+                           </units>
                         </col>
                         <col name="q_y" >
+                           <dimensionality> length^-1
+                           </dimensionality>
+                           <units> tpiba
+                           </units>
                         </col>
                         <col name="q_z" >
+                           <dimensionality> length^-1
+                           </dimensionality>
+                           <units> tpiba
+                           </units>
                         </col>
                      </colgroup>
                      <col name="nptq" type="INTEGER" >
@@ -400,10 +504,22 @@ The format of the q-points specification is:
 q-points in cartesian coordinates, 2pi/<i>a</i> units (<i>a</i> = lattice parameters)
                         </info>
                         <col name="q_x" >
+                           <dimensionality> length^-1
+                           </dimensionality>
+                           <units> tpiba
+                           </units>
                         </col>
                         <col name="q_y" >
+                           <dimensionality> length^-1
+                           </dimensionality>
+                           <units> tpiba
+                           </units>
                         </col>
                         <col name="q_z" >
+                           <dimensionality> length^-1
+                           </dimensionality>
+                           <units> tpiba
+                           </units>
                         </col>
                      </colgroup>
                   </rows>

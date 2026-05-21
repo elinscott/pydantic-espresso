@@ -48,6 +48,8 @@ explicitly specified.
    </intro>
    <namelist name="PPACF" >
       <var name="prefix" type="CHARACTER" >
+         <default> &apos;ppacf&apos;
+         </default>
          <info>
 prefix of files saved by program pw.x
 prepended to input/output filenames:
@@ -56,11 +58,9 @@ prefix.ecnl, prefix.tcnl, etc.
       </var>
       <var name="outdir" type="CHARACTER" >
          <info>
-directory containing the output data from pw.x, i.e. the same as in pw.x
+directory containing the output data from pw.x, i.e. the same as in pw.x.
          </info>
-         <default>
-value of the <tt>ESPRESSO_TMPDIR</tt> environment variable if set;
-current directory (&apos;./&apos;) otherwise
+         <default> &apos;./&apos;
          </default>
       </var>
       <var name="n_lambda" type="INTEGER" >
@@ -95,7 +95,7 @@ Option for plot (lplot=.True.):
             </label>
             <var name="ltks" type="LOGICAL" >
                <default>
-.True.
+.False.
                </default>
                <info>
 If .True. also print out
@@ -164,7 +164,7 @@ analysis of nonlocal-correlations in vdW-DF versions:
 See IOP JCPM (2020) for presentation of the latter two (non-default) options
          </info>
          <default>
-o
+0
          </default>
       </var>
    </namelist>

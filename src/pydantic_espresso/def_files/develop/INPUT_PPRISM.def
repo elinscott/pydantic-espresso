@@ -48,14 +48,14 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program ppris
             info {
                 directory containing the input data, i.e. the same as in pw.x
             }
-            default {
-                value of the @tt ESPRESSO_TMPDIR environment variable if set;
-                current directory ('./') otherwise
+            default -kind conditional {
+                case -test "ESPRESSO_TMPDIR is set" { value of the @tt ESPRESSO_TMPDIR environment variable }
+                case { current directory ('./') }
             }
         }
 
         var filplot -type CHARACTER {
-            default { "@ref prefix".pprism }
+            default -kind expr { "@ref prefix".pprism }
             info {
                 file "filplot" contains solvent's quantities
                 (can be saved for further processing)
@@ -109,7 +109,10 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program ppris
         }
 
         var fileout -type CHARACTER {
-            default { "@ref prefix".3drism }
+            default -kind conditional {
+                case -test "0 <= @ref output_format <= 7" { "@ref prefix".3drism_* with a format-dependent extension }
+                case { "@ref prefix".3drism }
+            }
             info {
                 name of the file to which the plot is written
             }
@@ -132,19 +135,23 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program ppris
                 label { the following variables are REQUIRED: }
 
                 dimension x0 -start 1 -end 3  -type REAL {
+                    default { 0.0 }
+                    dimensionality { length }
+                    units { alat }
                     info {
                         3D vector, origin of the line
-                        (in alat units)
                     }
                 }
 
                 var nx -type INTEGER {
+                    default { 0 }
                     info {
                         number of radial grids
                     }
                 }
 
                 var lebedev -type INTEGER {
+                    default { 302 }
                     info {
                         number of spherical grids of Lebedev quadrature
                         (only for @ref interpolation = 'bspline')
@@ -156,15 +163,19 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program ppris
                 label { the following variables are REQUIRED: }
 
                 dimension e1 -start 1 -end 3 -type REAL {
+                    dimensionality { length }
+                    units { alat }
                     info {
                         3D vector which determines the plotting line
-                        (in alat units)
                     }
                 }
 
                 dimension x0 -start 1 -end 3  -type REAL {
+                    default { 0.0 }
+                    dimensionality { length }
+                    units { alat }
                     info {
-                        3D vector, origin of the line (in alat units)
+                        3D vector, origin of the line
                     }
                 }
 
@@ -183,16 +194,21 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program ppris
                 dimensiongroup -start 1 -end 3 -type REAL {
                     dimension e1
                     dimension e2
+                    dimensionality { length }
+                    units { alat }
                     info {
-                        3D vectors which determine the plotting plane (in alat units)
+                        3D vectors which determine the plotting plane
 
                         BEWARE: @b e1 and @b e2 must be orthogonal
                     }
                 }
 
                 dimension x0 -start 1 -end 3 -type REAL {
+                    default { 0.0 }
+                    dimensionality { length }
+                    units { alat }
                     info {
-                        3D vector, origin of the plane (in alat units)
+                        3D vector, origin of the plane
                     }
                 }
 
@@ -215,19 +231,20 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program ppris
                     dimension e1
                     dimension e2
                     dimension e3
+                    dimensionality { length }
+                    units { alat }
                     info {
                         3D vectors which determine the plotting parallelepiped
                         (if present, must be orthogonal)
-
-                        @ref e1, @ref e2, and @ref e3 are in alat units !
                     }
                 }
 
                 dimension x0 -start 1 -end 3 -type REAL {
+                    default { 0.0 }
+                    dimensionality { length }
+                    units { alat }
                     info {
                         3D vector, origin of the parallelepiped
-
-                        @ref x0 is in alat units !
                     }
                 }
 
@@ -250,11 +267,11 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program ppris
                           are ignored, the entire FFT grid is written in the
                           XCRYSDEN format - works for any crystal axis (VERY FAST)
 
-                        - If @ref e1, @ref e2, @ref e3, @ref x0 are present, 
-                          and @ref e1, @ref e2, @ref e3 are parallel to xyz 
-                          and parallel to crystal axis, a subset of the FFT 
+                        - If @ref e1, @ref e2, @ref e3, @ref x0 are present,
+                          and @ref e1, @ref e2, @ref e3 are parallel to xyz
+                          and parallel to crystal axis, a subset of the FFT
                           grid that approximately covers the parallelepiped
-                          defined by @ref e1, @ref e2, @ref e3, @ref x0, is 
+                          defined by @ref e1, @ref e2, @ref e3, @ref x0, is
                           written - untested, might be obsolete
 
                         - Otherwise, the required 3D grid is generated from the
@@ -267,8 +284,11 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program ppris
                 label { the following variables are REQUIRED: }
 
                 var radius -type REAL {
+                    default { 1.0 }
+                    dimensionality { length }
+                    units { alat }
                     info {
-                        Radius of the sphere (alat units), centered at (0,0,0)
+                        Radius of the sphere, centered at (0,0,0)
                     }
                 }
 

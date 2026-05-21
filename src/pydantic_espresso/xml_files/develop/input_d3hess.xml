@@ -45,13 +45,15 @@ prefix of input file produced by pw.x
          <info>
 directory containing the input data, i.e. the same as in pw.x
          </info>
-         <default>
-value of the <tt>ESPRESSO_TMPDIR</tt> environment variable if set;
-current directory (&apos;./&apos;) otherwise
+         <default kind="conditional" >
+            <case test="ESPRESSO_TMPDIR is set and non-blank" > value of the <tt>ESPRESSO_TMPDIR</tt> environment variable
+            </case>
+            <case> current directory (&apos;./&apos;)
+            </case>
          </default>
       </var>
       <var name="filhess" type="CHARACTER" >
-         <default> &apos;prefix.hess&apos;
+         <default kind="expr" > trim(<ref>prefix</ref>)//&apos;.hess&apos;
          </default>
          <info>
 output file where the D3 hessian matrix is written
@@ -59,10 +61,14 @@ output file where the D3 hessian matrix is written
          </info>
       </var>
       <var name="step" type="REAL" >
-         <info> step for numerical differentiation in a.u.
+         <info> step for numerical differentiation
          </info>
-         <default> 1.d-3
+         <default> 2.d-5
          </default>
+         <dimensionality> length
+         </dimensionality>
+         <units> bohr
+         </units>
       </var>
    </namelist>
 </input_description>

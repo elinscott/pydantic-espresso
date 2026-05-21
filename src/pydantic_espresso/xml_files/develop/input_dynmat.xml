@@ -41,6 +41,8 @@ input file containing the dynamical matrix
          <info>
 calculate LO modes (add non-analytic terms) along the direction q (Cartesian axis)
          </info>
+         <dimensionality> dimensionless
+         </dimensionality>
          <default> q = (0,0,0)
          </default>
       </dimension>
@@ -48,7 +50,17 @@ calculate LO modes (add non-analytic terms) along the direction q (Cartesian axi
          <info>
 mass for each atom type
          </info>
-         <default> amass is read from file <ref>fildyn</ref>
+         <dimensionality> mass
+         </dimensionality>
+         <units> amu
+         </units>
+         <default kind="conditional" >
+            <case test="@ref amass(nt) &lt;= 0.0" >
+read from file <ref>fildyn</ref> (amass_(nt); divided by amu_ry for non-XML files)
+            </case>
+            <case>
+0.0
+            </case>
          </default>
       </dimension>
       <var name="asr" type="CHARACTER" >
@@ -61,7 +73,7 @@ Indicates the type of Acoustic Sum Rule imposed.
 Allowed values:
             </info>
             <opt val="'no'" >
-no Acoustic Sum Rules imposed <b>(default)</b>
+no Acoustic Sum Rules imposed
             </opt>
             <opt val="'simple'" >
 previous implementation of the asr used
@@ -178,6 +190,10 @@ coupling calculation.
 The spacing of double-delta smearing values used in an electron-phonon
 coupling calculation.
          </info>
+         <dimensionality> energy
+         </dimensionality>
+         <units> Ry
+         </units>
       </var>
    </namelist>
 </input_description>

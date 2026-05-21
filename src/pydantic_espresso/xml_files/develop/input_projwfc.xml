@@ -33,9 +33,11 @@ prefix of input file produced by <b>pw.x</b> (wavefunctions are needed)
          <info>
 directory containing the input data, i.e. the same as in <b>pw.x</b>
          </info>
-         <default>
-value of the ESPRESSO_TMPDIR environment variable if set;
-current directory (&apos;./&apos;) otherwise
+         <default kind="conditional" >
+            <case test="ESPRESSO_TMPDIR is set" > from_environment
+            </case>
+            <case> &apos;./&apos;
+            </case>
          </default>
       </var>
       <var name="ngauss" type="INTEGER" >
@@ -43,7 +45,7 @@ current directory (&apos;./&apos;) otherwise
          </default>
          <info>
 Type of gaussian broadening:
-    0 ... Simple Gaussian (default)
+    0 ... Simple Gaussian
     1 ... Methfessel-Paxton of order 1
    -1 ... &quot;cold smearing&quot; (Marzari-Vanderbilt-DeVita-Payne)
   -99 ... Fermi-Dirac function
@@ -52,6 +54,10 @@ Type of gaussian broadening:
       <var name="degauss" type="REAL" >
          <default> 0.0
          </default>
+         <dimensionality> energy
+         </dimensionality>
+         <units> Ry
+         </units>
          <info> gaussian broadening, Ry (not eV!)
          </info>
       </var>
@@ -60,14 +66,22 @@ Type of gaussian broadening:
          </var>
          <var name="Emax" >
          </var>
-         <info> min &amp; max energy (eV) for DOS plot
+         <info> min &amp; max energy for DOS plot
          </info>
          <default> (band extrema)
          </default>
+         <dimensionality> energy
+         </dimensionality>
+         <units> eV
+         </units>
       </vargroup>
       <var name="DeltaE" type="REAL" >
-         <info> energy grid step (eV)
+         <info> energy grid step
          </info>
+         <dimensionality> energy
+         </dimensionality>
+         <units> eV
+         </units>
       </var>
       <var name="lsym" type="LOGICAL" >
          <default> .true.
@@ -108,7 +122,7 @@ Only for PAW, not implemented in the noncolinear case.
       <var name="filpdos" type="CHARACTER" >
          <info> prefix for output files containing PDOS(E)
          </info>
-         <default> (value of <ref>prefix</ref> variable)
+         <default kind="ref" > <ref>prefix</ref>
          </default>
       </var>
       <var name="filproj" type="CHARACTER" >

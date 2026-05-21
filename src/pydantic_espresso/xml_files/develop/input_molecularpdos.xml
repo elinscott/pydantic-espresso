@@ -48,7 +48,11 @@ considered for the projection
          </info>
       </var>
       <var name="i_atmwfc_end_full" type="INTEGER" >
-         <default> 0, i.e., all atomic wavefunctions
+         <default kind="conditional" >
+            <case test="@ref i_atmwfc_end_full &lt; 1" > natomwfc_full (all atomic wavefunctions)
+            </case>
+            <case> 0
+            </case>
          </default>
          <info>
 last atomic wavefunction of the full system
@@ -64,7 +68,11 @@ considered for the projection
          </info>
       </var>
       <var name="i_atmwfc_end_part" type="INTEGER" >
-         <default> 0, i.e., all atomic wavefunctions
+         <default kind="conditional" >
+            <case test="@ref i_atmwfc_end_part &lt; 1" > natomwfc_part (all atomic wavefunctions)
+            </case>
+            <case> 0
+            </case>
          </default>
          <info>
 last atomic wavefunction of the molecular part
@@ -80,7 +88,11 @@ into account for the projection
          </info>
       </var>
       <var name="i_bnd_end_full" type="INTEGER" >
-         <default> 0, i.e., all eigenstates
+         <default kind="conditional" >
+            <case test="@ref i_bnd_end_full &lt; 1" > nbnd_full (all eigenstates)
+            </case>
+            <case> 0
+            </case>
          </default>
          <info>
 last eigenstate of the full system to be taken
@@ -96,7 +108,11 @@ into account for the projection
          </info>
       </var>
       <var name="i_bnd_end_part" type="INTEGER" >
-         <default> 0, i.e., all eigenstates
+         <default kind="conditional" >
+            <case test="@ref i_bnd_end_part &lt; 1" > nbnd_part (all eigenstates)
+            </case>
+            <case> 0
+            </case>
          </default>
          <info>
 last eigenstate of the molecular part to be taken
@@ -114,7 +130,7 @@ into account for the projection
          </default>
          <info>
 Type of gaussian broadening:
-    0 ... Simple Gaussian (default)
+    0 ... Simple Gaussian
     1 ... Methfessel-Paxton of order 1
    -1 ... &quot;cold smearing&quot; (Marzari-Vanderbilt-DeVita-Payne)
   -99 ... Fermi-Dirac function
@@ -123,7 +139,11 @@ Type of gaussian broadening:
       <var name="degauss" type="REAL" >
          <default> 0.0
          </default>
-         <info> gaussian broadening, Ry (not eV!)
+         <dimensionality> energy
+         </dimensionality>
+         <units> Ry
+         </units>
+         <info> gaussian broadening (not eV!)
          </info>
       </var>
       <vargroup type="REAL" >
@@ -131,15 +151,25 @@ Type of gaussian broadening:
          </var>
          <var name="Emax" >
          </var>
-         <info> min &amp; max energy (eV) for DOS plot
+         <dimensionality> energy
+         </dimensionality>
+         <units> eV
+         </units>
+         <info>
+min &amp; max energy for DOS plot.
+               If not specified, the band extrema are used.
          </info>
-         <default> (band extrema)
+         <default kind="computed" > internal
          </default>
       </vargroup>
       <var name="DeltaE" type="REAL" >
          <default> 0.01
          </default>
-         <info> energy grid step (eV)
+         <dimensionality> energy
+         </dimensionality>
+         <units> eV
+         </units>
+         <info> energy grid step
          </info>
       </var>
       <var name="kresolveddos" type="LOGICAL" >

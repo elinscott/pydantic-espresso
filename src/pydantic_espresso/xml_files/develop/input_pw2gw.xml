@@ -27,13 +27,19 @@
       <var name="prefix" type="STRING" >
          <status> MANDATORY
          </status>
+         <default> &apos;pwscf&apos;
+         </default>
          <info>
 the first part of the name of all the file written by the code
 should be equal to the value given in the main calculations.
          </info>
       </var>
       <var name="outdir" type="STRING" >
-         <default> &quot;./&quot;
+         <default kind="conditional" >
+            <case test="ESPRESSO_TMPDIR environment variable is set and non-blank" > value of the ESPRESSO_TMPDIR environment variable
+            </case>
+            <case> &quot;./&quot;
+            </case>
          </default>
          <info>
 the scratch directory where the massive data-files are written
@@ -75,22 +81,34 @@ on all the Kohn-Sham states and write it into the &quot;vxcdiag.dat&quot; file.
       <var name="Emin" type="REAL" >
          <default> 0.0
          </default>
+         <dimensionality> energy
+         </dimensionality>
+         <units> eV
+         </units>
          <info>
-Starting photon energy for which the dielectric function is calculated (in eV)
+Starting photon energy for which the dielectric function is calculated
          </info>
       </var>
       <var name="Emax" type="REAL" >
          <default> 30.0
          </default>
+         <dimensionality> energy
+         </dimensionality>
+         <units> eV
+         </units>
          <info>
-Highest photon energy for which the dielectric function is calculated (in eV)
+Highest photon energy for which the dielectric function is calculated
          </info>
       </var>
       <var name="DeltaE" type="REAL" >
          <default> 0.05
          </default>
+         <dimensionality> energy
+         </dimensionality>
+         <units> eV
+         </units>
          <info>
-Energy step with which the dielectric function is calculated (in eV)
+Energy step with which the dielectric function is calculated
          </info>
       </var>
    </namelist>

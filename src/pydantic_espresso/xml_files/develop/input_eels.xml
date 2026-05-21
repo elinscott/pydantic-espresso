@@ -41,7 +41,11 @@ same prefix.
          </info>
       </var>
       <var name="outdir" type="CHARACTER" >
-         <default> &apos;./&apos;
+         <default kind="conditional" >
+            <case test="ESPRESSO_TMPDIR is set" > $ESPRESSO_TMPDIR
+            </case>
+            <case> &apos;./&apos;
+            </case>
          </default>
          <info>
 The directory that contains the run critical files, which
@@ -60,7 +64,7 @@ previous runs.
          </info>
       </var>
       <var name="restart_step" type="INTEGER" >
-         <default> itermax
+         <default kind="expr" > <ref>itermax</ref> + 1
          </default>
          <info>
 The code writes restart files every restart_step iterations.
@@ -79,11 +83,17 @@ written to standard output.
       <var name="disk_io" type="CHARACTER" >
          <default> &apos;default&apos;
          </default>
-         <info>
-    Fine control of disk usage. Currently only &apos;reduced&apos; is
-supported where no restart files are written, apart from
-the &apos;default&apos; mode.
-         </info>
+         <options>
+            <info> Fine control of disk usage.
+            </info>
+            <opt val="'default'" >
+Standard disk I/O: restart files are written so the
+calculation can be resumed.
+            </opt>
+            <opt val="'reduced'" >
+Reduced disk I/O: no restart files are written.
+            </opt>
+         </options>
       </var>
    </namelist>
    <namelist name="LR_CONTROL" >
@@ -116,6 +126,8 @@ Crystal Local Field Effects (CLFE)
          </var>
          <default> 1.0, 1.0, 1.0
          </default>
+         <dimensionality> dimensionless
+         </dimensionality>
          <info>
 The values of the transferred momentum q = (q1, q2, q3)
 in Cartesian coordinates in units of 2pi/a, where
@@ -158,8 +170,14 @@ biorthogonalization algorithm is used (which is two times slower).
          </info>
       </var>
       <var name="alpha_mix(i)" type="REAL" >
-         <default> alpha_mix(1)=0.7
+         <default kind="conditional" >
+            <case test="i == 1" > 0.7
+            </case>
+            <case> 0.0
+            </case>
          </default>
+         <dimensionality> dimensionless
+         </dimensionality>
          <info>
 This variable is used only when <ref>calculator</ref> = &apos;sternheimer&apos;.
 Mixing parameter (for the i-th iteration) for updating
@@ -170,9 +188,13 @@ method: D.D. Johnson, <a href="https://journals.aps.org/prb/abstract/10.1103/Phy
       <var name="epsil" type="REAL" >
          <default> 0.02
          </default>
+         <dimensionality> energy
+         </dimensionality>
+         <units> Ry
+         </units>
          <info>
 This variable is used only when <ref>calculator</ref> = &apos;sternheimer&apos;.
-The broadening/damping term (in Rydberg units).
+The broadening/damping term.
          </info>
       </var>
       <var name="units" type="INTEGER" >
@@ -188,6 +210,10 @@ and <ref>increment</ref> input parameters.
       <var name="start" type="REAL" >
          <default> 0.0
          </default>
+         <dimensionality> energy
+         </dimensionality>
+         <units> Ry
+         </units>
          <see> end, increment
          </see>
          <info>
@@ -200,6 +226,10 @@ susceptibility and the loss function (-Im(1/eps)) will be computed.
       <var name="end" type="REAL" >
          <default> 2.5
          </default>
+         <dimensionality> energy
+         </dimensionality>
+         <units> Ry
+         </units>
          <see> start, increment
          </see>
          <info>
@@ -212,6 +242,10 @@ susceptibility and the loss function (-Im(1/eps)) will be computed.
       <var name="increment" type="REAL" >
          <default> 0.001
          </default>
+         <dimensionality> energy
+         </dimensionality>
+         <units> Ry
+         </units>
          <see> start, end
          </see>
          <info>
@@ -224,6 +258,8 @@ of frequencies between <ref>start</ref> and <ref>end</ref>.
       <var name="ethr_nscf" type="REAL" >
          <default> 1.D-11
          </default>
+         <dimensionality> dimensionless
+         </dimensionality>
          <info>
 Threshold for the convergence of eigenvalues during
 the iterative diagonalization of the Hamiltonian in

@@ -10,6 +10,7 @@ from gitlab.v4.objects import Project, ProjectCommit
 from packaging.version import Version
 
 from pydantic_espresso.def_files import directory as def_directory
+from pydantic_espresso.models import MIN_VERSION
 
 OWNER = "QEF"
 REPO = "q-e"
@@ -89,6 +90,8 @@ def fetch_all_defs() -> None:
         except ValueError:
             continue
         if version.is_devrelease:
+            continue
+        if version < MIN_VERSION:
             continue
         existing_tags = [t.name for t in def_directory.iterdir() if t.is_dir()]
         if tag.name not in existing_tags:

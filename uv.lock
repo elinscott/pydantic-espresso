@@ -1089,6 +1089,7 @@ tests = [
     { name = "pytest" },
 ]
 typing = [
+    { name = "click" },
     { name = "coverage" },
     { name = "mypy" },
     { name = "numpy" },
@@ -1153,6 +1154,7 @@ tests = [
     { name = "pytest" },
 ]
 typing = [
+    { name = "click" },
     { name = "coverage", extras = ["toml"] },
     { name = "mypy" },
     { name = "numpy" },

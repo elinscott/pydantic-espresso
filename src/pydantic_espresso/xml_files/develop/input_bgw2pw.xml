@@ -35,12 +35,18 @@ are using bgw2pw.x in conjunction with SAPO code in BerkeleyGW).
       <var name="prefix" type="STRING" >
          <status> MANDATORY
          </status>
+         <default> &apos;prefix&apos;
+         </default>
          <info>
 prefix of files saved by program pw.x
          </info>
       </var>
       <var name="outdir" type="STRING" >
-         <default> &apos;./&apos;
+         <default kind="conditional" >
+            <case test="ESPRESSO_TMPDIR environment variable is set and non-blank" > value of the ESPRESSO_TMPDIR environment variable
+            </case>
+            <case> &apos;./&apos;
+            </case>
          </default>
          <info>
 the scratch directory where the massive data-files are written

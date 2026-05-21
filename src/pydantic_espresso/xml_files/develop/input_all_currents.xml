@@ -92,6 +92,10 @@ if (gamma)
    </intro>
    <namelist name="ENERGY_CURRENT" >
       <var name="delta_t" type="REAL" >
+         <dimensionality> time
+         </dimensionality>
+         <units> bohr electron_mass^1/2 Ry^-1/2
+         </units>
          <default> 1.D0
          </default>
          <info>
@@ -169,6 +173,8 @@ assume velocities are given in pw.x time units
          </options>
       </var>
       <var name="eta" type="REAL" >
+         <dimensionality> dimensionless
+         </dimensionality>
          <default> 1.D0
          </default>
          <info> Convergence parameter for Ewald-like sums
@@ -218,6 +224,10 @@ MOD(step, <ref>step_mul</ref>) == <ref>step_rem</ref>.
          </info>
       </var>
       <var name="ethr_small_step" type="REAL" >
+         <dimensionality> energy
+         </dimensionality>
+         <units> Ry
+         </units>
          <default> 1.D-7
          </default>
          <info>
@@ -226,6 +236,10 @@ Diagonalization threshold after the small <ref>delta_t</ref> numerical derivativ
          </info>
       </var>
       <var name="ethr_big_step" type="REAL" >
+         <dimensionality> energy
+         </dimensionality>
+         <units> Ry
+         </units>
          <default> 1.D-3
          </default>
          <info>
@@ -262,11 +276,11 @@ or solid case this is a non-diffusive contribution.
          </info>
       </var>
       <var name="save_dvpsi" type="LOGICAL" >
-         <default> .false.
+         <default> .true.
          </default>
          <info>
-If true allocate the space needed for saving the solution of the linear system betweew every calculation.
-The iterative algorithm will always start from there. By default it starts always from scratch.
+If true allocate the space needed for saving the solution of the linear system between every calculation.
+The iterative algorithm will always start from there.
          </info>
       </var>
       <var name="re_init_wfc_1" type="LOGICAL" >

@@ -26,14 +26,19 @@
          <info>
 prefix of files saved by program pw.x
          </info>
+         <default> &apos; &apos;
+         </default>
       </var>
       <var name="outdir" type="CHARACTER" >
          <info>
 directory containing the input data, i.e. the same as in pw.x
          </info>
-         <default>
-value of the <tt>ESPRESSO_TMPDIR</tt> environment variable if set;
-current directory (&apos;./&apos;) otherwise
+         <default kind="conditional" >
+            <case test="ESPRESSO_TMPDIR environment variable is set" >
+value of the <tt>ESPRESSO_TMPDIR</tt> environment variable
+            </case>
+            <case> &apos;./&apos;
+            </case>
          </default>
       </var>
       <var name="seedname" type="STRING" >
@@ -84,7 +89,11 @@ The reduction factor per direction for <ref>reduce_unk</ref>. Default 2 means a 
 of 2x2x2 = 8 of the total number of grid points.
 Only relevant if <ref>write_unk</ref> = .true.
          </info>
-         <default> 1 if <ref>reduce_unk</ref> = .FALSE., 2 if <ref>reduce_unk</ref> = .TRUE.
+         <default kind="conditional" >
+            <case test="@ref reduce_unk == .TRUE." > 2
+            </case>
+            <case> 1
+            </case>
          </default>
       </var>
       <var name="wvfn_formatted" type="LOGICAL" >
@@ -123,12 +132,24 @@ Set to .true. to compute amn using the SCDM projection.
 Set to the chemical potential for the SCDM occupation.
 Only relevant if <ref>scdm_entanglement</ref> = &apos;erfc&apos; or &apos;gaussian&apos;.
          </info>
+         <dimensionality> energy
+         </dimensionality>
+         <units> eV
+         </units>
+         <default> 0.0
+         </default>
       </var>
       <var name="scdm_sigma" type="REAL" >
          <info>
 Set to the smearing for the SCDM occupation.
 Only relevant if <ref>scdm_entanglement</ref> = &apos;erfc&apos; or &apos;gaussian&apos;.
          </info>
+         <dimensionality> energy
+         </dimensionality>
+         <units> eV
+         </units>
+         <default> 1.0
+         </default>
       </var>
       <var name="atom_proj" type="LOGICAL" >
          <info>
@@ -145,7 +166,7 @@ from the initial projection. This is useful for excluding the
 semicore states from the initial projection.
 Only relevant if <ref>atom_proj</ref> = .true.
          </info>
-         <default> empty
+         <default> -1
          </default>
       </dimension>
       <var name="atom_proj_ext" type="LOGICAL" >
@@ -165,6 +186,8 @@ species name of the atom.
 For more details, see the wannier90 user guide and examples.
 Only relevant if <ref>atom_proj_ext</ref> = .true.
          </info>
+         <default> &apos;./&apos;
+         </default>
       </var>
       <var name="atom_proj_ortho" type="LOGICAL" >
          <info>

@@ -52,6 +52,8 @@ reprinted on output, CUB files and other places
          </info>
       </var>
       <var name="prefix" type="CHARACTER" >
+         <default> &apos;pwscf&apos;
+         </default>
          <info>
 prefix of files saved by program pw.x
          </info>
@@ -60,9 +62,11 @@ prefix of files saved by program pw.x
          <info>
 directory containing the input data, i.e. the same as in pw.x
          </info>
-         <default>
-value of the <tt>ESPRESSO_TMPDIR</tt> environment variable if set;
-current directory (&apos;./&apos;) otherwise
+         <default kind="conditional" >
+            <case test="ESPRESSO_TMPDIR is set" > from_environment
+            </case>
+            <case> &apos;./&apos;
+            </case>
          </default>
       </var>
       <var name="filplot" type="CHARACTER" >
@@ -159,7 +163,7 @@ or for total minus atomic charge (plot_num=9):
                <default> 0
                </default>
                <info>
-0 = total charge (default value),
+0 = total charge,
 1 = spin up charge,
 2 = spin down charge.
                </info>
@@ -173,7 +177,7 @@ Options for total potential (plot_num=1):
                <default> 0
                </default>
                <info>
-0 = spin averaged potential (default value),
+0 = spin averaged potential,
 1 = spin up potential,
 2 = spin down potential.
                </info>
@@ -185,10 +189,18 @@ Options for LDOS (plot_num=3):
 LDOS is plotted on grid [emin, emax] with spacing delta_e.
             </label>
             <var name="emin" type="REAL" >
-               <default> e_fermi
+               <default kind="conditional" >
+                  <case test="@ref emin == -999.0 (sentinel) and @ref plot_num == 3" > <ref>E_fermi</ref>
+                  </case>
+                  <case> -999.0
+                  </case>
                </default>
+               <dimensionality> energy
+               </dimensionality>
+               <units> eV
+               </units>
                <info>
-lower boundary of energy grid (in eV).
+lower boundary of energy grid.
 
 Defaults to Fermi energy.
                </info>
@@ -196,8 +208,18 @@ Defaults to Fermi energy.
             <var name="emax" type="REAL" >
                <status> OPTIONAL
                </status>
+               <default kind="conditional" >
+                  <case test="@ref emax == +999.0 (sentinel) and @ref plot_num == 3" > <ref>E_fermi</ref>
+                  </case>
+                  <case> 999.0
+                  </case>
+               </default>
+               <dimensionality> energy
+               </dimensionality>
+               <units> eV
+               </units>
                <info>
-upper boundary of energy grid (in eV).
+upper boundary of energy grid.
 
 Defaults to Fermi energy.
                </info>
@@ -207,17 +229,29 @@ Defaults to Fermi energy.
                </default>
                <status> OPTIONAL
                </status>
+               <dimensionality> energy
+               </dimensionality>
+               <units> eV
+               </units>
                <info>
-spacing of energy grid (in eV).
+spacing of energy grid.
                </info>
             </var>
             <var name="degauss_ldos" type="REAL" >
-               <default> degauss (converted to eV)
+               <default kind="conditional" >
+                  <case test="@ref degauss_ldos == -999.0 (sentinel) and @ref plot_num == 3" > degauss * rytoev
+                  </case>
+                  <case> -999.0
+                  </case>
                </default>
                <status> OPTIONAL
                </status>
+               <dimensionality> energy
+               </dimensionality>
+               <units> eV
+               </units>
                <info>
-broadening of energy levels for LDOS (in eV).
+broadening of energy levels for LDOS.
 
 Defaults to broadening degauss specified for electronic smearing
 in pw.x calculation.
@@ -241,8 +275,14 @@ of the pw.x calculation will be used.
 Options for STM images (plot_num=5):
             </label>
             <var name="sample_bias" type="REAL" >
+               <default> 0.01
+               </default>
+               <dimensionality> energy
+               </dimensionality>
+               <units> Ry
+               </units>
                <info>
-the bias of the sample (Ry) in stm images
+the bias of the sample in stm images
                </info>
             </var>
          </elsewhen>
@@ -251,6 +291,12 @@ the bias of the sample (Ry) in stm images
 Options for |psi|^2 (plot_num=7):
             </label>
             <dimension name="kpoint" start="1" end="2" type="INTEGER" >
+               <default kind="conditional" >
+                  <case test="@ref kpoint(2) == 0" > kpoint(2) = kpoint(1)
+                  </case>
+                  <case> kpoint(2) initialized to 0; kpoint(1) has no default
+                  </case>
+               </default>
                <info>
 Unpolarized and noncollinear case:
         k-point(s) to be plotted
@@ -263,6 +309,12 @@ To plot a range of kpoints [imin, imax], specify kpoint(1)=imin and kpoint(2)=im
                </info>
             </dimension>
             <dimension name="kband" start="1" end="2" type="INTEGER" >
+               <default kind="conditional" >
+                  <case test="@ref kband(2) == 0" > kband(2) = kband(1)
+                  </case>
+                  <case> kband(2) initialized to 0; kband(1) has no default
+                  </case>
+               </default>
                <info>
 Band(s) to be plotted.
 
@@ -271,12 +323,18 @@ To plot a range of bands [imin, imax], specify kband(1)=imin and kband(2)=imax
                </info>
             </dimension>
             <var name="lsign" type="LOGICAL" >
+               <default> .false.
+               </default>
                <info>
 if true and k point is Gamma, plot |psi|^2 sign(psi)
                </info>
             </var>
             <dimension name="spin_component" start="1" end="2" type="INTEGER" >
-               <default> 0
+               <default kind="conditional" >
+                  <case test="@ref spin_component(2) == 0" > spin_component(2) = spin_component(1)
+                  </case>
+                  <case> 0
+                  </case>
                </default>
                <status> OPTIONAL
                </status>
@@ -285,7 +343,7 @@ if true and k point is Gamma, plot |psi|^2 sign(psi)
 plot the contribution of the given state(s) to the charge
 or to the magnetization along the direction(s) indicated
 by spin_component:
-        0 = charge (default),
+        0 = charge,
         1 = x,
         2 = y,
         3 = z.
@@ -302,13 +360,29 @@ To plot a range of components [imin, imax], specify spin_component(1)=imin and s
 Options for ILDOS (plot_num=10):
             </label>
             <var name="emin" type="REAL" >
+               <default> -999.0
+               </default>
+               <dimensionality> energy
+               </dimensionality>
+               <units> eV
+               </units>
                <info>
-lower energy boundary (in eV)
+lower energy boundary
                </info>
             </var>
             <var name="emax" type="REAL" >
+               <default kind="conditional" >
+                  <case test="@ref emax == +999.0 (sentinel) and @ref plot_num == 10" > ef * rytoev (E_fermi)
+                  </case>
+                  <case> 999.0
+                  </case>
+               </default>
+               <dimensionality> energy
+               </dimensionality>
+               <units> eV
+               </units>
                <info>
-upper energy boundary (in eV),
+upper energy boundary,
 i.e. compute ILDOS from <ref>emin</ref> to <ref>emax</ref>
                </info>
             </var>
@@ -331,7 +405,7 @@ Options for noncollinear magnetization (plot_num=13):
                <default> 0
                </default>
                <info>
-0 = absolute value (default value)
+0 = absolute value
 1 = x component of the magnetization
 2 = y component of the magnetization
 3 = z component of the magnetization
@@ -346,7 +420,7 @@ Options for reconstructed charge density (plot_num=17):
                <default> 0
                </default>
                <info>
-0 = total charge (default value),
+0 = total charge,
 1 = spin up charge,
 2 = spin down charge.
                </info>
@@ -361,7 +435,7 @@ LSDA case only:
                <default> 0
                </default>
                <info>
-0 = total density (default value),
+0 = total density,
 1 = spin up density,
 2 = spin down density.
                </info>
@@ -419,6 +493,8 @@ nfile &gt; 1 : see <ref>weight</ref>
          <dimension name="weight" start="1" end="nfile" type="REAL" >
             <default> weight(1)=1.0
             </default>
+            <dimensionality> dimensionless
+            </dimensionality>
             <info>
 weighing factors: assuming that rho(i) is the quantity
 read from filepp(i), the quantity that will be plotted is:
@@ -433,6 +509,8 @@ weight(1)*rho(1) + weight(2)*rho(2) + weight(3)*rho(3) + ...
          </message>
       </group>
       <var name="iflag" type="INTEGER" >
+         <default> 0
+         </default>
          <info>
 0 = 1D plot of the spherical average
 1 = 1D plot
@@ -442,6 +520,8 @@ weight(1)*rho(1) + weight(2)*rho(2) + weight(3)*rho(3) + ...
          </info>
       </var>
       <var name="output_format" type="INTEGER" >
+         <default> -1
+         </default>
          <info>
 (ignored on 1D plot)
 
@@ -488,16 +568,30 @@ Type of interpolation:
             <label> the following variables are REQUIRED:
             </label>
             <dimension name="e1" start="1" end="3" type="REAL" >
+               <default> 0.0
+               </default>
+               <dimensionality> length
+               </dimensionality>
+               <units> alat
+               </units>
                <info>
-3D vector which determines the plotting line (in alat units)
+3D vector which determines the plotting line
                </info>
             </dimension>
             <dimension name="x0" start="1" end="3" type="REAL" >
+               <default> 0.0
+               </default>
+               <dimensionality> length
+               </dimensionality>
+               <units> alat
+               </units>
                <info>
-3D vector, origin of the line (in alat units)
+3D vector, origin of the line
                </info>
             </dimension>
             <var name="nx" type="INTEGER" >
+               <default> 0
+               </default>
                <info>
 number of points in the line:
 
@@ -513,15 +607,27 @@ rho(i) = rho( x0 + e1 * (i-1)/(nx-1) ), i=1, nx
                </dimension>
                <dimension name="e2" >
                </dimension>
+               <default> 0.0
+               </default>
+               <dimensionality> length
+               </dimensionality>
+               <units> alat
+               </units>
                <info>
-3D vectors which determine the plotting plane (in alat units)
+3D vectors which determine the plotting plane
 
 BEWARE: <b>e1</b> and <b>e2</b> must be orthogonal
                </info>
             </dimensiongroup>
             <dimension name="x0" start="1" end="3" type="REAL" >
+               <default> 0.0
+               </default>
+               <dimensionality> length
+               </dimensionality>
+               <units> alat
+               </units>
                <info>
-3D vector, origin of the plane (in alat units)
+3D vector, origin of the plane
                </info>
             </dimension>
             <vargroup type="INTEGER" >
@@ -529,6 +635,8 @@ BEWARE: <b>e1</b> and <b>e2</b> must be orthogonal
                </var>
                <var name="ny" >
                </var>
+               <default> 0
+               </default>
                <info>
 Number of points in the plane:
 
@@ -547,18 +655,26 @@ rho(i,j) = rho( x0 + e1 * (i-1)/(nx-1)
                </dimension>
                <dimension name="e3" >
                </dimension>
+               <default> 0.0
+               </default>
+               <dimensionality> length
+               </dimensionality>
+               <units> alat
+               </units>
                <info>
 3D vectors which determine the plotting parallelepiped
 (if present, must be orthogonal)
-
-<ref>e1</ref>, <ref>e2</ref>, and <ref>e3</ref> are in alat units !
                </info>
             </dimensiongroup>
             <dimension name="x0" start="1" end="3" type="REAL" >
+               <default> 0.0
+               </default>
+               <dimensionality> length
+               </dimensionality>
+               <units> alat
+               </units>
                <info>
 3D vector, origin of the parallelepiped
-
-<ref>x0</ref> is in alat units !
                </info>
             </dimension>
             <vargroup type="INTEGER" >
@@ -568,6 +684,8 @@ rho(i,j) = rho( x0 + e1 * (i-1)/(nx-1)
                </var>
                <var name="nz" >
                </var>
+               <default> 0
+               </default>
                <info>
 Number of points in the parallelepiped:
 
@@ -599,8 +717,14 @@ rho(i,j,k) = rho( x0 + e1 * (i-1)/nx
             <label> the following variables are REQUIRED:
             </label>
             <var name="radius" type="REAL" >
+               <default> 1.0
+               </default>
+               <dimensionality> length
+               </dimensionality>
+               <units> alat
+               </units>
                <info>
-Radius of the sphere (alat units), centered at (0,0,0)
+Radius of the sphere, centered at (0,0,0)
                </info>
             </var>
             <vargroup type="INTEGER" >
@@ -608,6 +732,8 @@ Radius of the sphere (alat units), centered at (0,0,0)
                </var>
                <var name="ny" >
                </var>
+               <default> 0
+               </default>
                <info>
 Number of points in the polar plane:
 

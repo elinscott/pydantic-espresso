@@ -28,6 +28,8 @@ Needed for pseudo-potential (PP) test. optional for PP generation:
          </info>
          <status> OPTIONAL
          </status>
+         <default> &apos; &apos;
+         </default>
       </var>
       <group>
          <label> Either:
@@ -41,6 +43,12 @@ The nuclear charge (1 &lt; zed &lt; 100).
 <b>IMPORTANT:</b>
 Specify either <ref>zed</ref> OR <ref>atom</ref>, not both!
             </info>
+            <default> 0.0
+            </default>
+            <dimensionality> charge
+            </dimensionality>
+            <units> e
+            </units>
          </var>
          <label> Or:
          </label>
@@ -53,6 +61,8 @@ Atomic symbol: atom=&apos;H&apos;, &apos;He&apos;, &apos;Be&apos;, etc.
 <b>IMPORTANT:</b>
 Specify either <ref>atom</ref> OR <ref>zed</ref>, not both!
             </info>
+            <default> &apos;  &apos;
+            </default>
          </var>
       </group>
       <group>
@@ -61,10 +71,14 @@ Specify either <ref>atom</ref> OR <ref>zed</ref>, not both!
          <var name="xmin" type="REAL" >
             <see> dx
             </see>
-            <default>
--7.0 if <ref>iswitch</ref>&gt;1 or <ref>rel</ref>=0,
--8.0 otherwise
+            <default kind="conditional" >
+               <case test="@ref iswitch==1 .and. .not.@ref vdw .and. @ref rel&gt;0" > -8.0
+               </case>
+               <case> -7.0
+               </case>
             </default>
+            <dimensionality> dimensionless
+            </dimensionality>
             <info> Radial grid parameter.
             </info>
          </var>
@@ -74,16 +88,24 @@ Radial grid parameter.
 
 The radial grid is: r(i+1) = exp(xmin+i*dx)/zed  a.u.
             </info>
-            <default>
-0.0125 if <ref>iswitch</ref>&gt;1,
-0.008 otherwise
+            <default kind="conditional" >
+               <case test="@ref iswitch==1 .and. .not.@ref vdw" > 0.008
+               </case>
+               <case> 0.0125
+               </case>
             </default>
+            <dimensionality> dimensionless
+            </dimensionality>
          </var>
          <var name="rmax" type="REAL" >
             <info> Outermost grid point.
             </info>
-            <default> 100.0 a.u.
+            <default> 100.0
             </default>
+            <dimensionality> length
+            </dimensionality>
+            <units> bohr
+            </units>
          </var>
       </group>
       <var name="beta" type="REAL" >
@@ -91,12 +113,16 @@ The radial grid is: r(i+1) = exp(xmin+i*dx)/zed  a.u.
          </info>
          <default> 0.2
          </default>
+         <dimensionality> dimensionless
+         </dimensionality>
       </var>
       <var name="tr2" type="REAL" >
          <info> convergence threshold for scf
          </info>
          <default> 1e-14
          </default>
+         <dimensionality> dimensionless
+         </dimensionality>
       </var>
       <var name="iswitch" type="INTEGER" >
          <info>
@@ -114,10 +140,18 @@ The radial grid is: r(i+1) = exp(xmin+i*dx)/zed  a.u.
          <var name="nld" type="INTEGER" >
             <info> the number of logarithmic derivatives to be calculated
             </info>
+            <default> 0
+            </default>
          </var>
          <var name="rlderiv" type="REAL" >
-            <info> radius (a.u.) at which logarithmic derivatives are calculated
+            <info> radius at which logarithmic derivatives are calculated
             </info>
+            <default> 4.0
+            </default>
+            <dimensionality> length
+            </dimensionality>
+            <units> bohr
+            </units>
          </var>
          <vargroup type="REAL" >
             <var name="eminld" >
@@ -125,20 +159,38 @@ The radial grid is: r(i+1) = exp(xmin+i*dx)/zed  a.u.
             <var name="emaxld" >
             </var>
             <info>
-Energy range (min, max energy, in Ry) at which
+Energy range (min, max energy) at which
 logarithmic derivatives are calculated.
             </info>
+            <dimensionality> energy
+            </dimensionality>
+            <units> Ry
+            </units>
          </vargroup>
          <var name="deld" type="REAL" >
             <info>
-Delta e (Ry) of energy for logarithmic derivatives.
+Delta e of energy for logarithmic derivatives.
             </info>
+            <default> 0.03
+            </default>
+            <dimensionality> energy
+            </dimensionality>
+            <units> Ry
+            </units>
          </var>
          <var name="rpwe" type="REAL" >
-            <info> radius (a.u.) at which partial wave expansions are calculated
+            <info> radius at which partial wave expansions are calculated
             </info>
-            <default> rlderiv
+            <default kind="conditional" >
+               <case test="@ref nld&gt;0" > rlderiv
+               </case>
+               <case> 0.0
+               </case>
             </default>
+            <dimensionality> length
+            </dimensionality>
+            <units> bohr
+            </units>
          </var>
          <message>
 If the above parameters are not specified, logarithmic
@@ -151,9 +203,11 @@ derivatives and partial wave expansions are not calculated.
 1 ... scalar relativistic calculation
 2 ... full relativistic calculation with spin-orbit
          </info>
-         <default>
-0 for Z &lt;= 18;
-1 for Z &gt;  18
+         <default kind="conditional" >
+            <case test="@ref zed &lt; 19" > 0
+            </case>
+            <case> 1
+            </case>
          </default>
       </var>
       <var name="lsmall" type="LOGICAL" >
@@ -207,6 +261,8 @@ For the complete list, see module &quot;functionals&quot; in ../Modules/
 The default is <b>&apos;PZ&apos;</b> for all-electron calculations,
 it is read from the PP file in a PP calculation.
          </info>
+         <default> &apos;LDA&apos;
+         </default>
       </var>
       <var name="latt" type="INTEGER" >
          <info>
@@ -228,17 +284,27 @@ only for all-electron calculation
          </status>
       </var>
       <var name="rytoev_fact" type="REAL" >
-         <default> as specified in file Modules/constants.f90
+         <default kind="computed" > internal
          </default>
+         <dimensionality> dimensionless
+         </dimensionality>
          <info>
 Factor used to convert Ry into eV.
+
+By default the value specified in file Modules/constants.f90
+is used.
          </info>
       </var>
       <var name="cau_fact" type="REAL" >
-         <default> as specified in file Modules/constants.f90
+         <default kind="computed" > internal
          </default>
+         <dimensionality> dimensionless
+         </dimensionality>
          <info>
 Speed of light in a.u..
+
+By default the value specified in file Modules/constants.f90
+is used.
 
 (Be careful the default value is always used in the
  relativistic exchange.)
@@ -268,13 +334,19 @@ See below for file names and the content of the file.
       <var name="verbosity" type="CHARACTER" >
          <default> &apos;low&apos;
          </default>
-         <info>
-<b>&apos;low&apos;</b> or <b>&apos;high&apos;</b>
-
-if <b>&apos;high&apos;</b> with <ref>iswitch</ref>=2,3 prints separately core and
-valence contributions to the energies. Print the
+         <options>
+            <info>
+Controls how much information is printed on output.
+            </info>
+            <opt val="'low'" >
+Standard output.
+            </opt>
+            <opt val="'high'" >
+With <ref>iswitch</ref>=2,3 prints separately core and
+valence contributions to the energies, and prints the
 frozen-core energy.
-         </info>
+            </opt>
+         </options>
       </var>
       <var name="file_charge" type="CHARACTER" >
          <default> &apos; &apos;
@@ -333,14 +405,19 @@ Prentice-Hall, Inc., Englewood Cliffs, New Jersey, 1963
       <var name="rel_dist" type="CHARACTER" >
          <default> &apos;energy&apos;
          </default>
-         <info>
-<b>&apos;energy&apos;</b> or <b>&apos;average&apos;</b>
-
-* if <b>&apos;energy&apos;</b> the relativistic l-1/2 states are filled first.
-
-* if <b>&apos;average&apos;</b> the electrons are uniformly distributed
-  among all the states with the given l.
-         </info>
+         <options>
+            <info>
+Distribution of electrons among the relativistic
+states with the same l.
+            </info>
+            <opt val="'energy'" >
+The relativistic l-1/2 states are filled first.
+            </opt>
+            <opt val="'average'" alias="'AVERAGE', 'Average'" >
+The electrons are uniformly distributed among all
+the states with the given l.
+            </opt>
+         </options>
       </var>
       <var name="write_coulomb" type="LOGICAL" >
          <default> .false.
@@ -367,6 +444,8 @@ the following cards:
                      <info>
 number of wavefunctions
                      </info>
+                     <default kind="computed" > internal
+                     </default>
                   </var>
                </line>
                <table name="AE_wfs" >
@@ -374,22 +453,34 @@ number of wavefunctions
                      <col name="nl" type="CHARACTER" >
                         <info> wavefunction label (e.g. 1s, 2s, etc.)
                         </info>
+                        <default kind="computed" > internal
+                        </default>
                      </col>
                      <col name="n" type="INTEGER" >
                         <info> principal quantum number
                         </info>
+                        <default kind="computed" > internal
+                        </default>
                      </col>
                      <col name="l" type="INTEGER" >
                         <info> angular quantum number
                         </info>
+                        <default kind="computed" > internal
+                        </default>
                      </col>
                      <col name="oc" type="REAL" >
                         <info> occupation number
                         </info>
+                        <default kind="computed" > internal
+                        </default>
+                        <dimensionality> dimensionless
+                        </dimensionality>
                      </col>
                      <col name="isw" type="INTEGER" >
                         <info> the spin index (1-2) used only in the lsda case
                         </info>
+                        <default kind="computed" > internal
+                        </default>
                      </col>
                   </rows>
                </table>
@@ -417,6 +508,10 @@ The total angular momentum (0.0 is allowed for complete
 shells: the codes fills 2l states with jj=l-1/2,
 2l+2 with jj=l+1/2).
                         </info>
+                        <default kind="computed" > internal
+                        </default>
+                        <dimensionality> dimensionless
+                        </dimensionality>
                      </col>
                   </rows>
                </table>
@@ -426,8 +521,12 @@ shells: the codes fills 2l states with jj=l-1/2,
    </card>
    <namelist name="INPUTP" >
       <var name="zval" type="REAL" >
-         <default> (calculated)
+         <default kind="computed" > internal
          </default>
+         <dimensionality> charge
+         </dimensionality>
+         <units> e
+         </units>
          <info>
 Valence charge.
 
@@ -451,6 +550,8 @@ for noninteger zval (i.e. half core-hole pseudo-potentials).
 
 3 ... ultrasoft PP or PAW
          </info>
+         <default> 0
+         </default>
       </var>
       <var name="file_pseudopw" type="CHARACTER" >
          <status> REQUIRED
@@ -504,8 +605,14 @@ Must be specified only if <ref>lloc</ref>=-1, otherwise the
 corresponding value of <ref>rcut</ref> is used.
          </status>
          <info>
-Matching radius (a.u.) for local pseudo-potential (no default).
+Matching radius for local pseudo-potential (no default).
          </info>
+         <default> -1.0
+         </default>
+         <dimensionality> length
+         </dimensionality>
+         <units> bohr
+         </units>
       </var>
       <var name="nlcc" type="LOGICAL" >
          <default> .false.
@@ -527,10 +634,16 @@ If .true. pseudizes the core charge with bessel functions.
       </var>
       <var name="rcore" type="REAL" >
          <info>
-Matching radius (a.u.) for the smoothing of the core charge.
+Matching radius for the smoothing of the core charge.
 If not specified, the matching radius is determined
 by the condition:  rho_core(rcore) = 2*rho_valence(rcore)
          </info>
+         <default> 0.0
+         </default>
+         <dimensionality> length
+         </dimensionality>
+         <units> bohr
+         </units>
       </var>
       <var name="tm" type="LOGICAL" >
          <default> .false.
@@ -551,6 +664,10 @@ Typical values are in the order of 0.01-0.02
          </info>
          <default> 0.0
          </default>
+         <dimensionality> charge length^-3
+         </dimensionality>
+         <units> e bohr^-3
+         </units>
       </var>
       <var name="lpaw" type="LOGICAL" >
          <info>
@@ -562,40 +679,60 @@ only for <ref>pseudotype</ref>=3
       </var>
       <group>
          <var name="which_augfun" type="CHARACTER" >
-            <default>
-<tt>&apos;AE&apos;</tt> for Vanderbilt-Ultrasoft pseudo-potentials and &apos;BESSEL&apos; for PAW datasets.
+            <default kind="conditional" >
+               <case test="(@ref lpaw .and. lnc2paw) .or. (.not. @ref lpaw)" > &apos;AE&apos;
+               </case>
+               <case> &apos;BESSEL&apos;
+               </case>
             </default>
-            <info>
+            <options>
+               <info>
 If different from <b>&apos;AE&apos;</b> the augmentation functions are pseudized
 before <ref>rmatch_augfun</ref>. The pseudization options are:
-
-* <b>&apos;PSQ&apos;</b>        Use Bessel functions to pseudize Q
-               from the origin to rmatch_augfun.
-
-These features are available only for PAW:
-
-* <b>&apos;BESSEL&apos;</b>     Use Bessel functions to pseudize the Q.
-* <b>&apos;GAUSS&apos;</b>      Use 2 Gaussian functions to pseudize the Q.
-* <b>&apos;BG&apos;</b>         Use original Bloechl&apos;s recipe with a single gaussian.
-
-Note: if lpaw is true and which_augfun is set to AE real all-
-electron charge will be used, which will produce extremely
-hard augmentation.
-            </info>
+               </info>
+               <opt val="'AE'" >
+Use the real all-electron augmentation charge. If <ref>lpaw</ref>
+is true this will produce extremely hard augmentation.
+               </opt>
+               <opt val="'PSQ'" >
+Use Bessel functions to pseudize Q from the origin
+to <ref>rmatch_augfun</ref>.
+               </opt>
+               <info>
+The following options are available only for PAW
+(<ref>lpaw</ref>=.true.):
+               </info>
+               <opt val="'BESSEL'" >
+Use Bessel functions to pseudize the Q (Kresse-Joubert style).
+               </opt>
+               <opt val="'GAUSS'" >
+Use 2 Gaussian functions to pseudize the Q.
+               </opt>
+               <opt val="'BG'" >
+Use the original Bloechl recipe with a single Gaussian.
+               </opt>
+            </options>
          </var>
          <var name="rmatch_augfun" type="REAL" >
-            <default> 0.5 a.u.
+            <default kind="computed" > internal
             </default>
+            <dimensionality> length
+            </dimensionality>
+            <units> bohr
+            </units>
             <status> Used only if which_augfun is different from &apos;AE&apos;.
             </status>
             <info>
 Pseudization radius for the augmentation functions. Presently
-it has the same value for all L.
+it has the same value for all L. If not specified, the
+largest ultrasoft core radius is used.
             </info>
          </var>
          <var name="rmatch_augfun_nc" type="REAL" >
             <default> .false.
             </default>
+            <dimensionality> dimensionless
+            </dimensionality>
             <status> Used only if which_augfun is &apos;PSQ&apos;.
             </status>
             <info>
@@ -607,12 +744,20 @@ rmatch_augfun is not used.
          </var>
       </group>
       <var name="lsave_wfc" type="LOGICAL" >
-         <default> .false. if .not. lpaw, otherwise .true.
+         <default kind="conditional" >
+            <case test="@ref lpaw" > .true.
+            </case>
+            <case> .false.
+            </case>
          </default>
          <info>
 Set it to .true. to save all-electron and pseudo wavefunctions
 used in the pseudo-potential generation in the UPF file. Only
 works for UPFv2 format.
+
+The default is .false. for a norm-conserving or ultrasoft
+calculation (.not. lpaw), and .true. for a PAW calculation
+(lpaw=.true.).
          </info>
       </var>
       <var name="lgipaw_reconstruction" type="LOGICAL" >
@@ -714,6 +859,8 @@ Setting this to .true. always implies <ref>lgipaw_reconstruction</ref> = .true.
                   <var name="nwfs" type="INTEGER" >
                      <info> number of wavefunctions to be pseudized
                      </info>
+                     <default kind="computed" > internal
+                     </default>
                   </var>
                </line>
                <table name="PP_wfs" >
@@ -722,39 +869,71 @@ Setting this to .true. always implies <ref>lgipaw_reconstruction</ref> = .true.
                         <info>
 Wavefunction label (same as in the all-electron configuration).
                         </info>
+                        <default kind="computed" > internal
+                        </default>
                      </col>
                      <col name="nns" type="INTEGER" >
                         <info>
 Principal quantum number (referred to the PSEUDOPOTENTIAL case;
 nns=1 for lowest s, nns=2 for lowest p, and so on).
                         </info>
+                        <default kind="computed" > internal
+                        </default>
                      </col>
                      <col name="lls" type="INTEGER" >
                         <info> Angular momentum quantum number.
                         </info>
+                        <default kind="computed" > internal
+                        </default>
                      </col>
                      <col name="ocs" type="REAL" >
                         <info> Occupation number  (same as in the all-electron configuration).
                         </info>
+                        <default kind="computed" > internal
+                        </default>
+                        <dimensionality> dimensionless
+                        </dimensionality>
                      </col>
                      <col name="ener" type="REAL" >
                         <info>
-Energy (Ry) used to pseudize the corresponding state.
+Energy used to pseudize the corresponding state.
 If 0.d0, use the one-electron energy of the all-electron state.
 Do not use 0.d0 for unbound states!
                         </info>
+                        <default kind="computed" > internal
+                        </default>
+                        <dimensionality> energy
+                        </dimensionality>
+                        <units> Ry
+                        </units>
                      </col>
                      <col name="rcut" type="REAL" >
-                        <info> Matching radius (a.u.) for norm conserving PP.
+                        <info> Matching radius for norm conserving PP.
                         </info>
+                        <default kind="computed" > internal
+                        </default>
+                        <dimensionality> length
+                        </dimensionality>
+                        <units> bohr
+                        </units>
                      </col>
                      <col name="rcutus" type="REAL" >
-                        <info> Matching radius (a.u.) for ultrasoft PP - only for pseudotype=3.
+                        <info> Matching radius for ultrasoft PP - only for pseudotype=3.
                         </info>
+                        <default kind="computed" > internal
+                        </default>
+                        <dimensionality> length
+                        </dimensionality>
+                        <units> bohr
+                        </units>
                      </col>
                      <col name="jjs" type="REAL" >
                         <info> The total angular momentum (0.0 is allowed for complete shells).
                         </info>
+                        <default kind="computed" > internal
+                        </default>
+                        <dimensionality> dimensionless
+                        </dimensionality>
                      </col>
                   </rows>
                </table>
@@ -832,7 +1011,7 @@ Use the UPF format if you want to test the separable form!
          <var name="decut" >
          </var>
          <info>
-Parameters (Ry) used for test with a basis set of spherical
+Parameters used for test with a basis set of spherical
 Bessel functions j_l(qr) . The hamiltonian at fixed scf
 potential is diagonalized for various values of ecut:
 <ref>ecutmin</ref>, <ref>ecutmin</ref>+<ref>decut</ref>, <ref>ecutmin</ref>+2*<ref>decut</ref> ... up to <ref>ecutmax</ref>.
@@ -843,14 +1022,22 @@ in an unambiguous way if there are &quot;ghost&quot; states
          <default>
 decut=5.0 Ry; ecutmin=ecutmax=0Ry
          </default>
+         <dimensionality> energy
+         </dimensionality>
+         <units> Ry
+         </units>
          <status> specify <ref>ecutmin</ref> and <ref>ecutmax</ref> if you want to perform this test
          </status>
       </vargroup>
       <var name="rm" type="REAL" >
          <info> Radius of the box used with spherical Bessel functions.
          </info>
-         <default> 30 a.u.
+         <default> 30.0
          </default>
+         <dimensionality> length
+         </dimensionality>
+         <units> bohr
+         </units>
       </var>
       <dimension name="configts" start="1" end="nconf" type="CHARACTER" >
          <info>
@@ -860,9 +1047,11 @@ but only VALENCE states must be included.
 If <ref>configts</ref>(i) is not set, the electron configuration
 is read from the cards following the namelist.
          </info>
+         <default> &apos; &apos;
+         </default>
       </dimension>
       <dimension name="lsdts" start="1" end="nconf" type="INTEGER" >
-         <default> 1
+         <default kind="ref" > lsd
          </default>
          <see> lsd
          </see>
@@ -890,6 +1079,10 @@ Needed (mandatory) only if <ref>iswitch</ref> = 4
          </info>
          <default> -1.0
          </default>
+         <dimensionality> length
+         </dimensionality>
+         <units> bohr
+         </units>
       </var>
    </namelist>
    <card name="PseudoPotentialTestCards" nameless="1" >
@@ -902,6 +1095,8 @@ Needed (mandatory) only if <ref>iswitch</ref> = 4
                   <var name="nwfts" type="INTEGER" >
                      <info> number of wavefunctions
                      </info>
+                     <default kind="computed" > internal
+                     </default>
                   </var>
                </line>
                <table name="test_wfs" >
@@ -909,34 +1104,64 @@ Needed (mandatory) only if <ref>iswitch</ref> = 4
                      <col name="elts" type="CHARACTER" >
                         <see> nls
                         </see>
+                        <default kind="computed" > internal
+                        </default>
                      </col>
                      <col name="nnts" type="INTEGER" >
                         <see> nns
                         </see>
+                        <default kind="computed" > internal
+                        </default>
                      </col>
                      <col name="llts" type="INTEGER" >
                         <see> lls
                         </see>
+                        <default kind="computed" > internal
+                        </default>
                      </col>
                      <col name="octs" type="REAL" >
                         <see> ocs
                         </see>
+                        <default kind="computed" > internal
+                        </default>
+                        <dimensionality> dimensionless
+                        </dimensionality>
                      </col>
                      <col name="enerts" type="REAL" >
                         <status> not used
                         </status>
+                        <default kind="computed" > internal
+                        </default>
+                        <dimensionality> energy
+                        </dimensionality>
+                        <units> Ry
+                        </units>
                      </col>
                      <col name="rcutts" type="REAL" >
                         <status> not used
                         </status>
+                        <default kind="computed" > internal
+                        </default>
+                        <dimensionality> length
+                        </dimensionality>
+                        <units> bohr
+                        </units>
                      </col>
                      <col name="rcutusts" type="REAL" >
                         <status> not used
                         </status>
+                        <default kind="computed" > internal
+                        </default>
+                        <dimensionality> length
+                        </dimensionality>
+                        <units> bohr
+                        </units>
                      </col>
                      <col name="iswts" type="INTEGER" >
                         <info> spin index (1 or 2, used in lsda case)
                         </info>
+                        <default kind="computed" > internal
+                        </default>
                      </col>
                   </rows>
                </table>
@@ -967,6 +1192,10 @@ Needed (mandatory) only if <ref>iswitch</ref> = 4
                      <col name="jjts" type="REAL" >
                         <info> total angular momentum of the state
                         </info>
+                        <default kind="computed" > internal
+                        </default>
+                        <dimensionality> dimensionless
+                        </dimensionality>
                      </col>
                   </rows>
                </table>

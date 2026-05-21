@@ -38,12 +38,18 @@ BerkeleyGW package.
       <var name="prefix" type="STRING" >
          <status> MANDATORY
          </status>
+         <default> &apos;prefix&apos;
+         </default>
          <info>
 prefix of files saved by program pw.x
          </info>
       </var>
       <var name="outdir" type="STRING" >
-         <default> &apos;./&apos;
+         <default kind="conditional" >
+            <case test="ESPRESSO_TMPDIR environment variable is set and non-blank" > value of the ESPRESSO_TMPDIR environment variable
+            </case>
+            <case> &apos;./&apos;
+            </case>
          </default>
          <info>
 the scratch directory where the massive data-files are written
@@ -132,6 +138,8 @@ Not used if <ref>wfng_kgrid</ref> = .FALSE.
       <var name="wfng_dk1" type="REAL" >
          <default> 0.0
          </default>
+         <dimensionality> dimensionless
+         </dimensionality>
          <info>
 k-grid offset (0.0 unshifted, 0.5 shifted by half a grid step)
 along b_1 reciprocal lattice vector. Not used if <ref>wfng_kgrid</ref> = .FALSE.
@@ -140,6 +148,8 @@ along b_1 reciprocal lattice vector. Not used if <ref>wfng_kgrid</ref> = .FALSE.
       <var name="wfng_dk2" type="REAL" >
          <default> 0.0
          </default>
+         <dimensionality> dimensionless
+         </dimensionality>
          <info>
 k-grid offset (0.0 unshifted, 0.5 shifted by half a grid step)
 along b_2 reciprocal lattice vector. Not used if <ref>wfng_kgrid</ref> = .FALSE.
@@ -148,6 +158,8 @@ along b_2 reciprocal lattice vector. Not used if <ref>wfng_kgrid</ref> = .FALSE.
       <var name="wfng_dk3" type="REAL" >
          <default> 0.0
          </default>
+         <dimensionality> dimensionless
+         </dimensionality>
          <info>
 k-grid offset (0.0 unshifted, 0.5 shifted by half a grid step)
 along b_3 reciprocal lattice vector. Not used if <ref>wfng_kgrid</ref> = .FALSE.

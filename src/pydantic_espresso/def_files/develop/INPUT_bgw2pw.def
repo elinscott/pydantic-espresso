@@ -33,13 +33,17 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program bgw2p
 
 	var prefix -type STRING {
 	    status { MANDATORY }
+	    default { 'prefix' }
 	    info {
 		prefix of files saved by program pw.x
 	    }
 	}
 
 	var outdir -type STRING {
-	    default { './' }
+	    default -kind conditional {
+		case -test "ESPRESSO_TMPDIR environment variable is set and non-blank" { value of the ESPRESSO_TMPDIR environment variable }
+		case { './' }
+	    }
 	    info {
 		the scratch directory where the massive data-files are written
 	    }

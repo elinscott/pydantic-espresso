@@ -274,7 +274,7 @@ Minimum OS-CDFT iterations.
          </info>
       </var>
       <var name="maxiter" type="INTEGER" >
-         <default> 0
+         <default> 99999
          </default>
          <info>
 Maximum OS-CDFT iterations.

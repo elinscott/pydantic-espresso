@@ -49,9 +49,13 @@ prefix of files saved by program pw.x
          <info>
 directory containing the input data, i.e. the same as in pw.x
          </info>
-         <default>
-value of the ESPRESSO_TMPDIR environment variable if set;
-current directory (&apos;./&apos;) otherwise
+         <default kind="conditional" >
+            <case test="ESPRESSO_TMPDIR environment variable is set and non-blank" >
+value of the ESPRESSO_TMPDIR environment variable
+            </case>
+            <case>
+current directory (&apos;./&apos;)
+            </case>
          </default>
       </var>
       <var name="filband" type="CHARACTER" >
@@ -68,6 +72,8 @@ In the lsda case select:
    1 = spin-up
    2 = spin-down
          </info>
+         <default> 1
+         </default>
       </var>
       <dimension name="lsigma" start="1" end="3" type="LOGICAL" >
          <info>
@@ -75,6 +81,8 @@ If true computes expectation values of the spin operator
 on the spinor wave-functions (only in the noncollinear case),
 writes them to a file &quot;filband&quot;.i, i=1,2,3
          </info>
+         <default> .false.
+         </default>
       </dimension>
       <var name="lp" type="LOGICAL" >
          <default> .false.
@@ -139,6 +147,9 @@ energies are written in eV and xk in units 2\pi/a.
 if <ref>lsym</ref>=.true. makes the symmetry analysis only for k
 points between firstk to lastk
          </info>
+         <default kind="ref" >
+firstk = 0; lastk = <ref>npk</ref> (max number of k-points)
+         </default>
       </vargroup>
    </namelist>
 </input_description>

@@ -182,8 +182,12 @@ Useful to avoid jumps in the initial reaction path.
                </info>
             </var>
             <var name="temp_req" type="REAL" >
-               <default> 0.D0 Kelvin
+               <default> 0.D0
                </default>
+               <dimensionality> temperature
+               </dimensionality>
+               <units> K
+               </units>
                <info>
 Temperature used for the langevin dynamics of the string.
                </info>
@@ -191,6 +195,8 @@ Temperature used for the langevin dynamics of the string.
             <var name="ds" type="REAL" >
                <default> 1.D0
                </default>
+               <dimensionality> dimensionless
+               </dimensionality>
                <info>
 Optimisation step length ( Hartree atomic units ).
 If <ref>opt_scheme</ref>==&quot;broyden&quot;, ds is used as a guess for the
@@ -202,8 +208,12 @@ diagonal part of the Jacobian matrix.
                </var>
                <var name="k_min" >
                </var>
-               <default> 0.1D0 Hartree atomic units
+               <default> 0.1D0
                </default>
+               <dimensionality> energy length^-2
+               </dimensionality>
+               <units> Hartree bohr^-2
+               </units>
                <info>
 Set them to use a Variable Elastic Constants scheme
 elastic constants are in the range [ k_min, k_max ]
@@ -211,11 +221,15 @@ this is useful to rise the resolution around the saddle point.
                </info>
             </vargroup>
             <var name="path_thr" type="REAL" >
-               <default> 0.05D0 eV / Angstrom
+               <default> 0.05D0
                </default>
+               <dimensionality> energy length^-1
+               </dimensionality>
+               <units> eV angstrom^-1
+               </units>
                <info>
 The simulation stops when the error ( the norm of the force
-orthogonal to the path in eV/A ) is less than path_thr.
+orthogonal to the path ) is less than path_thr.
                </info>
             </var>
             <var name="use_masses" type="LOGICAL" >
@@ -260,8 +274,12 @@ See the header of PW/src/fcp_module.f90 for documentation
                </see>
                <default> 0.d0
                </default>
+               <dimensionality> energy
+               </dimensionality>
+               <units> eV
+               </units>
                <info>
-If <ref>lfcp</ref> == .TRUE., gives the target Fermi energy [eV].
+If <ref>lfcp</ref> == .TRUE., gives the target Fermi energy.
 One can specify the total charge of the system for the first
 and last image by giving <ref>TOTAL_CHARGE</ref> cards
 so that the Fermi energy of these systems will be the target value,
@@ -274,8 +292,12 @@ unless the <ref>TOTAL_CHARGE</ref> is given in the input file.
             <var name="fcp_thr" type="REAL" >
                <see> lfcp
                </see>
-               <default> 0.01D0 V
+               <default> 0.01D0
                </default>
+               <dimensionality> energy
+               </dimensionality>
+               <units> eV
+               </units>
                <info>
 The simulation stops when the error ( the maximum of the force
 acting on the FCP in V ) is less than fcp_thr.
@@ -370,6 +392,10 @@ Optional card, needed only if <ref>lfcp</ref> == .TRUE.
                      <list name="tot_charge_list" type="REAL" >
                         <format> tot_charge
                         </format>
+                        <dimensionality> charge
+                        </dimensionality>
+                        <units> e
+                        </units>
                         <info>
 tot_charge is the total charge of the system.
                         </info>
@@ -398,6 +424,10 @@ Optional card, needed only if <ref>lfcp</ref> == .TRUE.
                         <list name="tot_charge_list" type="REAL" >
                            <format> tot_charge
                            </format>
+                           <dimensionality> charge
+                           </dimensionality>
+                           <units> e
+                           </units>
                            <info>
 tot_charge is the total charge of the system.
                            </info>
@@ -424,6 +454,10 @@ Optional card, needed only if <ref>lfcp</ref> == .TRUE.
                      <list name="tot_charge_list" type="REAL" >
                         <format> tot_charge
                         </format>
+                        <dimensionality> charge
+                        </dimensionality>
+                        <units> e
+                        </units>
                         <info>
 tot_charge is the total charge of the system.
                         </info>

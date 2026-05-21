@@ -33,9 +33,11 @@ prefix of input file produced by pw.x
          <info>
 directory containing the input data, i.e. the same as in pw.x
          </info>
-         <default>
-value of the <tt>ESPRESSO_TMPDIR</tt> environment variable if set;
-current directory (&apos;./&apos;) otherwise
+         <default kind="conditional" >
+            <case test="ESPRESSO_TMPDIR is set" > from_environment
+            </case>
+            <case> &apos;./&apos;
+            </case>
          </default>
       </var>
       <var name="bz_sum" type="CHARACTER" >
@@ -62,10 +64,12 @@ Optimized tetrahedron method:
 see M. Kawamura, <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.89.094515">PRB 89, 094515 (2014)</a>.
             </opt>
          </options>
-         <default>
-&apos;smearing&apos; if degauss is given in input;
-                        options read from the xml data file otherwise.
+         <default> &apos;&apos;
          </default>
+         <info>
+By default this is set to &apos;smearing&apos; if degauss is given
+in input; otherwise the method is read from the xml data file.
+         </info>
       </var>
       <var name="ngauss" type="INTEGER" >
          <default> 0
@@ -75,7 +79,7 @@ see M. Kawamura, <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB
          <info>
 Type of gaussian broadening:
 
-    =  0  Simple Gaussian (default)
+    =  0  Simple Gaussian
 
     =  1  Methfessel-Paxton of order 1
 
@@ -85,6 +89,12 @@ Type of gaussian broadening:
          </info>
       </var>
       <var name="degauss" type="REAL" >
+         <default> 0.0
+         </default>
+         <dimensionality> energy
+         </dimensionality>
+         <units> Ry
+         </units>
          <info>
 gaussian broadening, Ry (not eV!)
 (see below)
@@ -95,21 +105,31 @@ gaussian broadening, Ry (not eV!)
          </var>
          <var name="Emax" >
          </var>
-         <default> band extrema
+         <default kind="computed" > internal
          </default>
+         <dimensionality> energy
+         </dimensionality>
+         <units> eV
+         </units>
          <info>
-min, max energy (eV) for DOS plot. If unspecified, the
+min, max energy for DOS plot. If unspecified, the
 lower and/or upper band value, plus/minus 3 times the
 value of the gaussian smearing if present, will be used.
          </info>
       </vargroup>
       <var name="DeltaE" type="REAL" >
+         <default> 0.01
+         </default>
+         <dimensionality> energy
+         </dimensionality>
+         <units> eV
+         </units>
          <info>
-energy grid step (eV)
+energy grid step
          </info>
       </var>
       <var name="fildos" type="CHARACTER" >
-         <default> &apos;<ref>prefix</ref>.dos&apos;
+         <default kind="expr" > <ref>prefix</ref> // &apos;.dos&apos;
          </default>
          <info>
 output file containing DOS(E)

@@ -27,14 +27,19 @@
          <info>
 prefix of files saved by program pw.x
          </info>
+         <default> &apos; &apos;
+         </default>
       </var>
       <var name="outdir" type="CHARACTER" >
          <info>
 directory containing the input data, i.e. the same as in pw.x
          </info>
-         <default>
-value of the <tt>ESPRESSO_TMPDIR</tt> environment variable if set;
-current directory (&apos;./&apos;) otherwise
+         <default kind="conditional" >
+            <case test="ESPRESSO_TMPDIR environment variable is set" >
+value of the <tt>ESPRESSO_TMPDIR</tt> environment variable
+            </case>
+            <case> &apos;./&apos;
+            </case>
          </default>
       </var>
       <var name="seedname" type="STRING" >

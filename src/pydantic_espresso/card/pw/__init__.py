@@ -8,7 +8,7 @@ prebuilt_cards = {
     },
     "atomic_positions": {
         "type": "AtomicPositionsCard",
-        "default": "Field(...)",
+        "default": 'Field(..., discriminator="unit")',
         "import_str": "from pydantic_espresso.card.pw.atomic_positions import AtomicPositionsCard",
     },
     "k_points": {
@@ -23,7 +23,7 @@ prebuilt_cards = {
     },
     "cell_parameters": {
         "type": "CellParametersCard",
-        "default": "Field(...)",
+        "default": 'Field(..., discriminator="unit")',
         "import_str": "from pydantic_espresso.card.pw.cell_parameters import CellParametersCard",
     },
     "constraints": {
