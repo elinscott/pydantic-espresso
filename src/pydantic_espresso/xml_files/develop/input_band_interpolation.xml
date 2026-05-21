@@ -219,7 +219,7 @@ user-defined Star vectors.
       <flag name="kpoint_type" use="optional" >
          <enum> tpiba_b
          </enum>
-         <default> none
+         <default> tpiba_b
          </default>
          <options>
             <info>

@@ -76,17 +76,23 @@ in input; otherwise the method is read from the xml data file.
          </default>
          <status> optional
          </status>
-         <info>
-Type of gaussian broadening:
-
-    =  0  Simple Gaussian
-
-    =  1  Methfessel-Paxton of order 1
-
-    = -1  &quot;cold smearing&quot; (Marzari-Vanderbilt-DeVita-Payne)
-
-    =-99  Fermi-Dirac function
-         </info>
+         <options>
+            <info>
+Type of gaussian broadening.
+            </info>
+            <opt val="0" >
+Simple Gaussian.
+            </opt>
+            <opt val="1" >
+Methfessel-Paxton of order 1.
+            </opt>
+            <opt val="-1" >
+&quot;cold smearing&quot; (Marzari-Vanderbilt-DeVita-Payne).
+            </opt>
+            <opt val="-99" >
+Fermi-Dirac function.
+            </opt>
+         </options>
       </var>
       <var name="degauss" type="REAL" >
          <default> 0.0

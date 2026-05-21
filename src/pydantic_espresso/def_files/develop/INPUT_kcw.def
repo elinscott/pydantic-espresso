@@ -97,10 +97,23 @@ input_description -distribution {Quantum ESPRESSO} -package KCW -program kcw.x {
 
         var kcw_iverbosity -type INTEGER {
             default { 1 }
-            info {
-                = 0 : minimal output
-                = 1 : as above + performs additional checks.
-                > 1 : as above + additional infos on all the steps.
+            options {
+                info {
+                    Verbosity level of the KCW output.
+                }
+
+                opt -val 0 {
+                    Minimal output.
+                }
+
+                opt -val 1 {
+                    As above + performs additional checks.
+                }
+
+                opt -val 2 {
+                    As above + additional infos on all the steps
+                    (any value > 1 selects this verbosity tier).
+                }
             }
         }
 
@@ -187,12 +200,20 @@ input_description -distribution {Quantum ESPRESSO} -package KCW -program kcw.x {
 
         var spin_component -type INTEGER {
             default { 1 }
-            info {
-             Which spin channel to calculate (only collinear calculation).
-             1 = spin up channel
-             2 = spin down channel
-             It has to be consistent with the previous Wannier90
-             calculation (see 'spin' keyword in Wannier90 documentation)
+            options {
+                info {
+                    Which spin channel to calculate (only collinear calculation).
+                    It has to be consistent with the previous Wannier90
+                    calculation (see 'spin' keyword in Wannier90 documentation).
+                }
+
+                opt -val 1 {
+                    spin up channel.
+                }
+
+                opt -val 2 {
+                    spin down channel.
+                }
             }
         }
 

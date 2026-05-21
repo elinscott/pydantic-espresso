@@ -58,12 +58,19 @@ the scratch directory where the massive data-files are written
       <var name="real_or_complex" type="INTEGER" >
          <default> 2
          </default>
-         <info>
-1 | 2
-<b>1</b> for real flavor of BerkeleyGW (for systems with inversion symmetry and
-time-reversal symmetry) or <b>2</b> for complex flavor of BerkeleyGW (for systems
-without inversion symmetry and time-reversal symmetry)
-         </info>
+         <options>
+            <info>
+BerkeleyGW data flavor.
+            </info>
+            <opt val="1" >
+Real flavor of BerkeleyGW (for systems with inversion symmetry
+and time-reversal symmetry).
+            </opt>
+            <opt val="2" >
+Complex flavor of BerkeleyGW (for systems without inversion
+symmetry and time-reversal symmetry).
+            </opt>
+         </options>
       </var>
       <var name="symm_type" type="STRING" >
          <default> &apos;cubic&apos;

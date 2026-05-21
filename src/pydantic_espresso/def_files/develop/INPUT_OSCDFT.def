@@ -54,12 +54,21 @@ input_description -distribution {Quantum ESPRESSO} -package {PWscf} -program  {p
 
         var oscdft_type -type INTEGER {
             default { 1 }
-            info {
-                1 : C. Ku, P. H. L. Sit, J. Chem. Theory Comput. 15, 4781 (2019).
-                2 : L. Ponet, E. Di Lucente, N. Marzari, npj Comput. Mater. 10, 151 (2024).
+            options {
+                info {
+                    OS-CDFT method to use.
 
-                Note: For oscdft_type=2, only the keyword "occupation" and the keywords
-                      constraint_* can be used (see below).
+                    Note: For oscdft_type=2, only the keyword "occupation" and
+                    the keywords constraint_* can be used (see below).
+                }
+
+                opt -val 1 {
+                    C. Ku, P. H. L. Sit, J. Chem. Theory Comput. 15, 4781 (2019).
+                }
+
+                opt -val 2 {
+                    L. Ponet, E. Di Lucente, N. Marzari, npj Comput. Mater. 10, 151 (2024).
+                }
             }
         }
 
@@ -414,11 +423,11 @@ input_description -distribution {Quantum ESPRESSO} -package {PWscf} -program  {p
                     col spin -type CHARACTER {
                         status { REQUIRED }
                         options {
-                            opt -val { 1, UP } {
-                                Spin up channel
+                            opt -val 'UP' -alias {'1'} {
+                                Spin up channel.
                             }
-                            opt -val { 2, DOWN } {
-                                Spin down channel
+                            opt -val 'DOWN' -alias {'DW', '2'} {
+                                Spin down channel.
                             }
                         }
                     }

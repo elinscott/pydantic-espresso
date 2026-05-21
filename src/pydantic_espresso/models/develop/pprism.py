@@ -49,16 +49,8 @@ class PlotNamelist(Namelist):
             "sphere"
         ),
     )
-    output_format: int | None = Field(
-        None,
-        description=(
-            "(ignored on 1D plot)  0  = format suitable for gnuplot   (1D)  1  = obsolete format "
-            "no longer supported  2  = format suitable for plotrho   (2D)  3  = format suitable "
-            "for XCRYSDEN  (2D or user-supplied 3D region)  4  = obsolete format no longer "
-            "supported  5  = format suitable for XCRYSDEN  (3D, using entire FFT grid)  6  = "
-            "format as gaussian cube file  (3D) (can be read by many programs)  7  = format "
-            "suitable for gnuplot   (2D) x, y, f(x,y)"
-        ),
+    output_format: Literal[None, 0, 2, 3, 5, 6, 7] = Field(
+        None, description="Output format for the plot (ignored on 1D plot)."
     )
     fileout: str | None = Field(
         None,

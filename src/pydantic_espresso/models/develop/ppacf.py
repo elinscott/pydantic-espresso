@@ -4,6 +4,7 @@ This file has been generated automatically. Do not edit it manually.
 """
 
 from pathlib import Path
+from typing import Literal
 
 from pydantic import Field
 
@@ -51,29 +52,13 @@ class PpacfNamelist(Namelist):
         False,
         description="If .True. calculate the Fock exchange based on input Kohn-Sham orbitals.",
     )
-    code_num: int = Field(
-        1,
-        description=(
-            "Select from which code to read output files. 1 = Quantum ESPRESSO 2 = VASP The codes "
-            "will read vasprun.xml and CHGCAR from VASP calculations. Please note that in "
-            "VASP-based analysis: - Core charge is ignored. - The ppacf-from-VASP-read-in only "
-            "works for VASP calculations done in PBE, revPBE, vdW-DF, vdW-DF2, or vdW-DF-cx - The "
-            "ppacf-from-VASP-read-in only always uses the full Ecnl kernel for coupling-constant "
-            "scaling analysis of vdW-DF versions. - Wavefunction based analysis (Fock exchange "
-            "energy and Kohn-Sham kinetic energy) are not available from VASP - When lplot = "
-            ".True., the code will also print out charge density in prefix.chg (prefix.chg1 and "
-            "prefix.chg2 save the spin-up and spin-down components in case of spin-polarized "
-            "calculations), which can be processed by pp.x."
-        ),
-    )
-    vdW_analysis: int = Field(  # noqa: N815
+    code_num: Literal[1, 2] = Field(1, description="Select from which code to read output files.")
+    vdW_analysis: Literal[0, 1, 2] = Field(  # noqa: N815
         0,
         description=(
             "Select type of vdw kernel table used in ppacf coupling-constant scaling analysis of "
-            "nonlocal-correlations in vdW-DF versions: - vdW_analysis = 0: Full Ecnl kenel of "
-            "vdW-DF method - vdW_analysis = 1: The cumulant- or susceptibility-Ecnl kernel "
-            "component - vdW_analysis = 2: The pure-vdW-Ecnl kernel component See IOP JCPM (2020) "
-            "for presentation of the latter two (non-default) options"
+            "nonlocal-correlations in vdW-DF versions. See IOP JCPM (2020) for presentation of the "
+            "two non-default options."
         ),
     )
 

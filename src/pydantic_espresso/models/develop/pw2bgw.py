@@ -29,14 +29,7 @@ class InputPw2bgwNamelist(Namelist):
         },
         description="the scratch directory where the massive data-files are written",
     )
-    real_or_complex: int = Field(
-        2,
-        description=(
-            "1 | 2 1 for real flavor of BerkeleyGW (for systems with inversion symmetry and "
-            "time-reversal symmetry) or 2 for complex flavor of BerkeleyGW (for systems without "
-            "inversion symmetry and time-reversal symmetry)"
-        ),
-    )
+    real_or_complex: Literal[1, 2] = Field(2, description="BerkeleyGW data flavor.")
     symm_type: Literal["cubic", "hexagonal"] = Field(
         "cubic",
         description=(

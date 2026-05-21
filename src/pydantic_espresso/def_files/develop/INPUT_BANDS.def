@@ -66,13 +66,20 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program bands
 	}
 
 	var spin_component -type INTEGER {
-	    info {
-		In the lsda case select:
-
-		   1 = spin-up
-		   2 = spin-down
-	    }
 	    default { 1 }
+	    options {
+		info {
+		    In the lsda case select spin channel.
+		}
+
+		opt -val 1 {
+		    spin-up.
+		}
+
+		opt -val 2 {
+		    spin-down.
+		}
+	    }
 	}
 
 	dimension lsigma  -start 1 -end 3 -type LOGICAL {

@@ -584,134 +584,166 @@ For structural relaxation with BFGS,
       <var name="ibrav" type="INTEGER" >
          <status> REQUIRED
          </status>
-         <info>
-  Bravais-lattice index. Optional only if space_group is set.
-  If ibrav /= 0, specify EITHER [ <ref>celldm</ref>(1)-<ref>celldm</ref>(6) ]
-  OR [ <ref>A</ref>, <ref>B</ref>, <ref>C</ref>, <ref>cosAB</ref>, <ref>cosAC</ref>, <ref>cosBC</ref> ]
-  but NOT both. The lattice parameter &quot;alat&quot; is set to
-  alat = celldm(1) (in a.u.) or alat = A (in Angstrom);
-  see below for the other parameters.
-  For ibrav=0 specify the lattice vectors in <ref>CELL_PARAMETERS</ref>,
-  optionally the lattice parameter alat = celldm(1) (in a.u.)
-  or = A (in Angstrom). If not specified, the lattice parameter is
-  taken from <ref>CELL_PARAMETERS</ref>
-  IMPORTANT NOTICE 1:
-  with ibrav=0 lattice vectors must be given with a sufficiently large
-  number of digits and with the correct symmetry, or else symmetry
-  detection may fail and strange problems may arise in symmetrization.
-  IMPORTANT NOTICE 2:
-  do not use celldm(1) or A as a.u. to Ang conversion factor,
-  use the true lattice parameters or nothing,
-  specify units in <ref>CELL_PARAMETERS</ref> and <ref>ATOMIC_POSITIONS</ref>
+         <options>
+            <info>
+Bravais-lattice index. Optional only if space_group is set.
+If ibrav /= 0, specify EITHER [ <ref>celldm</ref>(1)-<ref>celldm</ref>(6) ]
+OR [ <ref>A</ref>, <ref>B</ref>, <ref>C</ref>, <ref>cosAB</ref>, <ref>cosAC</ref>, <ref>cosBC</ref> ]
+but NOT both. The lattice parameter &quot;alat&quot; is set to
+alat = celldm(1) (in a.u.) or alat = A (in Angstrom);
+see below for the other parameters.
+For ibrav=0 specify the lattice vectors in <ref>CELL_PARAMETERS</ref>,
+optionally the lattice parameter alat = celldm(1) (in a.u.)
+or = A (in Angstrom). If not specified, the lattice parameter is
+taken from <ref>CELL_PARAMETERS</ref>
+IMPORTANT NOTICE 1:
+with ibrav=0 lattice vectors must be given with a sufficiently large
+number of digits and with the correct symmetry, or else symmetry
+detection may fail and strange problems may arise in symmetrization.
+IMPORTANT NOTICE 2:
+do not use celldm(1) or A as a.u. to Ang conversion factor,
+use the true lattice parameters or nothing,
+specify units in <ref>CELL_PARAMETERS</ref> and <ref>ATOMIC_POSITIONS</ref>
 
-ibrav      structure                   celldm(2)-celldm(6)
-                                     or: b,c,cosbc,cosac,cosab
-  0          free
-      crystal axis provided in input: see card <ref>CELL_PARAMETERS</ref>
-
-  1          cubic P (sc)
-      v1 = a(1,0,0),  v2 = a(0,1,0),  v3 = a(0,0,1)
-
-  2          cubic F (fcc)
-      v1 = (a/2)(-1,0,1),  v2 = (a/2)(0,1,1), v3 = (a/2)(-1,1,0)
-
-  3          cubic I (bcc)
-      v1 = (a/2)(1,1,1),  v2 = (a/2)(-1,1,1),  v3 = (a/2)(-1,-1,1)
- -3          cubic I (bcc), more symmetric axis:
-      v1 = (a/2)(-1,1,1), v2 = (a/2)(1,-1,1),  v3 = (a/2)(1,1,-1)
-
-  4          Hexagonal and Trigonal P        celldm(3)=c/a
-      v1 = a(1,0,0),  v2 = a(-1/2,sqrt(3)/2,0),  v3 = a(0,0,c/a)
-
-  5          Trigonal R, 3fold axis c        celldm(4)=cos(gamma)
-      The crystallographic vectors form a three-fold star around
-      the z-axis, the primitive cell is a simple rhombohedron:
-      v1 = a(tx,-ty,tz),   v2 = a(0,2ty,tz),   v3 = a(-tx,-ty,tz)
-      where c=cos(gamma) is the cosine of the angle gamma between
-      any pair of crystallographic vectors, tx, ty, tz are:
-        tx=sqrt((1-c)/2), ty=sqrt((1-c)/6), tz=sqrt((1+2c)/3)
- -5          Trigonal R, 3fold axis &lt;111&gt;    celldm(4)=cos(gamma)
-      The crystallographic vectors form a three-fold star around
-      &lt;111&gt;. Defining a&apos; = a/sqrt(3) :
-      v1 = a&apos; (u,v,v),   v2 = a&apos; (v,u,v),   v3 = a&apos; (v,v,u)
-      where u and v are defined as
-        u = tz - 2*sqrt(2)*ty,  v = tz + sqrt(2)*ty
-      and tx, ty, tz as for case ibrav=5
-      Note: if you prefer x,y,z as axis in the cubic limit,
-            set  u = tz + 2*sqrt(2)*ty,  v = tz - sqrt(2)*ty
-            See also the note in Modules/latgen.f90
-
-  6          Tetragonal P (st)               celldm(3)=c/a
-      v1 = a(1,0,0),  v2 = a(0,1,0),  v3 = a(0,0,c/a)
-
-  7          Tetragonal I (bct)              celldm(3)=c/a
-      v1=(a/2)(1,-1,c/a),  v2=(a/2)(1,1,c/a),  v3=(a/2)(-1,-1,c/a)
-
-  8          Orthorhombic P                  celldm(2)=b/a
-                                             celldm(3)=c/a
-      v1 = (a,0,0),  v2 = (0,b,0), v3 = (0,0,c)
-
-  9          Orthorhombic base-centered(bco) celldm(2)=b/a
-                                             celldm(3)=c/a
-      v1 = (a/2, b/2,0),  v2 = (-a/2,b/2,0),  v3 = (0,0,c)
- -9          as 9, alternate description
-      v1 = (a/2,-b/2,0),  v2 = (a/2, b/2,0),  v3 = (0,0,c)
- 91          Orthorhombic one-face base-centered A-type
-                                             celldm(2)=b/a
-                                             celldm(3)=c/a
-      v1 = (a, 0, 0),  v2 = (0,b/2,-c/2),  v3 = (0,b/2,c/2)
-
- 10          Orthorhombic face-centered      celldm(2)=b/a
-                                             celldm(3)=c/a
-      v1 = (a/2,0,c/2),  v2 = (a/2,b/2,0),  v3 = (0,b/2,c/2)
-
- 11          Orthorhombic body-centered      celldm(2)=b/a
-                                             celldm(3)=c/a
-      v1=(a/2,b/2,c/2),  v2=(-a/2,b/2,c/2),  v3=(-a/2,-b/2,c/2)
-
- 12          Monoclinic P, unique axis c     celldm(2)=b/a
-                                             celldm(3)=c/a,
-                                             celldm(4)=cos(ab)
-      v1=(a,0,0), v2=(b*cos(gamma),b*sin(gamma),0),  v3 = (0,0,c)
-      where gamma is the angle between axis a and b.
--12          Monoclinic P, unique axis b     celldm(2)=b/a
-                                             celldm(3)=c/a,
-                                             celldm(5)=cos(ac)
-      v1 = (a,0,0), v2 = (0,b,0), v3 = (c*cos(beta),0,c*sin(beta))
-      where beta is the angle between axis a and c
-
- 13          Monoclinic base-centered        celldm(2)=b/a
-             (unique axis c)                 celldm(3)=c/a,
-                                             celldm(4)=cos(gamma)
-      v1 = (  a/2,         0,          -c/2),
-      v2 = (b*cos(gamma), b*sin(gamma), 0  ),
-      v3 = (  a/2,         0,           c/2),
-      where gamma=angle between axis a and b projected on xy plane
-
--13          Monoclinic base-centered        celldm(2)=b/a
-             (unique axis b)                 celldm(3)=c/a,
-                                             celldm(5)=cos(beta)
-      v1 = (  a/2,       b/2,             0),
-      v2 = ( -a/2,       b/2,             0),
-      v3 = (c*cos(beta),   0,   c*sin(beta)),
-      where beta=angle between axis a and c projected on xz plane
- IMPORTANT NOTICE: until QE v.6.4.1, axis for ibrav=-13 had a
- different definition: v1(old) =-v2(now), v2(old) = v1(now)
-
- 14          Triclinic                       celldm(2)= b/a,
-                                             celldm(3)= c/a,
-                                             celldm(4)= cos(bc),
-                                             celldm(5)= cos(ac),
-                                             celldm(6)= cos(ab)
-      v1 = (a, 0, 0),
-      v2 = (b*cos(gamma), b*sin(gamma), 0)
-      v3 = (c*cos(beta),  c*(cos(alpha)-cos(beta)cos(gamma))/sin(gamma),
-           c*sqrt( 1 + 2*cos(alpha)cos(beta)cos(gamma)
-                     - cos(alpha)^2-cos(beta)^2-cos(gamma)^2 )/sin(gamma) )
-      where alpha is the angle between axis b and c
-             beta is the angle between axis a and c
-            gamma is the angle between axis a and b
-         </info>
+The accepted values of ibrav and the corresponding lattices
+(with the required celldm(2)-celldm(6), or equivalently
+b,c,cosbc,cosac,cosab) are listed below.
+            </info>
+            <opt val="0" >
+free
+crystal axis provided in input: see card <ref>CELL_PARAMETERS</ref>
+            </opt>
+            <opt val="1" >
+cubic P (sc)
+v1 = a(1,0,0),  v2 = a(0,1,0),  v3 = a(0,0,1)
+            </opt>
+            <opt val="2" >
+cubic F (fcc)
+v1 = (a/2)(-1,0,1),  v2 = (a/2)(0,1,1), v3 = (a/2)(-1,1,0)
+            </opt>
+            <opt val="3" >
+cubic I (bcc)
+v1 = (a/2)(1,1,1),  v2 = (a/2)(-1,1,1),  v3 = (a/2)(-1,-1,1)
+            </opt>
+            <opt val="-3" >
+cubic I (bcc), more symmetric axis:
+v1 = (a/2)(-1,1,1), v2 = (a/2)(1,-1,1),  v3 = (a/2)(1,1,-1)
+            </opt>
+            <opt val="4" >
+Hexagonal and Trigonal P        celldm(3)=c/a
+v1 = a(1,0,0),  v2 = a(-1/2,sqrt(3)/2,0),  v3 = a(0,0,c/a)
+            </opt>
+            <opt val="5" >
+Trigonal R, 3fold axis c        celldm(4)=cos(gamma)
+The crystallographic vectors form a three-fold star around
+the z-axis, the primitive cell is a simple rhombohedron:
+v1 = a(tx,-ty,tz),   v2 = a(0,2ty,tz),   v3 = a(-tx,-ty,tz)
+where c=cos(gamma) is the cosine of the angle gamma between
+any pair of crystallographic vectors, tx, ty, tz are:
+  tx=sqrt((1-c)/2), ty=sqrt((1-c)/6), tz=sqrt((1+2c)/3)
+            </opt>
+            <opt val="-5" >
+Trigonal R, 3fold axis &lt;111&gt;    celldm(4)=cos(gamma)
+The crystallographic vectors form a three-fold star around
+&lt;111&gt;. Defining a&apos; = a/sqrt(3) :
+v1 = a&apos; (u,v,v),   v2 = a&apos; (v,u,v),   v3 = a&apos; (v,v,u)
+where u and v are defined as
+  u = tz - 2*sqrt(2)*ty,  v = tz + sqrt(2)*ty
+and tx, ty, tz as for case ibrav=5
+Note: if you prefer x,y,z as axis in the cubic limit,
+      set  u = tz + 2*sqrt(2)*ty,  v = tz - sqrt(2)*ty
+      See also the note in Modules/latgen.f90
+            </opt>
+            <opt val="6" >
+Tetragonal P (st)               celldm(3)=c/a
+v1 = a(1,0,0),  v2 = a(0,1,0),  v3 = a(0,0,c/a)
+            </opt>
+            <opt val="7" >
+Tetragonal I (bct)              celldm(3)=c/a
+v1=(a/2)(1,-1,c/a),  v2=(a/2)(1,1,c/a),  v3=(a/2)(-1,-1,c/a)
+            </opt>
+            <opt val="8" >
+Orthorhombic P                  celldm(2)=b/a,
+                                celldm(3)=c/a
+v1 = (a,0,0),  v2 = (0,b,0), v3 = (0,0,c)
+            </opt>
+            <opt val="9" >
+Orthorhombic base-centered(bco) celldm(2)=b/a,
+                                celldm(3)=c/a
+v1 = (a/2, b/2,0),  v2 = (-a/2,b/2,0),  v3 = (0,0,c)
+            </opt>
+            <opt val="-9" >
+as 9, alternate description
+v1 = (a/2,-b/2,0),  v2 = (a/2, b/2,0),  v3 = (0,0,c)
+            </opt>
+            <opt val="91" >
+Orthorhombic one-face base-centered A-type,
+                                celldm(2)=b/a,
+                                celldm(3)=c/a
+v1 = (a, 0, 0),  v2 = (0,b/2,-c/2),  v3 = (0,b/2,c/2)
+            </opt>
+            <opt val="10" >
+Orthorhombic face-centered      celldm(2)=b/a,
+                                celldm(3)=c/a
+v1 = (a/2,0,c/2),  v2 = (a/2,b/2,0),  v3 = (0,b/2,c/2)
+            </opt>
+            <opt val="11" >
+Orthorhombic body-centered      celldm(2)=b/a,
+                                celldm(3)=c/a
+v1=(a/2,b/2,c/2),  v2=(-a/2,b/2,c/2),  v3=(-a/2,-b/2,c/2)
+            </opt>
+            <opt val="12" >
+Monoclinic P, unique axis c     celldm(2)=b/a,
+                                celldm(3)=c/a,
+                                celldm(4)=cos(ab)
+v1=(a,0,0), v2=(b*cos(gamma),b*sin(gamma),0),  v3 = (0,0,c)
+where gamma is the angle between axis a and b.
+            </opt>
+            <opt val="-12" >
+Monoclinic P, unique axis b     celldm(2)=b/a,
+                                celldm(3)=c/a,
+                                celldm(5)=cos(ac)
+v1 = (a,0,0), v2 = (0,b,0), v3 = (c*cos(beta),0,c*sin(beta))
+where beta is the angle between axis a and c
+            </opt>
+            <opt val="13" >
+Monoclinic base-centered (unique axis c)
+                                celldm(2)=b/a,
+                                celldm(3)=c/a,
+                                celldm(4)=cos(gamma)
+v1 = (  a/2,         0,          -c/2),
+v2 = (b*cos(gamma), b*sin(gamma), 0  ),
+v3 = (  a/2,         0,           c/2),
+where gamma=angle between axis a and b projected on xy plane
+            </opt>
+            <opt val="-13" >
+Monoclinic base-centered (unique axis b)
+                                celldm(2)=b/a,
+                                celldm(3)=c/a,
+                                celldm(5)=cos(beta)
+v1 = (  a/2,       b/2,             0),
+v2 = ( -a/2,       b/2,             0),
+v3 = (c*cos(beta),   0,   c*sin(beta)),
+where beta=angle between axis a and c projected on xz plane
+IMPORTANT NOTICE: until QE v.6.4.1, axis for ibrav=-13 had a
+different definition: v1(old) =-v2(now), v2(old) = v1(now)
+            </opt>
+            <opt val="14" >
+Triclinic                       celldm(2)= b/a,
+                                celldm(3)= c/a,
+                                celldm(4)= cos(bc),
+                                celldm(5)= cos(ac),
+                                celldm(6)= cos(ab)
+v1 = (a, 0, 0),
+v2 = (b*cos(gamma), b*sin(gamma), 0)
+v3 = (c*cos(beta),  c*(cos(alpha)-cos(beta)cos(gamma))/sin(gamma),
+     c*sqrt( 1 + 2*cos(alpha)cos(beta)cos(gamma)
+               - cos(alpha)^2-cos(beta)^2-cos(gamma)^2 )/sin(gamma) )
+where alpha is the angle between axis b and c
+       beta is the angle between axis a and c
+      gamma is the angle between axis a and b
+            </opt>
+         </options>
       </var>
       <group>
          <label> Either:
@@ -1254,17 +1286,24 @@ smearing with Fermi-Dirac function
       <var name="nspin" type="INTEGER" >
          <default> 1
          </default>
-         <info>
-nspin = 1 :  non-polarized calculation
-
-nspin = 2 :  spin-polarized calculation, LSDA
-             (magnetization along z axis)
-
-nspin = 4 :  spin-polarized calculation, noncollinear
-             (magnetization in generic direction)
-             DO NOT specify <ref>nspin</ref> in this case;
-             specify <ref>noncolin</ref>=.TRUE. instead
-         </info>
+         <options>
+            <info>
+Spin polarization mode of the calculation.
+            </info>
+            <opt val="1" >
+non-polarized calculation
+            </opt>
+            <opt val="2" >
+spin-polarized calculation, LSDA
+(magnetization along z axis)
+            </opt>
+            <opt val="4" >
+spin-polarized calculation, noncollinear
+(magnetization in generic direction)
+DO NOT specify <ref>nspin</ref> in this case;
+specify <ref>noncolin</ref>=.TRUE. instead
+            </opt>
+         </options>
       </var>
       <var name="sic_gamma" type="REAL" >
          <dimensionality> dimensionless
@@ -2241,12 +2280,18 @@ b axis. If .FALSE. it is parallel to the c axis.
       <var name="origin_choice" type="INTEGER" >
          <default> 1
          </default>
-         <info>
+         <options>
+            <info>
 Used only for space groups that in the ITA allow
-the use of two different origins. <ref>origin_choice</ref>=1,
-means the first origin, while <ref>origin_choice</ref>=2 is the
-second origin.
-         </info>
+the use of two different origins.
+            </info>
+            <opt val="1" >
+the first origin
+            </opt>
+            <opt val="2" >
+the second origin
+            </opt>
+         </options>
       </var>
       <var name="rhombohedral" type="LOGICAL" >
          <default> .true.
@@ -2972,15 +3017,25 @@ currently maximum allowed is 4
          <var name="nhptyp" type="INTEGER" >
             <default> 0
             </default>
-            <info>
-type of the &quot;massive&quot; Nose-Hoover chain thermostat:
- * nhptyp = 0 usese one NH chain for all atoms.
- * nhtyp=1 uses a  NH chain per each atomic type
- * nhptyp=2 use a NH chaing per atom, this one is usefulf
-   for extremely rapid equipartioning.
- * nhptyp =3 together with <ref>nhgrp</ref> allows fine grained thermostat
-   control
-            </info>
+            <options>
+               <info>
+type of the &quot;massive&quot; Nose-Hoover chain thermostat.
+               </info>
+               <opt val="0" >
+uses one NH chain for all atoms.
+               </opt>
+               <opt val="1" >
+uses a NH chain per each atomic type
+               </opt>
+               <opt val="2" >
+use a NH chaing per atom, this one is usefulf
+for extremely rapid equipartioning.
+               </opt>
+               <opt val="3" >
+together with <ref>nhgrp</ref> allows fine grained thermostat
+control
+               </opt>
+            </options>
          </var>
          <dimension name="nhgrp" start="1" end="ntyp" type="INTEGER" >
             <default> 0
@@ -4204,7 +4259,7 @@ none of the above  old PWscf norm-conserving format
       <flag name="atompos_unit" use="optional" >
          <enum> alat | bohr | angstrom | crystal | crystal_sg
          </enum>
-         <default> (DEPRECATED) alat
+         <default> alat
          </default>
          <options>
             <info>
@@ -4405,7 +4460,7 @@ atoms.
       <flag name="kpoint_type" use="optional" >
          <enum> tpiba | automatic | crystal | gamma | tpiba_b | crystal_b | tpiba_c | crystal_c
          </enum>
-         <default> tbipa
+         <default> tpiba
          </default>
          <options>
             <info>
@@ -4561,7 +4616,7 @@ card is to do band plots with EXX.
       <flag name="additional_kpoints_type" use="optional" >
          <enum> tpiba | crystal | tpiba_b | crystal_b | tpiba_c | crystal_c
          </enum>
-         <default> tbipa
+         <default> tpiba
          </default>
          <info>
 for the explanation of the K_POINTS&apos; options, see <ref>K_POINTS</ref>

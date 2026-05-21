@@ -4,6 +4,7 @@ This file has been generated automatically. Do not edit it manually.
 """
 
 from pathlib import Path
+from typing import Literal
 
 from pydantic import Field
 
@@ -28,14 +29,7 @@ class InputBgw2pwNamelist(Namelist):
         },
         description="the scratch directory where the massive data-files are written",
     )
-    real_or_complex: int = Field(
-        2,
-        description=(
-            "1 | 2 1 for real flavor of BerkeleyGW (for systems with inversion symmetry and "
-            "time-reversal symmetry) or 2 for complex flavor of BerkeleyGW (for systems without "
-            "inversion symmetry and time-reversal symmetry)"
-        ),
-    )
+    real_or_complex: Literal[1, 2] = Field(2, description="BerkeleyGW data flavor.")
     wfng_flag: bool = Field(
         False, description="read wavefunctions in G-space from BerkeleyGW WFN file"
     )

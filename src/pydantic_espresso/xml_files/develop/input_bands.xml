@@ -66,14 +66,19 @@ file name for band output (to be read by &quot;plotband.x&quot;)
          </info>
       </var>
       <var name="spin_component" type="INTEGER" >
-         <info>
-In the lsda case select:
-
-   1 = spin-up
-   2 = spin-down
-         </info>
          <default> 1
          </default>
+         <options>
+            <info>
+In the lsda case select spin channel.
+            </info>
+            <opt val="1" >
+spin-up.
+            </opt>
+            <opt val="2" >
+spin-down.
+            </opt>
+         </options>
       </var>
       <dimension name="lsigma" start="1" end="3" type="LOGICAL" >
          <info>

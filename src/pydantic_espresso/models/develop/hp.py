@@ -4,7 +4,7 @@ This file has been generated automatically. Do not edit it manually.
 """
 
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import Field
 
@@ -36,15 +36,7 @@ class InputhpNamelist(Namelist):
             "in the calculation of the unperturbed system."
         ),
     )
-    iverbosity: int = Field(
-        1,
-        description=(
-            "= 1 : minimal output = 2 : as above + symmetry matrices, final response matrices chi0 "
-            "and chi1 and their inverse matrices, full U matrix = 3 : as above + various detailed "
-            "info about the NSCF calculation at k and k+q = 4 : as above + response occupation "
-            "matrices at every iteration and for every q point in the star"
-        ),
-    )
+    iverbosity: Literal[1, 2, 3, 4] = Field(1, description="")
     max_seconds: Annotated[float, Quantity(units="s", dimensionality="time")] = Field(
         1.0e7, description="Maximum allowed run time before the job stops smoothly."
     )
@@ -72,18 +64,8 @@ class InputhpNamelist(Namelist):
             "smoothly. This keyword can be used only if perturb_only_atom is set to .true."
         ),
     )
-    find_atpert: int = Field(
-        1,
-        description=(
-            "Method for searching of atoms which must be perturbed. 1 = Find how many inequivalent "
-            "Hubbard atoms there are by analyzing unperturbed occupations. 2 = Find how many "
-            "Hubbard atoms to perturb based on how many different Hubbard atomic types there are. "
-            "Warning: atoms which have the same type but which are inequivalent by symmetry or "
-            "which have different occupations will not be distinguished in this case (use option 1 "
-            "or 3 instead). 3 = Find how many inequivalent Hubbard atoms there are using symmetry. "
-            "Atoms which have the same type but are not equivalent by symmetry will be "
-            "distinguished in this case. 4 = Perturb all Hubbard atoms (the most expensive option)"
-        ),
+    find_atpert: Literal[1, 2, 3, 4] = Field(
+        1, description="Method for searching of atoms which must be perturbed."
     )
     docc_thr: float = Field(
         5.0e-5,
@@ -182,17 +164,14 @@ class InputhpNamelist(Namelist):
             "(post-processing stage)."
         ),
     )
-    lmin: int = Field(
+    lmin: Literal[0, 1, 2, 3] = Field(
         2,
         description=(
             "Minimum value of the orbital quantum number of the Hubbard atoms starting from which "
             "(and up to the maximum l in the system) Hubbard V will be written to the file "
             "parameters.out. lmin refers to the orbital quantum number of the atom corresponding "
             "to the first site-index in Hubbard_V(:,:,:). This keyword is used only for DFT+U+V "
-            "and only in the post-processing stage. Example: lmin=1 corresponds to writing to file "
-            "V between e.g. oxygen (with p states) and its neighbors, and including V between "
-            "transition metals (with d states) and their neighbors. Instead, when lmin=2 only the "
-            "latter will be written to parameters.out."
+            "and only in the post-processing stage."
         ),
     )
     rmax: Annotated[float, Quantity(units="bohr", dimensionality="length")] = Field(

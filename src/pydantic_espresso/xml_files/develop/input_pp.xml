@@ -81,77 +81,104 @@ unless you want to save it for further processing
       <var name="plot_num" type="INTEGER" >
          <default> -1
          </default>
-         <info>
+         <options>
+            <info>
 Selects what to save in filplot:
-
-  -1  = do not do anything, skip step (1) (see header)
-
-   0  = electron (pseudo-)charge density
-
-   1  = total potential V_bare + V_H + V_xc
-
-   2  = local ionic potential V_bare
-
-   3  = local density of states at specific energy or grid of energies
-        (number of states per volume, in bohr^3, per energy unit, in Ry)
-
-   4  = local density of electronic entropy
-
-   5  = STM images
-        Tersoff and Hamann, <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.31.805">PRB 31, 805 (1985)</a>
-
-   6  = spin polarization (rho(up)-rho(down))
-
-   7  = contribution of selected wavefunction(s) to the
-        (pseudo-)charge density. For norm-conserving PPs,
-        |psi|^2 (psi=selected wavefunction). Noncollinear case:
-        contribution of the given state to the charge or
-        to the magnetization along the direction indicated
-        by spin_component (0 = charge, 1 = x, 2 = y, 3 = z )
-
-   8  = electron localization function (ELF)
-
-   9  = charge density minus superposition of atomic densities
-
-   10 = integrated local density of states (ILDOS)
-        from <ref>emin</ref> to <ref>emax</ref> (emin, emax in eV)
-        if <ref>emax</ref> is not specified, <ref>emax</ref>=E_fermi
-
-   11 = the V_bare + V_H potential
-
-   12 = the sawtooth electric field potential (if present)
-
-   13 = the noncollinear magnetization.
-
-   17 = all-electron valence charge density
-        can be performed for PAW calculations only
-        requires a very dense real-space grid!
-
-   18 = The exchange and correlation magnetic field in the noncollinear case
-
-   19 = Reduced density gradient
-        ( J. Chem. Theory Comput. 7, 625 (2011), <a href="https://doi.org/10.1021/ct100641a">doi:10.1021/ct100641a</a> )
-        Set the isosurface between 0.3 and 0.6 to plot the
-        non-covalent interactions (see also plot_num = 20)
-
-   20 = Product of the electron density (charge) and the second
-        eigenvalue of the electron-density Hessian matrix;
-        used to colorize the RDG plot (plot_num = 19)
-
-   21 = all-electron charge density (valence+core).
-        For PAW calculations only; requires a very dense real-space grid.
-
-   22 = kinetic energy density
-
-   23 = the charge density of states between emin &amp; emax
-
-  123 = DORI: density overlap regions indicator
-        (<a href="https://doi.org/10.1021/ct500490b">doi: 10.1021/ct500490b</a>) Implemented by D. Yang &amp; Q.Liu
-
-   24 = Reconstructed all-electron charge
-
-   25 = Squared modulus of the Hubbard projector function of DFT+U
-         </info>
+            </info>
+            <opt val="-1" >
+do not do anything, skip step (1) (see header)
+            </opt>
+            <opt val="0" >
+electron (pseudo-)charge density
+            </opt>
+            <opt val="1" >
+total potential V_bare + V_H + V_xc
+            </opt>
+            <opt val="2" >
+local ionic potential V_bare
+            </opt>
+            <opt val="3" >
+local density of states at specific energy or grid of energies
+(number of states per volume, in bohr^3, per energy unit, in Ry)
+            </opt>
+            <opt val="4" >
+local density of electronic entropy
+            </opt>
+            <opt val="5" >
+STM images
+Tersoff and Hamann, <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.31.805">PRB 31, 805 (1985)</a>
+            </opt>
+            <opt val="6" >
+spin polarization (rho(up)-rho(down))
+            </opt>
+            <opt val="7" >
+contribution of selected wavefunction(s) to the
+(pseudo-)charge density. For norm-conserving PPs,
+|psi|^2 (psi=selected wavefunction). Noncollinear case:
+contribution of the given state to the charge or
+to the magnetization along the direction indicated
+by <ref>spin_component</ref> (0 = charge, 1 = x, 2 = y, 3 = z )
+            </opt>
+            <opt val="8" >
+electron localization function (ELF)
+            </opt>
+            <opt val="9" >
+charge density minus superposition of atomic densities
+            </opt>
+            <opt val="10" >
+integrated local density of states (ILDOS)
+from <ref>emin</ref> to <ref>emax</ref> (emin, emax in eV)
+if <ref>emax</ref> is not specified, <ref>emax</ref>=E_fermi
+            </opt>
+            <opt val="11" >
+the V_bare + V_H potential
+            </opt>
+            <opt val="12" >
+the sawtooth electric field potential (if present)
+            </opt>
+            <opt val="13" >
+the noncollinear magnetization.
+            </opt>
+            <opt val="17" >
+all-electron valence charge density
+can be performed for PAW calculations only
+requires a very dense real-space grid!
+            </opt>
+            <opt val="18" >
+The exchange and correlation magnetic field in the noncollinear case
+            </opt>
+            <opt val="19" >
+Reduced density gradient
+( J. Chem. Theory Comput. 7, 625 (2011), <a href="https://doi.org/10.1021/ct100641a">doi:10.1021/ct100641a</a> )
+Set the isosurface between 0.3 and 0.6 to plot the
+non-covalent interactions (see also <ref>plot_num</ref> = 20)
+            </opt>
+            <opt val="20" >
+Product of the electron density (charge) and the second
+eigenvalue of the electron-density Hessian matrix;
+used to colorize the RDG plot (<ref>plot_num</ref> = 19)
+            </opt>
+            <opt val="21" >
+all-electron charge density (valence+core).
+For PAW calculations only; requires a very dense real-space grid.
+            </opt>
+            <opt val="22" >
+kinetic energy density
+            </opt>
+            <opt val="23" >
+the charge density of states between <ref>emin</ref> and <ref>emax</ref>
+            </opt>
+            <opt val="24" >
+Reconstructed all-electron charge
+            </opt>
+            <opt val="25" >
+Squared modulus of the Hubbard projector function of DFT+U
+            </opt>
+            <opt val="123" >
+DORI: density overlap regions indicator
+(<a href="https://doi.org/10.1021/ct500490b">doi: 10.1021/ct500490b</a>) Implemented by D. Yang &amp; Q.Liu
+            </opt>
+         </options>
       </var>
       <choose>
          <when test="plot_num = 0 or 9" >
@@ -482,7 +509,7 @@ the number of data files to read
       </var>
       <group>
          <dimension name="filepp" start="1" end="nfile" type="CHARACTER" >
-            <default> filepp(1)=&apos;tmp.pp&apos;
+            <default> [&apos;tmp.pp&apos;]
             </default>
             <info>
 nfile = 1 : file containing the quantity to be plotted
@@ -491,7 +518,7 @@ nfile &gt; 1 : see <ref>weight</ref>
             </info>
          </dimension>
          <dimension name="weight" start="1" end="nfile" type="REAL" >
-            <default> weight(1)=1.0
+            <default> [1.0]
             </default>
             <dimensionality> dimensionless
             </dimensionality>
@@ -511,43 +538,65 @@ weight(1)*rho(1) + weight(2)*rho(2) + weight(3)*rho(3) + ...
       <var name="iflag" type="INTEGER" >
          <default> 0
          </default>
-         <info>
-0 = 1D plot of the spherical average
-1 = 1D plot
-2 = 2D plot
-3 = 3D plot
-4 = 2D polar plot on a sphere
-         </info>
+         <options>
+            <info>
+Type of plot to produce:
+            </info>
+            <opt val="0" >
+1D plot of the spherical average
+            </opt>
+            <opt val="1" >
+1D plot
+            </opt>
+            <opt val="2" >
+2D plot
+            </opt>
+            <opt val="3" >
+3D plot
+            </opt>
+            <opt val="4" >
+2D polar plot on a sphere
+            </opt>
+         </options>
       </var>
       <var name="output_format" type="INTEGER" >
          <default> -1
          </default>
-         <info>
-(ignored on 1D plot)
-
-0  = format suitable for gnuplot   (1D)
-
-1  = obsolete format no longer supported
-
-2  = format suitable for plotrho   (2D)
-
-3  = format suitable for XCRYSDEN  (2D or user-supplied 3D region)
-
-4  = obsolete format no longer supported
-
-5  = format suitable for XCRYSDEN  (3D, using entire FFT grid)
-
-6  = format as gaussian cube file  (3D)
-     (can be read by many programs)
-
-7  = format suitable for gnuplot   (2D) x, y, f(x,y)
-         </info>
+         <options>
+            <info>
+Format of the output plot file (ignored on 1D plot).
+Values 1 and 4 are obsolete and no longer supported.
+            </info>
+            <opt val="-1" >
+do not do anything, skip step (2) (see header)
+            </opt>
+            <opt val="0" >
+format suitable for gnuplot   (1D)
+            </opt>
+            <opt val="2" >
+format suitable for plotrho   (2D)
+            </opt>
+            <opt val="3" >
+format suitable for XCRYSDEN  (2D or user-supplied 3D region)
+            </opt>
+            <opt val="5" >
+format suitable for XCRYSDEN  (3D, using entire FFT grid)
+            </opt>
+            <opt val="6" >
+format as gaussian cube file  (3D)
+(can be read by many programs)
+            </opt>
+            <opt val="7" >
+format suitable for gnuplot   (2D) x, y, f(x,y)
+            </opt>
+         </options>
       </var>
       <var name="fileout" type="CHARACTER" >
-         <default> standard output
+         <default kind="computed" > internal
          </default>
          <info>
-name of the file to which the plot is written
+Name of the file to which the plot is written.
+If unset, the plot is written to standard output.
          </info>
       </var>
       <var name="interpolation" type="CHARACTER" >

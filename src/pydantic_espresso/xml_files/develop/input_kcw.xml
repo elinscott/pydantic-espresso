@@ -92,11 +92,21 @@ avoiding the need of re-doing a &quot;screen&quot; calculation.
       <var name="kcw_iverbosity" type="INTEGER" >
          <default> 1
          </default>
-         <info>
-= 0 : minimal output
-= 1 : as above + performs additional checks.
-&gt; 1 : as above + additional infos on all the steps.
-         </info>
+         <options>
+            <info>
+Verbosity level of the KCW output.
+            </info>
+            <opt val="0" >
+Minimal output.
+            </opt>
+            <opt val="1" >
+As above + performs additional checks.
+            </opt>
+            <opt val="2" >
+As above + additional infos on all the steps
+(any value &gt; 1 selects this verbosity tier).
+            </opt>
+         </options>
       </var>
       <var name="kcw_at_ks" type="LOGICAL" >
          <default> .TRUE.
@@ -178,13 +188,19 @@ calculation in clusters&quot;, J. Chem. Phys. 110, 2810 (1999),
       <var name="spin_component" type="INTEGER" >
          <default> 1
          </default>
-         <info>
+         <options>
+            <info>
 Which spin channel to calculate (only collinear calculation).
-1 = spin up channel
-2 = spin down channel
 It has to be consistent with the previous Wannier90
-calculation (see &apos;spin&apos; keyword in Wannier90 documentation)
-         </info>
+calculation (see &apos;spin&apos; keyword in Wannier90 documentation).
+            </info>
+            <opt val="1" >
+spin up channel.
+            </opt>
+            <opt val="2" >
+spin down channel.
+            </opt>
+         </options>
       </var>
       <vargroup type="INTEGER" >
          <var name="mp1" >

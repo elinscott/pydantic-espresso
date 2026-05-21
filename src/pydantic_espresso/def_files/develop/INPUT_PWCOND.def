@@ -153,18 +153,24 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program pwcon
 	}
 
 	var ikind  -type INTEGER {
-	    info {
-   	       The kind of conductance calculation:
-
-                  ikind=0  - just complex band structure (CBS) calculation
-
-                  ikind=1  - conductance calculation with identical
-                             left and right leads
-
-                  ikind=2  - conductance calculation with different
-		             left and right leads
-	    }
 	    default { 0 }
+	    options {
+		info {
+		    The kind of conductance calculation.
+		}
+
+		opt -val 0 {
+		    Just complex band structure (CBS) calculation.
+		}
+
+		opt -val 1 {
+		    Conductance calculation with identical left and right leads.
+		}
+
+		opt -val 2 {
+		    Conductance calculation with different left and right leads.
+		}
+	    }
 	}
 
 	var iofspin  -type INTEGER {

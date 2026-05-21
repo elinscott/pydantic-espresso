@@ -66,9 +66,9 @@ Type of gaussian broadening:
          </var>
          <var name="Emax" >
          </var>
-         <info> min &amp; max energy for DOS plot
+         <info> min &amp; max energy for DOS plot. Default: band extrema (computed at runtime).
          </info>
-         <default> (band extrema)
+         <default kind="computed" > internal
          </default>
          <dimensionality> energy
          </dimensionality>
@@ -126,10 +126,11 @@ Only for PAW, not implemented in the noncolinear case.
          </default>
       </var>
       <var name="filproj" type="CHARACTER" >
-         <default> (standard output)
+         <default kind="computed" > internal
          </default>
          <info>
-file containing the projections
+File containing the projections. If unset, projections are
+written to standard output.
          </info>
       </var>
       <var name="lwrite_overlaps" type="LOGICAL" >
@@ -180,7 +181,7 @@ number of boxes where the local DOS is computed
          </info>
       </var>
       <multidimension name="irmin" start="1,1" end="3,n_proj_boxes" indexes="i,n_proj_boxes" type="INTEGER" >
-         <default> 1 for each box
+         <default> 1
          </default>
          <info>
 first point of the given box
@@ -189,7 +190,7 @@ BEWARE: <ref>irmin</ref> is a 2D array of the form: <ref>irmin</ref>(3,<ref>n_pr
          </info>
       </multidimension>
       <multidimension name="irmax" start="1,1" end="3,n_proj_boxes" indexes="i,n_proj_boxes" type="INTEGER" >
-         <default> 0 for each box
+         <default> 0
          </default>
          <info>
 last point of the given box;

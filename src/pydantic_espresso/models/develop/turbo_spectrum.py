@@ -73,12 +73,10 @@ class LrInputNamelist(Namelist):
             ".true."
         ),
     )
-    units: int = Field(
+    units: Literal[0, 1, 2, 3] = Field(
         0,
         description=(
-            "The unit system used for the output and the start, end and increment input "
-            "parameters. (only meV used in that case).  0 = Rydbergs, 1 = Electron volts, 2 = "
-            "Nanometres per electron volts, 3 = milli Electron volts (only for magnons=.true.)"
+            "The unit system used for the output and the start, end and increment input parameters."
         ),
     )
     start: Annotated[float, Quantity(units="Ry", dimensionality="energy")] = Field(

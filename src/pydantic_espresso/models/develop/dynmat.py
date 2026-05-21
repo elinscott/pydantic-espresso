@@ -86,8 +86,8 @@ class InputNamelist(Namelist):
             "calculation."
         ),
     )
-    q: tuple[float, float, float] | None = Field(
-        None,
+    q: tuple[float, float, float] = Field(
+        (0.0, 0.0, 0.0),
         description=(
             "calculate LO modes (add non-analytic terms) along the direction q (Cartesian axis)"
         ),

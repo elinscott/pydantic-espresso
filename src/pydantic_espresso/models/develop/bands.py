@@ -4,6 +4,7 @@ This file has been generated automatically. Do not edit it manually.
 """
 
 from pathlib import Path
+from typing import Literal
 
 from pydantic import Field
 
@@ -31,9 +32,7 @@ class BandsNamelist(Namelist):
     filband: str = Field(
         "bands.out", description="file name for band output (to be read by 'plotband.x')"
     )
-    spin_component: int = Field(
-        1, description="In the lsda case select:  1 = spin-up 2 = spin-down"
-    )
+    spin_component: Literal[1, 2] = Field(1, description="In the lsda case select spin channel.")
     lp: bool = Field(
         False,
         description=(

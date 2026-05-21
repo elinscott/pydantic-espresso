@@ -43,7 +43,7 @@ calculate LO modes (add non-analytic terms) along the direction q (Cartesian axi
          </info>
          <dimensionality> dimensionless
          </dimensionality>
-         <default> q = (0,0,0)
+         <default> 0.0
          </default>
       </dimension>
       <dimension name="amass" start="1" end="ntyp" type="REAL" >

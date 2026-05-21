@@ -37,13 +37,7 @@ class DosNamelist(Namelist):
             "summation. Available options are:"
         ),
     )
-    ngauss: int = Field(
-        0,
-        description=(
-            "Type of gaussian broadening:  =  0  Simple Gaussian  =  1  Methfessel-Paxton of order "
-            "1  = -1  'cold smearing' (Marzari-Vanderbilt-DeVita-Payne)  =-99  Fermi-Dirac function"
-        ),
-    )
+    ngauss: Literal[0, 1, -1, -99] = Field(0, description="Type of gaussian broadening.")
     degauss: Annotated[float, Quantity(units="Ry", dimensionality="energy")] = Field(
         0.0, description="gaussian broadening, Ry (not eV!) (see below)"
     )

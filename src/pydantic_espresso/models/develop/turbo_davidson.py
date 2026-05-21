@@ -46,12 +46,12 @@ class LrInputNamelist(Namelist):
             "by ground state pw.x run."
         ),
     )
-    max_seconds: Annotated[float | None, Quantity(units="s", dimensionality="time")] = Field(
-        None,
+    max_seconds: Annotated[float, Quantity(units="s", dimensionality="time")] = Field(
+        1.0e7,
         description=(
-            "jobs stops after max_seconds CPU time. Use this option in conjunction with option "
-            "restart if you need to split a job too long to complete into shorter jobs that fit "
-            "into your batch queues."
+            "Jobs stop after max_seconds CPU time (default 1.D+7 s, i.e. about 150 days = no "
+            "practical limit). Use this option in conjunction with option restart if you need to "
+            "split a job too long to complete into shorter jobs that fit into your batch queues."
         ),
     )
     restart: bool = Field(

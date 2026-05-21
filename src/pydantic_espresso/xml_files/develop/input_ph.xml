@@ -764,7 +764,7 @@ IMPORTANT
             </info>
          </var>
          <var name="dvscf_star" type="STRUCTURE" >
-            <default> disabled
+            <default kind="computed" > internal
             </default>
             <info>
 It contains the following components:
@@ -803,7 +803,7 @@ Note2: this feature is currently untested with image parallelisation.
          <var name="drho_star" type="STRUCTURE" >
             <see> dvscf_star
             </see>
-            <default> disabled
+            <default kind="computed" > internal
             </default>
             <info>
 It contains the following components:

@@ -54,13 +54,20 @@ Requires oscdft.in file, described below, in the same directory as where the pw.
       <var name="oscdft_type" type="INTEGER" >
          <default> 1
          </default>
-         <info>
-1 : C. Ku, P. H. L. Sit, J. Chem. Theory Comput. 15, 4781 (2019).
-2 : L. Ponet, E. Di Lucente, N. Marzari, npj Comput. Mater. 10, 151 (2024).
+         <options>
+            <info>
+OS-CDFT method to use.
 
-Note: For oscdft_type=2, only the keyword &quot;occupation&quot; and the keywords
-      constraint_* can be used (see below).
-         </info>
+Note: For oscdft_type=2, only the keyword &quot;occupation&quot; and
+the keywords constraint_* can be used (see below).
+            </info>
+            <opt val="1" >
+C. Ku, P. H. L. Sit, J. Chem. Theory Comput. 15, 4781 (2019).
+            </opt>
+            <opt val="2" >
+L. Ponet, E. Di Lucente, N. Marzari, npj Comput. Mater. 10, 151 (2024).
+            </opt>
+         </options>
       </var>
       <var name="n_oscdft" type="INTEGER" >
          <status> REQUIRED
@@ -401,11 +408,11 @@ Others are ignored.
                   <status> REQUIRED
                   </status>
                   <options>
-                     <opt val=" 1, UP " >
-Spin up channel
+                     <opt val="'UP'" alias="'1'" >
+Spin up channel.
                      </opt>
-                     <opt val=" 2, DOWN " >
-Spin down channel
+                     <opt val="'DOWN'" alias="'DW', '2'" >
+Spin down channel.
                      </opt>
                   </options>
                </col>

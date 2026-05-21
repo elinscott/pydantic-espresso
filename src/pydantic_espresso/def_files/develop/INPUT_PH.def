@@ -719,7 +719,7 @@ input_description -distribution {Quantum ESPRESSO} -package PHonon -program ph.x
 	    }	
 
 	    var dvscf_star  -type STRUCTURE {
-		default { disabled }
+		default -kind computed { internal }
 		info {
         It contains the following components:
 
@@ -757,7 +757,7 @@ input_description -distribution {Quantum ESPRESSO} -package PHonon -program ph.x
 
 	    var drho_star  -type STRUCTURE {
 		see {dvscf_star }
-		default { disabled }
+		default -kind computed { internal }
 		info {
         It contains the following components:
 

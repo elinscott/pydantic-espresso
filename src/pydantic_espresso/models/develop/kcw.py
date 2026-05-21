@@ -50,13 +50,7 @@ class ControlNamelist(Namelist):
     calculation: Literal[None, "wann2kcw", "screen", "ham", "cc"] = Field(
         None, description="Specify the KCW calculation to be done Possible choices:"
     )
-    kcw_iverbosity: int = Field(
-        1,
-        description=(
-            "= 0 : minimal output = 1 : as above + performs additional checks. > 1 : as above + "
-            "additional infos on all the steps."
-        ),
-    )
+    kcw_iverbosity: Literal[0, 1, 2] = Field(1, description="Verbosity level of the KCW output.")
     kcw_at_ks: bool = Field(
         True,
         description=(
@@ -104,12 +98,12 @@ class ControlNamelist(Namelist):
             "cluster in a 3D supercell).  Currently available choices:"
         ),
     )
-    spin_component: int = Field(
+    spin_component: Literal[1, 2] = Field(
         1,
         description=(
-            "Which spin channel to calculate (only collinear calculation). 1 = spin up channel 2 = "
-            "spin down channel It has to be consistent with the previous Wannier90 calculation "
-            "(see 'spin' keyword in Wannier90 documentation)"
+            "Which spin channel to calculate (only collinear calculation). It has to be consistent "
+            "with the previous Wannier90 calculation (see 'spin' keyword in Wannier90 "
+            "documentation)."
         ),
     )
     lrpa: bool = Field(

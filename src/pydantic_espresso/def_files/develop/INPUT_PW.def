@@ -607,53 +607,66 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program pw.x 
 
         var ibrav -type INTEGER {
             status { REQUIRED }
-            info {
-                Bravais-lattice index. Optional only if space_group is set.
-                If ibrav /= 0, specify EITHER [ @ref celldm(1)-@ref celldm(6) ]
-                OR [ @ref A, @ref B, @ref C, @ref cosAB, @ref cosAC, @ref cosBC ]
-                but NOT both. The lattice parameter "alat" is set to
-                alat = celldm(1) (in a.u.) or alat = A (in Angstrom);
-                see below for the other parameters.
-                For ibrav=0 specify the lattice vectors in @ref CELL_PARAMETERS,
-                optionally the lattice parameter alat = celldm(1) (in a.u.)
-                or = A (in Angstrom). If not specified, the lattice parameter is
-                taken from @ref CELL_PARAMETERS
-                IMPORTANT NOTICE 1:
-                with ibrav=0 lattice vectors must be given with a sufficiently large
-                number of digits and with the correct symmetry, or else symmetry
-                detection may fail and strange problems may arise in symmetrization.
-                IMPORTANT NOTICE 2:
-                do not use celldm(1) or A as a.u. to Ang conversion factor,
-                use the true lattice parameters or nothing,
-                specify units in @ref CELL_PARAMETERS and @ref ATOMIC_POSITIONS
+            options {
+                info {
+                    Bravais-lattice index. Optional only if space_group is set.
+                    If ibrav /= 0, specify EITHER [ @ref celldm(1)-@ref celldm(6) ]
+                    OR [ @ref A, @ref B, @ref C, @ref cosAB, @ref cosAC, @ref cosBC ]
+                    but NOT both. The lattice parameter "alat" is set to
+                    alat = celldm(1) (in a.u.) or alat = A (in Angstrom);
+                    see below for the other parameters.
+                    For ibrav=0 specify the lattice vectors in @ref CELL_PARAMETERS,
+                    optionally the lattice parameter alat = celldm(1) (in a.u.)
+                    or = A (in Angstrom). If not specified, the lattice parameter is
+                    taken from @ref CELL_PARAMETERS
+                    IMPORTANT NOTICE 1:
+                    with ibrav=0 lattice vectors must be given with a sufficiently large
+                    number of digits and with the correct symmetry, or else symmetry
+                    detection may fail and strange problems may arise in symmetrization.
+                    IMPORTANT NOTICE 2:
+                    do not use celldm(1) or A as a.u. to Ang conversion factor,
+                    use the true lattice parameters or nothing,
+                    specify units in @ref CELL_PARAMETERS and @ref ATOMIC_POSITIONS
 
-              ibrav      structure                   celldm(2)-celldm(6)
-                                                   or: b,c,cosbc,cosac,cosab
-                0          free
+                    The accepted values of ibrav and the corresponding lattices
+                    (with the required celldm(2)-celldm(6), or equivalently
+                    b,c,cosbc,cosac,cosab) are listed below.
+                }
+                opt -val 0 {
+                    free
                     crystal axis provided in input: see card @ref CELL_PARAMETERS
-
-                1          cubic P (sc)
+                }
+                opt -val 1 {
+                    cubic P (sc)
                     v1 = a(1,0,0),  v2 = a(0,1,0),  v3 = a(0,0,1)
-
-                2          cubic F (fcc)
+                }
+                opt -val 2 {
+                    cubic F (fcc)
                     v1 = (a/2)(-1,0,1),  v2 = (a/2)(0,1,1), v3 = (a/2)(-1,1,0)
-
-                3          cubic I (bcc)
+                }
+                opt -val 3 {
+                    cubic I (bcc)
                     v1 = (a/2)(1,1,1),  v2 = (a/2)(-1,1,1),  v3 = (a/2)(-1,-1,1)
-               -3          cubic I (bcc), more symmetric axis:
+                }
+                opt -val -3 {
+                    cubic I (bcc), more symmetric axis:
                     v1 = (a/2)(-1,1,1), v2 = (a/2)(1,-1,1),  v3 = (a/2)(1,1,-1)
-
-                4          Hexagonal and Trigonal P        celldm(3)=c/a
+                }
+                opt -val 4 {
+                    Hexagonal and Trigonal P        celldm(3)=c/a
                     v1 = a(1,0,0),  v2 = a(-1/2,sqrt(3)/2,0),  v3 = a(0,0,c/a)
-
-                5          Trigonal R, 3fold axis c        celldm(4)=cos(gamma)
+                }
+                opt -val 5 {
+                    Trigonal R, 3fold axis c        celldm(4)=cos(gamma)
                     The crystallographic vectors form a three-fold star around
                     the z-axis, the primitive cell is a simple rhombohedron:
                     v1 = a(tx,-ty,tz),   v2 = a(0,2ty,tz),   v3 = a(-tx,-ty,tz)
                     where c=cos(gamma) is the cosine of the angle gamma between
                     any pair of crystallographic vectors, tx, ty, tz are:
                       tx=sqrt((1-c)/2), ty=sqrt((1-c)/6), tz=sqrt((1+2c)/3)
-               -5          Trigonal R, 3fold axis <111>    celldm(4)=cos(gamma)
+                }
+                opt -val -5 {
+                    Trigonal R, 3fold axis <111>    celldm(4)=cos(gamma)
                     The crystallographic vectors form a three-fold star around
                     <111>. Defining a' = a/sqrt(3) :
                     v1 = a' (u,v,v),   v2 = a' (v,u,v),   v3 = a' (v,v,u)
@@ -663,69 +676,87 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program pw.x 
                     Note: if you prefer x,y,z as axis in the cubic limit,
                           set  u = tz + 2*sqrt(2)*ty,  v = tz - sqrt(2)*ty
                           See also the note in Modules/latgen.f90
-
-                6          Tetragonal P (st)               celldm(3)=c/a
+                }
+                opt -val 6 {
+                    Tetragonal P (st)               celldm(3)=c/a
                     v1 = a(1,0,0),  v2 = a(0,1,0),  v3 = a(0,0,c/a)
-
-                7          Tetragonal I (bct)              celldm(3)=c/a
+                }
+                opt -val 7 {
+                    Tetragonal I (bct)              celldm(3)=c/a
                     v1=(a/2)(1,-1,c/a),  v2=(a/2)(1,1,c/a),  v3=(a/2)(-1,-1,c/a)
-
-                8          Orthorhombic P                  celldm(2)=b/a
-                                                           celldm(3)=c/a
+                }
+                opt -val 8 {
+                    Orthorhombic P                  celldm(2)=b/a,
+                                                    celldm(3)=c/a
                     v1 = (a,0,0),  v2 = (0,b,0), v3 = (0,0,c)
-
-                9          Orthorhombic base-centered(bco) celldm(2)=b/a
-                                                           celldm(3)=c/a
+                }
+                opt -val 9 {
+                    Orthorhombic base-centered(bco) celldm(2)=b/a,
+                                                    celldm(3)=c/a
                     v1 = (a/2, b/2,0),  v2 = (-a/2,b/2,0),  v3 = (0,0,c)
-               -9          as 9, alternate description
+                }
+                opt -val -9 {
+                    as 9, alternate description
                     v1 = (a/2,-b/2,0),  v2 = (a/2, b/2,0),  v3 = (0,0,c)
-               91          Orthorhombic one-face base-centered A-type
-                                                           celldm(2)=b/a
-                                                           celldm(3)=c/a
+                }
+                opt -val 91 {
+                    Orthorhombic one-face base-centered A-type,
+                                                    celldm(2)=b/a,
+                                                    celldm(3)=c/a
                     v1 = (a, 0, 0),  v2 = (0,b/2,-c/2),  v3 = (0,b/2,c/2)
-
-               10          Orthorhombic face-centered      celldm(2)=b/a
-                                                           celldm(3)=c/a
+                }
+                opt -val 10 {
+                    Orthorhombic face-centered      celldm(2)=b/a,
+                                                    celldm(3)=c/a
                     v1 = (a/2,0,c/2),  v2 = (a/2,b/2,0),  v3 = (0,b/2,c/2)
-
-               11          Orthorhombic body-centered      celldm(2)=b/a
-                                                           celldm(3)=c/a
+                }
+                opt -val 11 {
+                    Orthorhombic body-centered      celldm(2)=b/a,
+                                                    celldm(3)=c/a
                     v1=(a/2,b/2,c/2),  v2=(-a/2,b/2,c/2),  v3=(-a/2,-b/2,c/2)
-
-               12          Monoclinic P, unique axis c     celldm(2)=b/a
-                                                           celldm(3)=c/a,
-                                                           celldm(4)=cos(ab)
+                }
+                opt -val 12 {
+                    Monoclinic P, unique axis c     celldm(2)=b/a,
+                                                    celldm(3)=c/a,
+                                                    celldm(4)=cos(ab)
                     v1=(a,0,0), v2=(b*cos(gamma),b*sin(gamma),0),  v3 = (0,0,c)
                     where gamma is the angle between axis a and b.
-              -12          Monoclinic P, unique axis b     celldm(2)=b/a
-                                                           celldm(3)=c/a,
-                                                           celldm(5)=cos(ac)
+                }
+                opt -val -12 {
+                    Monoclinic P, unique axis b     celldm(2)=b/a,
+                                                    celldm(3)=c/a,
+                                                    celldm(5)=cos(ac)
                     v1 = (a,0,0), v2 = (0,b,0), v3 = (c*cos(beta),0,c*sin(beta))
                     where beta is the angle between axis a and c
-
-               13          Monoclinic base-centered        celldm(2)=b/a
-                           (unique axis c)                 celldm(3)=c/a,
-                                                           celldm(4)=cos(gamma)
+                }
+                opt -val 13 {
+                    Monoclinic base-centered (unique axis c)
+                                                    celldm(2)=b/a,
+                                                    celldm(3)=c/a,
+                                                    celldm(4)=cos(gamma)
                     v1 = (  a/2,         0,          -c/2),
                     v2 = (b*cos(gamma), b*sin(gamma), 0  ),
                     v3 = (  a/2,         0,           c/2),
                     where gamma=angle between axis a and b projected on xy plane
-
-              -13          Monoclinic base-centered        celldm(2)=b/a
-                           (unique axis b)                 celldm(3)=c/a,
-                                                           celldm(5)=cos(beta)
+                }
+                opt -val -13 {
+                    Monoclinic base-centered (unique axis b)
+                                                    celldm(2)=b/a,
+                                                    celldm(3)=c/a,
+                                                    celldm(5)=cos(beta)
                     v1 = (  a/2,       b/2,             0),
                     v2 = ( -a/2,       b/2,             0),
                     v3 = (c*cos(beta),   0,   c*sin(beta)),
                     where beta=angle between axis a and c projected on xz plane
-               IMPORTANT NOTICE: until QE v.6.4.1, axis for ibrav=-13 had a
-               different definition: v1(old) =-v2(now), v2(old) = v1(now)
-
-               14          Triclinic                       celldm(2)= b/a,
-                                                           celldm(3)= c/a,
-                                                           celldm(4)= cos(bc),
-                                                           celldm(5)= cos(ac),
-                                                           celldm(6)= cos(ab)
+                    IMPORTANT NOTICE: until QE v.6.4.1, axis for ibrav=-13 had a
+                    different definition: v1(old) =-v2(now), v2(old) = v1(now)
+                }
+                opt -val 14 {
+                    Triclinic                       celldm(2)= b/a,
+                                                    celldm(3)= c/a,
+                                                    celldm(4)= cos(bc),
+                                                    celldm(5)= cos(ac),
+                                                    celldm(6)= cos(ab)
                     v1 = (a, 0, 0),
                     v2 = (b*cos(gamma), b*sin(gamma), 0)
                     v3 = (c*cos(beta),  c*(cos(alpha)-cos(beta)cos(gamma))/sin(gamma),
@@ -734,6 +765,7 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program pw.x 
                     where alpha is the angle between axis b and c
                            beta is the angle between axis a and c
                           gamma is the angle between axis a and b
+                }
             }
         }
 
@@ -1263,16 +1295,23 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program pw.x 
         var nspin -type INTEGER {
             default { 1 }
 
-            info {
-                nspin = 1 :  non-polarized calculation
-
-                nspin = 2 :  spin-polarized calculation, LSDA
-                             (magnetization along z axis)
-
-                nspin = 4 :  spin-polarized calculation, noncollinear
-                             (magnetization in generic direction)
-                             DO NOT specify @ref nspin in this case;
-                             specify @ref noncolin=.TRUE. instead
+            options {
+                info {
+                    Spin polarization mode of the calculation.
+                }
+                opt -val 1 {
+                    non-polarized calculation
+                }
+                opt -val 2 {
+                    spin-polarized calculation, LSDA
+                    (magnetization along z axis)
+                }
+                opt -val 4 {
+                    spin-polarized calculation, noncollinear
+                    (magnetization in generic direction)
+                    DO NOT specify @ref nspin in this case;
+                    specify @ref noncolin=.TRUE. instead
+                }
             }
         }
 
@@ -2245,11 +2284,17 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program pw.x 
          var origin_choice -type INTEGER {
              default { 1 }
 
-             info {
-                  Used only for space groups that in the ITA allow
-                  the use of two different origins. @ref origin_choice=1,
-                  means the first origin, while @ref origin_choice=2 is the
-                  second origin.
+             options {
+                 info {
+                     Used only for space groups that in the ITA allow
+                     the use of two different origins.
+                 }
+                 opt -val 1 {
+                     the first origin
+                 }
+                 opt -val 2 {
+                     the second origin
+                 }
              }
          }
 
@@ -3021,14 +3066,24 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program pw.x 
             var nhptyp -type INTEGER {
                 default { 0 }
 
-                info {
-                    type of the "massive" Nose-Hoover chain thermostat:
-                     * nhptyp = 0 usese one NH chain for all atoms.
-                     * nhtyp=1 uses a  NH chain per each atomic type
-                     * nhptyp=2 use a NH chaing per atom, this one is usefulf
-                       for extremely rapid equipartioning.
-                     * nhptyp =3 together with @ref nhgrp allows fine grained thermostat
-                       control
+                options {
+                    info {
+                        type of the "massive" Nose-Hoover chain thermostat.
+                    }
+                    opt -val 0 {
+                        uses one NH chain for all atoms.
+                    }
+                    opt -val 1 {
+                        uses a NH chain per each atomic type
+                    }
+                    opt -val 2 {
+                        use a NH chaing per atom, this one is usefulf
+                        for extremely rapid equipartioning.
+                    }
+                    opt -val 3 {
+                        together with @ref nhgrp allows fine grained thermostat
+                        control
+                    }
                 }
             }
             dimension nhgrp -start 1 -end ntyp -type INTEGER {
@@ -4225,7 +4280,9 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program pw.x 
 
         flag atompos_unit -use optional {
             enum { alat | bohr | angstrom | crystal | crystal_sg }
-            default { (DEPRECATED) alat }
+            # DEPRECATED: omitting the units flag is deprecated; specify
+            # one of the enum values explicitly.
+            default { alat }
             options {
                 info {
                     Units for ATOMIC_POSITIONS:
@@ -4409,7 +4466,7 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program pw.x 
     card K_POINTS {
         flag kpoint_type -use optional {
             enum { tpiba | automatic | crystal | gamma | tpiba_b | crystal_b | tpiba_c | crystal_c }
-            default { tbipa }
+            default { tpiba }
             options {
                 info {
                     K_POINTS options are:
@@ -4569,7 +4626,7 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program pw.x 
         }
         flag additional_kpoints_type -use optional {
             enum { tpiba | crystal | tpiba_b | crystal_b | tpiba_c | crystal_c }
-            default { tbipa }
+            default { tpiba }
             info {
                 for the explanation of the K_POINTS' options, see @ref K_POINTS
             }

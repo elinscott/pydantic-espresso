@@ -41,7 +41,7 @@ input_description -distribution {Quantum ESPRESSO} -package PHonon -program dynm
 		calculate LO modes (add non-analytic terms) along the direction q (Cartesian axis)
 	    }
 	    dimensionality { dimensionless }
-	    default { q = (0,0,0) }
+	    default { 0.0 }
 	}
 
 	dimension amass -start 1 -end ntyp -type REAL {

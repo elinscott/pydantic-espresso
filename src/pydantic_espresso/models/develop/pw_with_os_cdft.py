@@ -14,12 +14,11 @@ from pydantic_espresso.namelist import Namelist
 class OscdftNamelist(Namelist):
     """Pydantic model for the `OSCDFT` namelist."""
 
-    oscdft_type: int = Field(
+    oscdft_type: Literal[1, 2] = Field(
         1,
         description=(
-            "1 : C. Ku, P. H. L. Sit, J. Chem. Theory Comput. 15, 4781 (2019). 2 : L. Ponet, E. Di "
-            "Lucente, N. Marzari, npj Comput. Mater. 10, 151 (2024).  Note: For oscdft_type=2, "
-            "only the keyword 'occupation' and the keywords constraint_* can be used (see below)."
+            "OS-CDFT method to use.  Note: For oscdft_type=2, only the keyword 'occupation' and "
+            "the keywords constraint_* can be used (see below)."
         ),
     )
     n_oscdft: int | None = Field(

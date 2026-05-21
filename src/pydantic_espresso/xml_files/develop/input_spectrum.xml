@@ -107,13 +107,24 @@ The broadening/damping term. In Rydberg units if magnons=.false.,
       <var name="units" type="INTEGER" >
          <default> 0
          </default>
-         <info>
-    The unit system used for the output and the start, end and increment
-input parameters. (only meV used in that case).
-
-0 = Rydbergs, 1 = Electron volts, 2 = Nanometres per electron volts,
-3 = milli Electron volts (only for magnons=.true.)
-         </info>
+         <options>
+            <info>
+The unit system used for the output and the start, end and
+increment input parameters.
+            </info>
+            <opt val="0" >
+Rydbergs.
+            </opt>
+            <opt val="1" >
+Electron volts.
+            </opt>
+            <opt val="2" >
+Nanometres per electron volts.
+            </opt>
+            <opt val="3" >
+Milli electron volts (only for magnons=.true.).
+            </opt>
+         </options>
       </var>
       <var name="start" type="REAL" >
          <default> 0.0

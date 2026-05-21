@@ -104,13 +104,28 @@ input_description -distribution {Quantum ESPRESSO} -package turboTDDFPT -program
 
 	var units -type INTEGER {
 	    default {0}
-	    info {
-	    	 The unit system used for the output and the start, end and increment
-		 input parameters. (only meV used in that case).
+	    options {
+		info {
+		    The unit system used for the output and the start, end and
+		    increment input parameters.
+		}
 
-		 0 = Rydbergs, 1 = Electron volts, 2 = Nanometres per electron volts,
-                 3 = milli Electron volts (only for magnons=.true.)
-		 }
+		opt -val 0 {
+		    Rydbergs.
+		}
+
+		opt -val 1 {
+		    Electron volts.
+		}
+
+		opt -val 2 {
+		    Nanometres per electron volts.
+		}
+
+		opt -val 3 {
+		    Milli electron volts (only for magnons=.true.).
+		}
+	    }
         }
 
 	var start -type REAL {

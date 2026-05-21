@@ -74,7 +74,13 @@ class ProjwfcNamelist(Namelist):
         json_schema_extra={"default_ref": "prefix"},
         description="prefix for output files containing PDOS(E)",
     )
-    filproj: str = Field("(standard output)", description="file containing the projections")
+    filproj: str | None = Field(
+        None,
+        json_schema_extra={"computed_default": True},
+        description=(
+            "File containing the projections. If unset, projections are written to standard output."
+        ),
+    )
     lwrite_overlaps: bool = Field(
         False,
         description=(

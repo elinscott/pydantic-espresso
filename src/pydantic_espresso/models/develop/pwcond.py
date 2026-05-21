@@ -4,7 +4,7 @@ This file has been generated automatically. Do not edit it manually.
 """
 
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import Field
 
@@ -85,14 +85,7 @@ class InputcondNamelist(Namelist):
     lread_loc: bool = Field(
         False, description="if .t. read 2D eigenvalue problem result from fil_loc"
     )
-    ikind: int = Field(
-        0,
-        description=(
-            "The kind of conductance calculation:  ikind=0  - just complex band structure (CBS) "
-            "calculation  ikind=1  - conductance calculation with identical left and right leads  "
-            "ikind=2  - conductance calculation with different left and right leads"
-        ),
-    )
+    ikind: Literal[0, 1, 2] = Field(0, description="The kind of conductance calculation.")
     iofspin: int = Field(1, description="spin index for which the calculations are performed")
     tk_plot: int = Field(
         0, description="if > 0, plot T(kx,ky) at each energy in the region [tk_plot x full BZ]"
