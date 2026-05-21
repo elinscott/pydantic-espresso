@@ -14,8 +14,16 @@ later, but that will cause problems--the code will get executed twice:
 """
 
 import json
+import sys
 
-import click
+try:
+    import click
+except ImportError:
+    sys.stderr.write(
+        "The pydantic_espresso CLI requires the optional 'dev' extra.\n"
+        "Install it with: pip install pydantic_espresso[dev]\n"
+    )
+    sys.exit(1)
 
 from pydantic_espresso.models import get_module, versions
 

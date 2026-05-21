@@ -47,16 +47,8 @@ license-files = [
 
 requires-python = ">=3.12"
 dependencies = [
-    "more_itertools", # missing from itertools in stdlib
-    "tqdm", # progress bars
-    "click",
-    "more_click",
-    "typing-extensions",
     "pydantic",
-    "numpy",
     "packaging",
-    "python-gitlab",
-    "defusedxml>=0.7.1",
 ]
 
 # see https://peps.python.org/pep-0735/ and https://docs.astral.sh/uv/concepts/dependencies/#dependency-groups
@@ -64,6 +56,7 @@ dependencies = [
 tests = [
     "pytest",
     "coverage[toml]",
+    "numpy",
 ]
 docs = [
     "sphinx>=8",
@@ -82,6 +75,7 @@ typing = [
     { include-group = "tests" },
     "mypy",
     "pydantic",
+    "click",
     # You will probably have to add additional type stubs here, especially if you're using tox-uv
 ]
 docs-lint = [
@@ -117,9 +111,10 @@ release = [
 
 # see https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#dependencies-optional-dependencies
 [project.optional-dependencies]
-fetch = [
-     "python-gitlab",
-     "defusedxml"
+dev = [
+    "click",
+    "python-gitlab",
+    "defusedxml>=0.7.1",
 ]
 
 

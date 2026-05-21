@@ -50,7 +50,11 @@ inp.system.nbnd = "a"
 
 ### Command Line Interface
 
-The `pydantic_espresso` command line tool is automatically installed.
+The `pydantic_espresso` command line tool ships with the package but requires
+the optional `dev` extra (which pulls in `click`, `python-gitlab`, and
+`defusedxml`). Install it with `pip install pydantic_espresso[dev]` or
+`uv pip install "pydantic_espresso[dev]"`.
+
 It can be used from the console with the `--help` flag to show all subcommands:
 
 ```console
