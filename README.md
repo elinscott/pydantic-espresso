@@ -35,18 +35,50 @@
 
 Pydantic models for `Quantum ESPRESSO`.
 
+The models are auto-generated from the `INPUT_*.def` files shipped with
+Quantum ESPRESSO. Supported QE versions are 7.6 and newer (the schema for
+older releases lacks the structured `<units>`, `<dimensionality>`, and
+`<default kind="...">` metadata that the generator depends on).
+
 ## 💪 Getting Started
 
-```
-from pydantic_espresso.models.develop.pw import PWEspressoInput
+```python
+from pydantic_espresso.models.pw.develop import PWInput
 
-inp = PWEspressoInput(control={"calculation": "bands"})
+inp = PWInput(
+    system={"ibrav": 0, "nat": 1, "ntyp": 1, "ecutwfc": 30.0},
+    cell_parameters={"unit": "alat", "vectors": [[1, 0, 0], [0, 1, 0], [0, 0, 1]]},
+    atomic_positions={
+        "unit": "alat",
+        "positions": [{"species": "H", "position": [0.0, 0.0, 0.0]}],
+    },
+    k_points={"kind": "gamma"},
+)
 
-# Any of...
-inp.system.ibrav = -1
-inp.system.nbnd = "a"
-# ... will raise ValidationErrors
+# Pydantic enforces both the QE input schema and the field constraints:
+inp.system.ibrav = -1          # ValidationError: invalid Bravais lattice index
+inp.system.nbnd = "a"          # ValidationError: not an int
+inp.control.calculation = "bands"   # OK
 ```
+
+Each numeric field carries its physical units and dimensionality as
+`Quantity` metadata, threaded into both the pydantic field info and the
+JSON schema:
+
+```python
+from pydantic_espresso.models.pw.develop import SystemNamelist
+from pydantic_espresso.quantity import quantity_for
+
+q = quantity_for(SystemNamelist.model_fields["ecutwfc"])
+# Quantity(units='Ry', dimensionality='energy')
+
+PWInput.model_json_schema()["$defs"]["SystemNamelist"]["properties"]["ecutwfc"]
+# {'type': 'number', 'units': 'Ry', 'dimensionality': 'energy', ...}
+```
+
+QE namelist branches with mutually-exclusive layouts (e.g. PP's `PLOT`
+namelist discriminated on `iflag`) are exposed as pydantic discriminated
+unions, so the right variant is picked automatically from the input data.
 
 ### Command Line Interface
 
