@@ -3,6 +3,8 @@
 This file has been generated automatically. Do not edit it manually.
 """
 
+from textwrap import dedent
+
 from pydantic import Field
 
 from pydantic_espresso.models.template import EspressoInput
@@ -12,20 +14,22 @@ from pydantic_espresso.namelist import Namelist
 class OscdftEtNamelistNamelist(Namelist):
     """Pydantic model for the `OSCDFT_ET_NAMELIST` namelist."""
 
-    initial_prefix: str | None = Field(None, description="prefix of the initial pw.x calculation.")
-    final_prefix: str | None = Field(None, description="prefix of the final pw.x calculation.")
-    initial_dir: str | None = Field(
-        None,
-        description=(
-            "The directory containing the input data of the initial pw.x calculation, i.e. the "
-            "same as in pw.x."
+    initial_prefix: str = Field(..., description="prefix of the initial pw.x calculation.")
+    final_prefix: str = Field(..., description="prefix of the final pw.x calculation.")
+    initial_dir: str = Field(
+        ...,
+        description=dedent(
+            """\
+            The directory containing the input data of the initial pw.x calculation, i.e. the same
+            as in pw.x."""
         ),
     )
-    final_dir: str | None = Field(
-        None,
-        description=(
-            "The directory containing the input data of the final pw.x calculation, i.e. the same "
-            "as in pw.x."
+    final_dir: str = Field(
+        ...,
+        description=dedent(
+            """\
+            The directory containing the input data of the final pw.x calculation, i.e. the same as
+            in pw.x."""
         ),
     )
     print_matrix: bool = Field(False, description="If .TRUE., prints the occupation matrices.")
@@ -36,6 +40,4 @@ class OscdftEtNamelistNamelist(Namelist):
 class OSCDFTETEspressoInput(EspressoInput):
     """Pydantic model for the input of `oscdft_et.x`."""
 
-    oscdft_et_namelist: OscdftEtNamelistNamelist = Field(
-        default_factory=lambda: OscdftEtNamelistNamelist()
-    )
+    oscdft_et_namelist: OscdftEtNamelistNamelist | None = Field(None)

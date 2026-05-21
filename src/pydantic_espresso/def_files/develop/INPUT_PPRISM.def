@@ -145,7 +145,6 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program ppris
                 label { the following variables are REQUIRED: }
 
                 dimension x0 -start 1 -end 3  -type REAL {
-                    default { 0.0 }
                     dimensionality { length }
                     units { alat }
                     info {
@@ -154,14 +153,12 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program ppris
                 }
 
                 var nx -type INTEGER {
-                    default { 0 }
                     info {
                         number of radial grids
                     }
                 }
 
                 var lebedev -type INTEGER {
-                    default { 302 }
                     info {
                         number of spherical grids of Lebedev quadrature
                         (only for @ref interpolation = 'bspline')
@@ -181,7 +178,6 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program ppris
                 }
 
                 dimension x0 -start 1 -end 3  -type REAL {
-                    default { 0.0 }
                     dimensionality { length }
                     units { alat }
                     info {
@@ -214,7 +210,6 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program ppris
                 }
 
                 dimension x0 -start 1 -end 3 -type REAL {
-                    default { 0.0 }
                     dimensionality { length }
                     units { alat }
                     info {
@@ -294,7 +289,6 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program ppris
                 label { the following variables are REQUIRED: }
 
                 var radius -type REAL {
-                    default { 1.0 }
                     dimensionality { length }
                     units { alat }
                     info {

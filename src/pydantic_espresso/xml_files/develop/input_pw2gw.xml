@@ -25,10 +25,8 @@
    </intro>
    <namelist name="INPUTPP" >
       <var name="prefix" type="STRING" >
-         <status> MANDATORY
+         <status> REQUIRED
          </status>
-         <default> &apos;pwscf&apos;
-         </default>
          <info>
 the first part of the name of all the file written by the code
 should be equal to the value given in the main calculations.

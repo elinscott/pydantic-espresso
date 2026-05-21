@@ -32,8 +32,7 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program bgw2p
     namelist INPUT_BGW2PW {
 
 	var prefix -type STRING {
-	    status { MANDATORY }
-	    default { 'prefix' }
+	    status { REQUIRED }
 	    info {
 		prefix of files saved by program pw.x
 	    }

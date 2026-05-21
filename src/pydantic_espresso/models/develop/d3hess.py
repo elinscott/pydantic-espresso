@@ -4,6 +4,7 @@ This file has been generated automatically. Do not edit it manually.
 """
 
 from pathlib import Path
+from textwrap import dedent
 from typing import Annotated
 
 from pydantic import Field
@@ -35,9 +36,10 @@ class InputNamelist(Namelist):
     filhess: str | None = Field(
         None,
         json_schema_extra={"default_expr": "trim(prefix)//'.hess'"},
-        description=(
-            "output file where the D3 hessian matrix is written (should match dftd3_hess keyword "
-            "in phonon calculation)"
+        description=dedent(
+            """\
+            output file where the D3 hessian matrix is written (should match dftd3_hess keyword in
+            phonon calculation)"""
         ),
     )
     step: Annotated[float, Quantity(units="bohr", dimensionality="length")] = Field(

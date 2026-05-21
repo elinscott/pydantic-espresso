@@ -212,10 +212,10 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program pp.x 
 
                 var spin_component -type INTEGER {
                     default { 0 }
-                    info {
-                        0 = total charge,
-                        1 = spin up charge,
-                        2 = spin down charge.
+                    options {
+                        opt -val 0 { total charge }
+                        opt -val 1 { spin up charge }
+                        opt -val 2 { spin down charge }
                     }
                 }
             }
@@ -227,10 +227,10 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program pp.x 
 
                 var spin_component -type INTEGER {
                     default { 0 }
-                    info {
-                        0 = spin averaged potential,
-                        1 = spin up potential,
-                        2 = spin down potential.
+                    options {
+                        opt -val 0 { spin averaged potential }
+                        opt -val 1 { spin up potential }
+                        opt -val 2 { spin down potential }
                     }
                 }
             }
@@ -420,11 +420,13 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program pp.x 
 
                 var spin_component -type INTEGER {
                     default { 0 }
-                    info {
-                        for LSDA case only: plot the contribution to ILDOS of
-                        0 = spin-up + spin-down (default)
-                        1 = spin-up   only
-                        2 = spin-down only
+                    options {
+                        info {
+                            For LSDA case only: plot the contribution to ILDOS of:
+                        }
+                        opt -val 0 { spin-up + spin-down (default) }
+                        opt -val 1 { spin-up only }
+                        opt -val 2 { spin-down only }
                     }
                 }
             }
@@ -436,11 +438,11 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program pp.x 
 
                 var spin_component -type INTEGER {
                     default { 0 }
-                    info {
-                        0 = absolute value
-                        1 = x component of the magnetization
-                        2 = y component of the magnetization
-                        3 = z component of the magnetization
+                    options {
+                        opt -val 0 { absolute value }
+                        opt -val 1 { x component of the magnetization }
+                        opt -val 2 { y component of the magnetization }
+                        opt -val 3 { z component of the magnetization }
                     }
                 }
             }
@@ -452,10 +454,10 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program pp.x 
 
                 var spin_component -type INTEGER {
                     default { 0 }
-                    info {
-                        0 = total charge,
-                        1 = spin up charge,
-                        2 = spin down charge.
+                    options {
+                        opt -val 0 { total charge }
+                        opt -val 1 { spin up charge }
+                        opt -val 2 { spin down charge }
                     }
                 }
             }
@@ -468,10 +470,10 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program pp.x 
 
                 var spin_component -type INTEGER {
                     default { 0 }
-                    info {
-                        0 = total density,
-                        1 = spin up density,
-                        2 = spin down density.
+                    options {
+                        opt -val 0 { total density }
+                        opt -val 1 { spin up density }
+                        opt -val 2 { spin down density }
                     }
                 }
             }
@@ -636,7 +638,6 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program pp.x 
                 label { the following variables are REQUIRED: }
 
                 dimension e1 -start 1 -end 3 -type REAL {
-                    default { 0.0 }
                     dimensionality { length }
                     units { alat }
                     info {
@@ -645,7 +646,6 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program pp.x 
                 }
 
                 dimension x0 -start 1 -end 3  -type REAL {
-                    default { 0.0 }
                     dimensionality { length }
                     units { alat }
                     info {
@@ -654,7 +654,6 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program pp.x 
                 }
 
                 var nx -type INTEGER {
-                    default { 0 }
                     info {
                         number of points in the line:
 
@@ -669,7 +668,6 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program pp.x 
                 dimensiongroup  -start 1 -end 3 -type REAL {
                     dimension e1
                     dimension e2
-                    default { 0.0 }
                     dimensionality { length }
                     units { alat }
                     info {
@@ -680,7 +678,6 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program pp.x 
                 }
 
                 dimension x0 -start 1 -end 3 -type REAL {
-                    default { 0.0 }
                     dimensionality { length }
                     units { alat }
                     info {
@@ -691,7 +688,6 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program pp.x 
                 vargroup -type INTEGER {
                     var nx
                     var ny
-                    default { 0 }
                     info {
                         Number of points in the plane:
 
@@ -763,7 +759,6 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program pp.x 
                 label { the following variables are REQUIRED: }
 
                 var radius -type REAL {
-                    default { 1.0 }
                     dimensionality { length }
                     units { alat }
                     info {
@@ -774,7 +769,6 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program pp.x 
                 vargroup -type INTEGER {
                     var nx
                     var ny
-                    default { 0 }
                     info {
                         Number of points in the polar plane:
 

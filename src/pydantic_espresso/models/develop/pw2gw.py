@@ -4,6 +4,7 @@ This file has been generated automatically. Do not edit it manually.
 """
 
 from pathlib import Path
+from textwrap import dedent
 from typing import Annotated
 
 from pydantic import Field
@@ -17,10 +18,11 @@ class InputppNamelist(Namelist):
     """Pydantic model for the `INPUTPP` namelist."""
 
     prefix: str = Field(
-        "pwscf",
-        description=(
-            "the first part of the name of all the file written by the code should be equal to the "
-            "value given in the main calculations."
+        ...,
+        description=dedent(
+            """\
+            the first part of the name of all the file written by the code should be equal to the
+            value given in the main calculations."""
         ),
     )
     outdir: Path | None = Field(
@@ -38,30 +40,34 @@ class InputppNamelist(Namelist):
     )
     what: str = Field(
         "gw",
-        description=(
-            "gw' : Calculate dipole optical matrix elements (use for norm-conserving "
-            "pseudopotentials) and imaginary part of the dielectric function.  'gmaps': write "
-            "g-maps for each processor in a file 'fort.'100 + processor number"
+        description=dedent(
+            """\
+            gw' : Calculate dipole optical matrix elements (use for norm-conserving
+            pseudopotentials) and imaginary part of the dielectric function.  'gmaps': write g-maps
+            for each processor in a file 'fort.'100 + processor number"""
         ),
     )
     qplda: bool = Field(
         False,
-        description=(
-            "if .TRUE. write the interface file 'QPLDA' to GW and BSE codes (chisig, dpforexc)."
+        description=dedent(
+            """\
+            if .TRUE. write the interface file 'QPLDA' to GW and BSE codes (chisig, dpforexc)."""
         ),
     )
     vxcdiag: bool = Field(
         False,
-        description=(
-            "if .TRUE. calculates the expectation value of the exchange and correlation potential "
-            "on all the Kohn-Sham states and write it into the 'vxcdiag.dat' file."
+        description=dedent(
+            """\
+            if .TRUE. calculates the expectation value of the exchange and correlation potential on
+            all the Kohn-Sham states and write it into the 'vxcdiag.dat' file."""
         ),
     )
     vkb: bool = Field(
         False,
-        description=(
-            "if .TRUE. use Kleyman-Bylander projectors to write additional informatio into fort.15 "
-            "file (Still in development)"
+        description=dedent(
+            """\
+            if .TRUE. use Kleyman-Bylander projectors to write additional informatio into fort.15
+            file (Still in development)"""
         ),
     )
     Emin: Annotated[float, Quantity(units="eV", dimensionality="energy")] = Field(
@@ -78,4 +84,4 @@ class InputppNamelist(Namelist):
 class PW2GWEspressoInput(EspressoInput):
     """Pydantic model for the input of `pw2gw.x`."""
 
-    inputpp: InputppNamelist = Field(default_factory=lambda: InputppNamelist())
+    inputpp: InputppNamelist | None = Field(None)

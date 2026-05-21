@@ -4,6 +4,7 @@ This file has been generated automatically. Do not edit it manually.
 """
 
 from pathlib import Path
+from textwrap import dedent
 from typing import Annotated, Literal
 
 from pydantic import Field
@@ -30,9 +31,10 @@ class _InputppNamelistBase(Namelist):
     )
     filplot: str = Field(
         "tmp.pp",
-        description=(
-            "file 'filplot' contains the quantity selected by plot_num. Typically this is a "
-            "temporary file and may be ignored, unless you want to save it for further processing"
+        description=dedent(
+            """\
+            file 'filplot' contains the quantity selected by plot_num. Typically this is a
+            temporary file and may be ignored, unless you want to save it for further processing"""
         ),
     )
 
@@ -41,8 +43,14 @@ class InputppPlotNum0Or9Namelist(_InputppNamelistBase):
     """`INPUTPP` namelist when `plot_num` in (0, 9)."""
 
     plot_num: Literal[0, 9] = Field(0, description="Discriminator: plot_num")
-    spin_component: int = Field(
-        0, description="0 = total charge, 1 = spin up charge, 2 = spin down charge."
+    spin_component: Literal[0, 1, 2] = Field(
+        0,
+        description=dedent(
+            """\
+            - '0': total charge.
+            - '1': spin up charge.
+            - '2': spin down charge."""
+        ),
     )
 
 
@@ -50,9 +58,14 @@ class InputppPlotNum1Namelist(_InputppNamelistBase):
     """`INPUTPP` namelist when `plot_num` == 1."""
 
     plot_num: Literal[1] = Field(1, description="Discriminator: plot_num")
-    spin_component: int = Field(
+    spin_component: Literal[0, 1, 2] = Field(
         0,
-        description="0 = spin averaged potential, 1 = spin up potential, 2 = spin down potential.",
+        description=dedent(
+            """\
+            - '0': spin averaged potential.
+            - '1': spin up potential.
+            - '2': spin down potential."""
+        ),
     )
 
 
@@ -94,16 +107,18 @@ class InputppPlotNum3Namelist(_InputppNamelistBase):
                 {"when": None, "value": "-999.0"},
             ],
         },
-        description=(
-            "broadening of energy levels for LDOS.  Defaults to broadening degauss specified for "
-            "electronic smearing in pw.x calculation."
+        description=dedent(
+            """\
+            broadening of energy levels for LDOS.  Defaults to broadening degauss specified for
+            electronic smearing in pw.x calculation."""
         ),
     )
     use_gauss_ldos: bool = Field(
         False,
-        description=(
-            "If .true., gaussian broadening (ngauss=0) is used for LDOS calculation.  Defaults "
-            ".false., in which case the broadening scheme of the pw.x calculation will be used."
+        description=dedent(
+            """\
+            If .true., gaussian broadening (ngauss=0) is used for LDOS calculation.  Defaults
+            .false., in which case the broadening scheme of the pw.x calculation will be used."""
         ),
     )
 
@@ -130,11 +145,12 @@ class InputppPlotNum7Namelist(_InputppNamelistBase):
                 {"when": None, "value": "kpoint(2) initialized to 0; kpoint(1) has no default"},
             ],
         },
-        description=(
-            "Unpolarized and noncollinear case: k-point(s) to be plotted LSDA: k-point(s) and spin "
-            "polarization to be plotted (spin-up and spin-down correspond to different k-points!)  "
-            "To plot a single kpoint ikpt, specify kpoint=ikpt or kpoint(1)=ikpt To plot a range "
-            "of kpoints [imin, imax], specify kpoint(1)=imin and kpoint(2)=imax"
+        description=dedent(
+            """\
+            Unpolarized and noncollinear case: k-point(s) to be plotted LSDA: k-point(s) and spin
+            polarization to be plotted (spin-up and spin-down correspond to different k-points!)
+            To plot a single kpoint ikpt, specify kpoint=ikpt or kpoint(1)=ikpt To plot a range of
+            kpoints [imin, imax], specify kpoint(1)=imin and kpoint(2)=imax"""
         ),
     )
     kband: tuple[int, int] | None = Field(
@@ -145,10 +161,10 @@ class InputppPlotNum7Namelist(_InputppNamelistBase):
                 {"when": None, "value": "kband(2) initialized to 0; kband(1) has no default"},
             ],
         },
-        description=(
-            "Band(s) to be plotted.  To plot a single band ibnd, specify kband=ibnd or "
-            "kband(1)=ibnd To plot a range of bands [imin, imax], specify kband(1)=imin and "
-            "kband(2)=imax"
+        description=dedent(
+            """\
+            Band(s) to be plotted.  To plot a single band ibnd, specify kband=ibnd or kband(1)=ibnd
+            To plot a range of bands [imin, imax], specify kband(1)=imin and kband(2)=imax"""
         ),
     )
     spin_component: tuple[int, int] | None = Field(
@@ -162,12 +178,13 @@ class InputppPlotNum7Namelist(_InputppNamelistBase):
                 {"when": None, "value": "0"},
             ],
         },
-        description=(
-            "Noncollinear case only: plot the contribution of the given state(s) to the charge or "
-            "to the magnetization along the direction(s) indicated by spin_component: 0 = charge, "
-            "1 = x, 2 = y, 3 = z.  Ignored in unpolarized or LSDA case  To plot a single component "
-            "ispin, specify spin_component=ispin or spin_component(1)=ispin To plot a range of "
-            "components [imin, imax], specify spin_component(1)=imin and spin_component(2)=imax"
+        description=dedent(
+            """\
+            Noncollinear case only: plot the contribution of the given state(s) to the charge or to
+            the magnetization along the direction(s) indicated by spin_component: 0 = charge, 1 =
+            x, 2 = y, 3 = z.  Ignored in unpolarized or LSDA case  To plot a single component
+            ispin, specify spin_component=ispin or spin_component(1)=ispin To plot a range of
+            components [imin, imax], specify spin_component(1)=imin and spin_component(2)=imax"""
         ),
     )
 
@@ -192,11 +209,14 @@ class InputppPlotNum10Namelist(_InputppNamelistBase):
         },
         description="upper energy boundary, i.e. compute ILDOS from emin to emax",
     )
-    spin_component: int = Field(
+    spin_component: Literal[0, 1, 2] = Field(
         0,
-        description=(
-            "for LSDA case only: plot the contribution to ILDOS of 0 = spin-up + spin-down "
-            "(default) 1 = spin-up   only 2 = spin-down only"
+        description=dedent(
+            """\
+            For LSDA case only: plot the contribution to ILDOS of:
+            - '0': spin-up + spin-down (default).
+            - '1': spin-up only.
+            - '2': spin-down only."""
         ),
     )
 
@@ -205,11 +225,14 @@ class InputppPlotNum13Namelist(_InputppNamelistBase):
     """`INPUTPP` namelist when `plot_num` == 13."""
 
     plot_num: Literal[13] = Field(13, description="Discriminator: plot_num")
-    spin_component: int = Field(
+    spin_component: Literal[0, 1, 2, 3] = Field(
         0,
-        description=(
-            "0 = absolute value 1 = x component of the magnetization 2 = y component of the "
-            "magnetization 3 = z component of the magnetization"
+        description=dedent(
+            """\
+            - '0': absolute value.
+            - '1': x component of the magnetization.
+            - '2': y component of the magnetization.
+            - '3': z component of the magnetization."""
         ),
     )
 
@@ -218,8 +241,14 @@ class InputppPlotNum17Namelist(_InputppNamelistBase):
     """`INPUTPP` namelist when `plot_num` == 17."""
 
     plot_num: Literal[17] = Field(17, description="Discriminator: plot_num")
-    spin_component: int = Field(
-        0, description="0 = total charge, 1 = spin up charge, 2 = spin down charge."
+    spin_component: Literal[0, 1, 2] = Field(
+        0,
+        description=dedent(
+            """\
+            - '0': total charge.
+            - '1': spin up charge.
+            - '2': spin down charge."""
+        ),
     )
 
 
@@ -227,8 +256,14 @@ class InputppPlotNum22Namelist(_InputppNamelistBase):
     """`INPUTPP` namelist when `plot_num` == 22."""
 
     plot_num: Literal[22] = Field(22, description="Discriminator: plot_num")
-    spin_component: int = Field(
-        0, description="0 = total density, 1 = spin up density, 2 = spin down density."
+    spin_component: Literal[0, 1, 2] = Field(
+        0,
+        description=dedent(
+            """\
+            - '0': total density.
+            - '1': spin up density.
+            - '2': spin down density."""
+        ),
     )
 
 
@@ -238,17 +273,19 @@ class InputppPlotNum25Namelist(_InputppNamelistBase):
     plot_num: Literal[25] = Field(25, description="Discriminator: plot_num")
     nc: int = Field(
         1,
-        description=(
-            "nc(1), nc(2), and nc(3) indicate the size of the supercell for the visualization of "
-            "the squared modulus of the Hubbard projector functions. Note, this supercell must "
-            "match the k-points grid size otherwise the resulting WFs are wrong."
+        description=dedent(
+            """\
+            nc(1), nc(2), and nc(3) indicate the size of the supercell for the visualization of the
+            squared modulus of the Hubbard projector functions. Note, this supercell must match the
+            k-points grid size otherwise the resulting WFs are wrong."""
         ),
     )
     n0: int = Field(
         0,
-        description=(
-            "n0(1), n0(2), and n0(3) indicate the shift of the coordinate frame in units of the "
-            "lattice vectors for a better visualization of the Hubbard projector functions"
+        description=dedent(
+            """\
+            n0(1), n0(2), and n0(3) indicate the shift of the coordinate frame in units of the
+            lattice vectors for a better visualization of the Hubbard projector functions"""
         ),
     )
 
@@ -274,35 +311,51 @@ class _PlotNamelistBase(Namelist):
     nfile: int = Field(1, description="the number of data files to read")
     output_format: Literal[-1, 0, 2, 3, 5, 6, 7] = Field(
         -1,
-        description=(
-            "Format of the output plot file (ignored on 1D plot). Values 1 and 4 are obsolete and "
-            "no longer supported."
+        description=dedent(
+            """\
+            Format of the output plot file (ignored on 1D plot). Values 1 and 4 are obsolete and no
+            longer supported.
+            - '-1': do not do anything, skip step (2) (see header).
+            - '0': format suitable for gnuplot   (1D).
+            - '2': format suitable for plotrho   (2D).
+            - '3': format suitable for XCRYSDEN  (2D or user-supplied 3D region).
+            - '5': format suitable for XCRYSDEN  (3D, using entire FFT grid).
+            - '6': format as gaussian cube file  (3D) (can be read by many programs).
+            - '7': format suitable for gnuplot   (2D) x, y, f(x,y)."""
         ),
     )
     fileout: str | None = Field(
         None,
         json_schema_extra={"computed_default": True},
-        description=(
-            "Name of the file to which the plot is written. If unset, the plot is written to "
-            "standard output."
+        description=dedent(
+            """\
+            Name of the file to which the plot is written. If unset, the plot is written to
+            standard output."""
         ),
     )
     interpolation: Literal["fourier", "bspline"] = Field(
-        "fourier", description="Type of interpolation:"
+        "fourier",
+        description=dedent(
+            """\
+            Type of interpolation:
+            - 'bspline': (EXPERIMENTAL)."""
+        ),
     )
     filepp: list[str] = Field(
         ["tmp.pp"],
-        description=(
-            "nfile = 1 : file containing the quantity to be plotted (should be the same as "
-            "filplot) nfile > 1 : see weight (start = 1, end = nfile)"
+        description=dedent(
+            """\
+            nfile = 1 : file containing the quantity to be plotted (should be the same as filplot)
+            nfile > 1 : see weight (start = 1, end = nfile)"""
         ),
     )
     weight: list[float] = Field(
         [1.0],
-        description=(
-            "weighing factors: assuming that rho(i) is the quantity read from filepp(i), the "
-            "quantity that will be plotted is:  weight(1)*rho(1) + weight(2)*rho(2) + "
-            "weight(3)*rho(3) + ... (start = 1, end = nfile)"
+        description=dedent(
+            """\
+            weighing factors: assuming that rho(i) is the quantity read from filepp(i), the
+            quantity that will be plotted is:  weight(1)*rho(1) + weight(2)*rho(2) +
+            weight(3)*rho(3) + ... (start = 1, end = nfile)"""
         ),
     )
 
@@ -312,16 +365,17 @@ class PlotIflag0Or1Namelist(_PlotNamelistBase):
 
     iflag: Literal[0, 1] = Field(0, description="Discriminator: iflag")
     nx: int = Field(
-        0,
-        description=(
-            "number of points in the line:  rho(i) = rho( x0 + e1 * (i-1)/(nx-1) ), i=1, nx"
+        ...,
+        description=dedent(
+            """\
+            number of points in the line:  rho(i) = rho( x0 + e1 * (i-1)/(nx-1) ), i=1, nx"""
         ),
     )
     e1: Annotated[tuple[float, float, float], Quantity(units="alat", dimensionality="length")] = (
-        Field((0.0, 0.0, 0.0), description="3D vector which determines the plotting line")
+        Field(..., description="3D vector which determines the plotting line")
     )
     x0: Annotated[tuple[float, float, float], Quantity(units="alat", dimensionality="length")] = (
-        Field((0.0, 0.0, 0.0), description="3D vector, origin of the line")
+        Field(..., description="3D vector, origin of the line")
     )
 
 
@@ -329,16 +383,44 @@ class PlotIflag2Namelist(_PlotNamelistBase):
     """`PLOT` namelist when `iflag` == 2."""
 
     iflag: Literal[2] = Field(2, description="Discriminator: iflag")
-    nx: int | None = Field(None, description="")
-    ny: int | None = Field(None, description="")
-    e1: Annotated[
-        tuple[float, float, float] | None, Quantity(units="alat", dimensionality="length")
-    ] = Field(None, description="")
-    e2: Annotated[
-        tuple[float, float, float] | None, Quantity(units="alat", dimensionality="length")
-    ] = Field(None, description="")
+    nx: int = Field(
+        ...,
+        description=dedent(
+            """\
+            Number of points in the plane:  rho(i,j) = rho( x0 + e1 * (i-1)/(nx-1) + e2 *
+            (j-1)/(ny-1) ), i=1,nx ; j=1,ny"""
+        ),
+    )
+    ny: int = Field(
+        ...,
+        description=dedent(
+            """\
+            Number of points in the plane:  rho(i,j) = rho( x0 + e1 * (i-1)/(nx-1) + e2 *
+            (j-1)/(ny-1) ), i=1,nx ; j=1,ny"""
+        ),
+    )
+    e1: Annotated[tuple[float, float, float], Quantity(units="alat", dimensionality="length")] = (
+        Field(
+            ...,
+            description=dedent(
+                """\
+                3D vectors which determine the plotting plane  BEWARE: e1 and e2 must be
+                orthogonal"""
+            ),
+        )
+    )
+    e2: Annotated[tuple[float, float, float], Quantity(units="alat", dimensionality="length")] = (
+        Field(
+            ...,
+            description=dedent(
+                """\
+                3D vectors which determine the plotting plane  BEWARE: e1 and e2 must be
+                orthogonal"""
+            ),
+        )
+    )
     x0: Annotated[tuple[float, float, float], Quantity(units="alat", dimensionality="length")] = (
-        Field((0.0, 0.0, 0.0), description="3D vector, origin of the plane")
+        Field(..., description="3D vector, origin of the plane")
     )
 
 
@@ -346,18 +428,81 @@ class PlotIflag3Namelist(_PlotNamelistBase):
     """`PLOT` namelist when `iflag` == 3."""
 
     iflag: Literal[3] = Field(3, description="Discriminator: iflag")
-    nx: int | None = Field(None, description="")
-    ny: int | None = Field(None, description="")
-    nz: int | None = Field(None, description="")
-    e1: Annotated[
-        tuple[float, float, float] | None, Quantity(units="alat", dimensionality="length")
-    ] = Field(None, description="")
-    e2: Annotated[
-        tuple[float, float, float] | None, Quantity(units="alat", dimensionality="length")
-    ] = Field(None, description="")
-    e3: Annotated[
-        tuple[float, float, float] | None, Quantity(units="alat", dimensionality="length")
-    ] = Field(None, description="")
+    nx: int = Field(
+        0,
+        description=dedent(
+            """\
+            Number of points in the parallelepiped:  rho(i,j,k) = rho( x0 + e1 * (i-1)/nx + e2 *
+            (j-1)/ny + e3 * (k-1)/nz ), i = 1, nx ; j = 1, ny ; k = 1, nz  - If output_format = 3
+            (XCRYSDEN), the above variables are used to determine the grid to plot.  - If
+            output_format = 5 (XCRYSDEN), the above variables are ignored, the entire FFT grid is
+            written in the XCRYSDEN format - works for any crystal axis (VERY FAST)  - If e1, e2,
+            e3, x0 are present, and e1, e2, e3 are parallel to xyz and parallel to crystal axis, a
+            subset of the FFT grid that approximately covers the parallelepiped defined by e1, e2,
+            e3, x0, is written - untested, might be obsolete  - Otherwise, the required 3D grid is
+            generated from the Fourier components (may be VERY slow)"""
+        ),
+    )
+    ny: int = Field(
+        0,
+        description=dedent(
+            """\
+            Number of points in the parallelepiped:  rho(i,j,k) = rho( x0 + e1 * (i-1)/nx + e2 *
+            (j-1)/ny + e3 * (k-1)/nz ), i = 1, nx ; j = 1, ny ; k = 1, nz  - If output_format = 3
+            (XCRYSDEN), the above variables are used to determine the grid to plot.  - If
+            output_format = 5 (XCRYSDEN), the above variables are ignored, the entire FFT grid is
+            written in the XCRYSDEN format - works for any crystal axis (VERY FAST)  - If e1, e2,
+            e3, x0 are present, and e1, e2, e3 are parallel to xyz and parallel to crystal axis, a
+            subset of the FFT grid that approximately covers the parallelepiped defined by e1, e2,
+            e3, x0, is written - untested, might be obsolete  - Otherwise, the required 3D grid is
+            generated from the Fourier components (may be VERY slow)"""
+        ),
+    )
+    nz: int = Field(
+        0,
+        description=dedent(
+            """\
+            Number of points in the parallelepiped:  rho(i,j,k) = rho( x0 + e1 * (i-1)/nx + e2 *
+            (j-1)/ny + e3 * (k-1)/nz ), i = 1, nx ; j = 1, ny ; k = 1, nz  - If output_format = 3
+            (XCRYSDEN), the above variables are used to determine the grid to plot.  - If
+            output_format = 5 (XCRYSDEN), the above variables are ignored, the entire FFT grid is
+            written in the XCRYSDEN format - works for any crystal axis (VERY FAST)  - If e1, e2,
+            e3, x0 are present, and e1, e2, e3 are parallel to xyz and parallel to crystal axis, a
+            subset of the FFT grid that approximately covers the parallelepiped defined by e1, e2,
+            e3, x0, is written - untested, might be obsolete  - Otherwise, the required 3D grid is
+            generated from the Fourier components (may be VERY slow)"""
+        ),
+    )
+    e1: Annotated[tuple[float, float, float], Quantity(units="alat", dimensionality="length")] = (
+        Field(
+            (0.0, 0.0, 0.0),
+            description=dedent(
+                """\
+                3D vectors which determine the plotting parallelepiped (if present, must be
+                orthogonal)"""
+            ),
+        )
+    )
+    e2: Annotated[tuple[float, float, float], Quantity(units="alat", dimensionality="length")] = (
+        Field(
+            (0.0, 0.0, 0.0),
+            description=dedent(
+                """\
+                3D vectors which determine the plotting parallelepiped (if present, must be
+                orthogonal)"""
+            ),
+        )
+    )
+    e3: Annotated[tuple[float, float, float], Quantity(units="alat", dimensionality="length")] = (
+        Field(
+            (0.0, 0.0, 0.0),
+            description=dedent(
+                """\
+                3D vectors which determine the plotting parallelepiped (if present, must be
+                orthogonal)"""
+            ),
+        )
+    )
     x0: Annotated[tuple[float, float, float], Quantity(units="alat", dimensionality="length")] = (
         Field((0.0, 0.0, 0.0), description="3D vector, origin of the parallelepiped")
     )
@@ -368,10 +513,24 @@ class PlotIflag4Namelist(_PlotNamelistBase):
 
     iflag: Literal[4] = Field(4, description="Discriminator: iflag")
     radius: Annotated[float, Quantity(units="alat", dimensionality="length")] = Field(
-        1.0, description="Radius of the sphere, centered at (0,0,0)"
+        ..., description="Radius of the sphere, centered at (0,0,0)"
     )
-    nx: int | None = Field(None, description="")
-    ny: int | None = Field(None, description="")
+    nx: int = Field(
+        ...,
+        description=dedent(
+            """\
+            Number of points in the polar plane:  phi(i)   = 2 pi * (i - 1)/(nx-1), i=1, nx
+            theta(j) =   pi * (j - 1)/(ny-1), j=1, ny"""
+        ),
+    )
+    ny: int = Field(
+        ...,
+        description=dedent(
+            """\
+            Number of points in the polar plane:  phi(i)   = 2 pi * (i - 1)/(nx-1), i=1, nx
+            theta(j) =   pi * (j - 1)/(ny-1), j=1, ny"""
+        ),
+    )
 
 
 PlotNamelist = Annotated[
@@ -386,6 +545,4 @@ class PPEspressoInput(EspressoInput):
     inputpp: InputppNamelist = Field(
         default_factory=lambda: InputppPlotNum0Or9Namelist(), discriminator="plot_num"
     )
-    plot: PlotNamelist = Field(
-        default_factory=lambda: PlotIflag0Or1Namelist(), discriminator="iflag"
-    )
+    plot: PlotNamelist | None = Field(None, discriminator="iflag")

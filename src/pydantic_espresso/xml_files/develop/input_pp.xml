@@ -189,11 +189,14 @@ or for total minus atomic charge (plot_num=9):
             <var name="spin_component" type="INTEGER" >
                <default> 0
                </default>
-               <info>
-0 = total charge,
-1 = spin up charge,
-2 = spin down charge.
-               </info>
+               <options>
+                  <opt val="0" > total charge
+                  </opt>
+                  <opt val="1" > spin up charge
+                  </opt>
+                  <opt val="2" > spin down charge
+                  </opt>
+               </options>
             </var>
          </when>
          <elsewhen test="plot_num=1" >
@@ -203,11 +206,14 @@ Options for total potential (plot_num=1):
             <var name="spin_component" type="INTEGER" >
                <default> 0
                </default>
-               <info>
-0 = spin averaged potential,
-1 = spin up potential,
-2 = spin down potential.
-               </info>
+               <options>
+                  <opt val="0" > spin averaged potential
+                  </opt>
+                  <opt val="1" > spin up potential
+                  </opt>
+                  <opt val="2" > spin down potential
+                  </opt>
+               </options>
             </var>
          </elsewhen>
          <elsewhen test="plot_num=3" >
@@ -416,12 +422,17 @@ i.e. compute ILDOS from <ref>emin</ref> to <ref>emax</ref>
             <var name="spin_component" type="INTEGER" >
                <default> 0
                </default>
-               <info>
-for LSDA case only: plot the contribution to ILDOS of
-0 = spin-up + spin-down (default)
-1 = spin-up   only
-2 = spin-down only
-               </info>
+               <options>
+                  <info>
+For LSDA case only: plot the contribution to ILDOS of:
+                  </info>
+                  <opt val="0" > spin-up + spin-down (default)
+                  </opt>
+                  <opt val="1" > spin-up only
+                  </opt>
+                  <opt val="2" > spin-down only
+                  </opt>
+               </options>
             </var>
          </elsewhen>
          <elsewhen test="plot_num=13" >
@@ -431,12 +442,16 @@ Options for noncollinear magnetization (plot_num=13):
             <var name="spin_component" type="INTEGER" >
                <default> 0
                </default>
-               <info>
-0 = absolute value
-1 = x component of the magnetization
-2 = y component of the magnetization
-3 = z component of the magnetization
-               </info>
+               <options>
+                  <opt val="0" > absolute value
+                  </opt>
+                  <opt val="1" > x component of the magnetization
+                  </opt>
+                  <opt val="2" > y component of the magnetization
+                  </opt>
+                  <opt val="3" > z component of the magnetization
+                  </opt>
+               </options>
             </var>
          </elsewhen>
          <elsewhen test="plot_num=17" >
@@ -446,11 +461,14 @@ Options for reconstructed charge density (plot_num=17):
             <var name="spin_component" type="INTEGER" >
                <default> 0
                </default>
-               <info>
-0 = total charge,
-1 = spin up charge,
-2 = spin down charge.
-               </info>
+               <options>
+                  <opt val="0" > total charge
+                  </opt>
+                  <opt val="1" > spin up charge
+                  </opt>
+                  <opt val="2" > spin down charge
+                  </opt>
+               </options>
             </var>
          </elsewhen>
          <elsewhen test="plot_num=22" >
@@ -461,11 +479,14 @@ LSDA case only:
             <var name="spin_component" type="INTEGER" >
                <default> 0
                </default>
-               <info>
-0 = total density,
-1 = spin up density,
-2 = spin down density.
-               </info>
+               <options>
+                  <opt val="0" > total density
+                  </opt>
+                  <opt val="1" > spin up density
+                  </opt>
+                  <opt val="2" > spin down density
+                  </opt>
+               </options>
             </var>
          </elsewhen>
          <elsewhen test="plot_num=25" >
@@ -617,8 +638,6 @@ Type of interpolation:
             <label> the following variables are REQUIRED:
             </label>
             <dimension name="e1" start="1" end="3" type="REAL" >
-               <default> 0.0
-               </default>
                <dimensionality> length
                </dimensionality>
                <units> alat
@@ -628,8 +647,6 @@ Type of interpolation:
                </info>
             </dimension>
             <dimension name="x0" start="1" end="3" type="REAL" >
-               <default> 0.0
-               </default>
                <dimensionality> length
                </dimensionality>
                <units> alat
@@ -639,8 +656,6 @@ Type of interpolation:
                </info>
             </dimension>
             <var name="nx" type="INTEGER" >
-               <default> 0
-               </default>
                <info>
 number of points in the line:
 
@@ -656,8 +671,6 @@ rho(i) = rho( x0 + e1 * (i-1)/(nx-1) ), i=1, nx
                </dimension>
                <dimension name="e2" >
                </dimension>
-               <default> 0.0
-               </default>
                <dimensionality> length
                </dimensionality>
                <units> alat
@@ -669,8 +682,6 @@ BEWARE: <b>e1</b> and <b>e2</b> must be orthogonal
                </info>
             </dimensiongroup>
             <dimension name="x0" start="1" end="3" type="REAL" >
-               <default> 0.0
-               </default>
                <dimensionality> length
                </dimensionality>
                <units> alat
@@ -684,8 +695,6 @@ BEWARE: <b>e1</b> and <b>e2</b> must be orthogonal
                </var>
                <var name="ny" >
                </var>
-               <default> 0
-               </default>
                <info>
 Number of points in the plane:
 
@@ -766,8 +775,6 @@ rho(i,j,k) = rho( x0 + e1 * (i-1)/nx
             <label> the following variables are REQUIRED:
             </label>
             <var name="radius" type="REAL" >
-               <default> 1.0
-               </default>
                <dimensionality> length
                </dimensionality>
                <units> alat
@@ -781,8 +788,6 @@ Radius of the sphere, centered at (0,0,0)
                </var>
                <var name="ny" >
                </var>
-               <default> 0
-               </default>
                <info>
 Number of points in the polar plane:
 

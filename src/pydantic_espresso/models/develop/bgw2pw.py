@@ -4,6 +4,7 @@ This file has been generated automatically. Do not edit it manually.
 """
 
 from pathlib import Path
+from textwrap import dedent
 from typing import Literal
 
 from pydantic import Field
@@ -15,7 +16,7 @@ from pydantic_espresso.namelist import Namelist
 class InputBgw2pwNamelist(Namelist):
     """Pydantic model for the `INPUT_BGW2PW` namelist."""
 
-    prefix: str = Field("prefix", description="prefix of files saved by program pw.x")
+    prefix: str = Field(..., description="prefix of files saved by program pw.x")
     outdir: Path | None = Field(
         None,
         json_schema_extra={
@@ -29,7 +30,17 @@ class InputBgw2pwNamelist(Namelist):
         },
         description="the scratch directory where the massive data-files are written",
     )
-    real_or_complex: Literal[1, 2] = Field(2, description="BerkeleyGW data flavor.")
+    real_or_complex: Literal[1, 2] = Field(
+        2,
+        description=dedent(
+            """\
+            BerkeleyGW data flavor.
+            - '1': Real flavor of BerkeleyGW (for systems with inversion symmetry and time-reversal
+              symmetry).
+            - '2': Complex flavor of BerkeleyGW (for systems without inversion symmetry and
+              time-reversal symmetry)."""
+        ),
+    )
     wfng_flag: bool = Field(
         False, description="read wavefunctions in G-space from BerkeleyGW WFN file"
     )
@@ -50,4 +61,4 @@ class InputBgw2pwNamelist(Namelist):
 class BGW2PWEspressoInput(EspressoInput):
     """Pydantic model for the input of `bgw2pw.x`."""
 
-    input_bgw2pw: InputBgw2pwNamelist = Field(default_factory=lambda: InputBgw2pwNamelist())
+    input_bgw2pw: InputBgw2pwNamelist | None = Field(None)

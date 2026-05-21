@@ -33,10 +33,8 @@ are using bgw2pw.x in conjunction with SAPO code in BerkeleyGW).
    </intro>
    <namelist name="INPUT_BGW2PW" >
       <var name="prefix" type="STRING" >
-         <status> MANDATORY
+         <status> REQUIRED
          </status>
-         <default> &apos;prefix&apos;
-         </default>
          <info>
 prefix of files saved by program pw.x
          </info>

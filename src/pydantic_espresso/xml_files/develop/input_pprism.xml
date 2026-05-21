@@ -141,8 +141,6 @@ Type of interpolation:
             <label> the following variables are REQUIRED:
             </label>
             <dimension name="x0" start="1" end="3" type="REAL" >
-               <default> 0.0
-               </default>
                <dimensionality> length
                </dimensionality>
                <units> alat
@@ -152,15 +150,11 @@ Type of interpolation:
                </info>
             </dimension>
             <var name="nx" type="INTEGER" >
-               <default> 0
-               </default>
                <info>
 number of radial grids
                </info>
             </var>
             <var name="lebedev" type="INTEGER" >
-               <default> 302
-               </default>
                <info>
 number of spherical grids of Lebedev quadrature
 (only for <ref>interpolation</ref> = &apos;bspline&apos;)
@@ -180,8 +174,6 @@ number of spherical grids of Lebedev quadrature
                </info>
             </dimension>
             <dimension name="x0" start="1" end="3" type="REAL" >
-               <default> 0.0
-               </default>
                <dimensionality> length
                </dimensionality>
                <units> alat
@@ -217,8 +209,6 @@ BEWARE: <b>e1</b> and <b>e2</b> must be orthogonal
                </info>
             </dimensiongroup>
             <dimension name="x0" start="1" end="3" type="REAL" >
-               <default> 0.0
-               </default>
                <dimensionality> length
                </dimensionality>
                <units> alat
@@ -308,8 +298,6 @@ rho(i,j,k) = rho( x0 + e1 * (i-1)/nx
             <label> the following variables are REQUIRED:
             </label>
             <var name="radius" type="REAL" >
-               <default> 1.0
-               </default>
                <dimensionality> length
                </dimensionality>
                <units> alat

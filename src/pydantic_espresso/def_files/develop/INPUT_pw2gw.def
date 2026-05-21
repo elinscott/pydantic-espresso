@@ -25,8 +25,7 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program pw2gw
     namelist INPUTPP {
 
         var prefix  -type        STRING {
-            status { MANDATORY }
-            default { 'pwscf' }
+            status { REQUIRED }
             info {
                 the first part of the name of all the file written by the code
                 should be equal to the value given in the main calculations.

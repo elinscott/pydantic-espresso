@@ -188,30 +188,71 @@ def _process_namelist(namelist: Element) -> tuple[str, list[str], bool]:
 
     name = namelist.attrib["name"]
     type_name = f"{camel_case(name)}Namelist"
-    field_line = _format_simple_field(
-        name.lower(),
-        type_name,
-        f"Field(default_factory=lambda: {type_name}())",
-    )
+    # If any ``<var>`` in this namelist is REQUIRED (and has no default) the
+    # namelist cannot be auto-constructed with zero args; expose it as
+    # ``Optional[...]`` defaulting to None so the user must supply it (or omit
+    # it entirely when not needed).
+    if _namelist_has_required_var(namelist):
+        field_line = _format_simple_field(
+            name.lower(),
+            f"{type_name} | None",
+            "Field(None)",
+        )
+    else:
+        field_line = _format_simple_field(
+            name.lower(),
+            type_name,
+            f"Field(default_factory=lambda: {type_name}())",
+        )
     namelist_block = _generate_namelist(name, field_definitions, field_validators)
     return field_line, namelist_block, uses_quantity
 
 
+def _namelist_has_required_var(namelist: Element) -> bool:
+    """Return True if any ``<var>`` / ``<dimension>`` in ``namelist`` is REQUIRED.
+
+    Only counts elements that have no ``<default>``; one that is REQUIRED but
+    also supplies a literal default is effectively optional from pydantic's
+    point of view. The "REQUIRED" status comes either from an explicit
+    ``<status>REQUIRED</status>`` child or from the element living inside a
+    ``<choose>`` branch without a ``<default>`` (see ``_var_is_required``).
+    """
+    branch_member_ids: set[int] = set()
+    for choose in namelist.findall(".//choose"):
+        for branch in choose:
+            if branch.tag in ("when", "elsewhen", "otherwise"):
+                for el in branch.iter():
+                    branch_member_ids.add(id(el))
+
+    for element in (*namelist.findall(".//var"), *namelist.findall(".//dimension")):
+        if element.find("default") is not None:
+            continue
+        in_branch = id(element) in branch_member_ids
+        if _var_is_required(element, in_choose_branch=in_branch):
+            return True
+    return False
+
+
 def _collect_fields(
-    vars_: list[Element], dims: list[Element]
+    vars_: list[Element], dims: list[Element], in_choose_branch: bool = False
 ) -> tuple[list[str], list[list[str]], bool]:
     """Collect field definitions and validators from a list of ``<var>`` / ``<dimension>``.
 
     Encapsulates the duplicate-handling that previously lived inline in
     ``_process_namelist`` so we can reuse the same logic when partitioning a
-    namelist into a base class plus discriminated variants.
+    namelist into a base class plus discriminated variants. When
+    ``in_choose_branch`` is True the children come from inside a ``<when>`` /
+    ``<elsewhen>`` / ``<otherwise>`` branch and the "no <default> means
+    REQUIRED" rule applies to each one.
     """
     field_definitions: list[str] = []
     field_validators: list[list[str]] = []
     uses_quantity = False
 
     for var in vars_:
-        field_definition, field_validator, var_uses_quantity = _parse_var(var)
+        field_definition, field_validator, var_uses_quantity = _parse_var(
+            var, in_choose_branch=in_choose_branch
+        )
         if field_definition is None:
             continue
         uses_quantity = uses_quantity or var_uses_quantity
@@ -231,7 +272,9 @@ def _collect_fields(
             field_validators.append(field_validator)
 
     for dim in dims:
-        field_definition, dim_uses_quantity = _parse_dimension(dim)
+        field_definition, dim_uses_quantity = _parse_dimension(
+            dim, in_choose_branch=in_choose_branch
+        )
         if field_definition is None:
             continue
         uses_quantity = uses_quantity or dim_uses_quantity
@@ -329,11 +372,21 @@ def _process_discriminated_namelist(
     subclasses.extend(["", ""])
 
     default_variant = variant_names[0]
-    field_line = _format_simple_field(
-        name.lower(),
-        alias_name,
-        f'Field(default_factory=lambda: {default_variant}(), discriminator="{discriminator}")',
-    )
+    # If any variant has a REQUIRED-without-default ``<var>`` (unconditional or
+    # branch-local), the namelist can't be auto-constructed; expose it as
+    # ``Optional[...]`` defaulting to None.
+    if _namelist_has_required_var(namelist):
+        field_line = _format_simple_field(
+            name.lower(),
+            f"{alias_name} | None",
+            f'Field(None, discriminator="{discriminator}")',
+        )
+    else:
+        field_line = _format_simple_field(
+            name.lower(),
+            alias_name,
+            f'Field(default_factory=lambda: {default_variant}(), discriminator="{discriminator}")',
+        )
     return field_line, subclasses, uses_quantity
 
 
@@ -524,7 +577,7 @@ def _render_variant_namelist(
     """Render one variant class inheriting from the base, with branch-specific fields."""
     _propagate_group_attributes(branch)
     field_definitions, field_validators, uses_quantity = _collect_fields(
-        branch.findall(".//var"), branch.findall(".//dimension")
+        branch.findall(".//var"), branch.findall(".//dimension"), in_choose_branch=True
     )
 
     # Render the discriminator field. Use Literal[...] keyed on the branch's
@@ -579,7 +632,18 @@ def _render_variant_alias(
     single = f'{alias_name} = Annotated[{union_str}, Field(discriminator="{discriminator}")]'
     if len(single) <= _MAX_LINE_LEN:
         return [single]
-    # Wrap onto multiple lines, one variant per line, matching ruff format.
+    # If the union fits on a single indented line, keep it on one line — this
+    # matches ruff format's preference (it would otherwise reformat a one-per-line
+    # wrap back to this shape).
+    union_inline = INDENT + union_str + ","
+    if len(union_inline) <= _MAX_LINE_LEN:
+        return [
+            f"{alias_name} = Annotated[",
+            INDENT + union_str + ",",
+            INDENT + f'Field(discriminator="{discriminator}"),',
+            "]",
+        ]
+    # Wrap onto multiple lines, one variant per line.
     lines = [f"{alias_name} = Annotated["]
     for i, variant in enumerate(variant_names):
         suffix = "," if i == len(variant_names) - 1 else ""
@@ -592,6 +656,17 @@ def _render_variant_alias(
     return lines
 
 
+_GROUP_SHARED_CHILD_TAGS = ("dimensionality", "units", "default", "info")
+
+
+def _copy_shared_children(child: Element, shared_children: list[Element]) -> None:
+    """Copy each ``shared`` child onto ``child`` when ``child`` doesn't already have one."""
+    existing_tags = {c.tag for c in child}
+    for shared in shared_children:
+        if shared.tag not in existing_tags:
+            child.append(shared)
+
+
 def _propagate_group_attributes(namelist: Element) -> None:
     """Push shared attributes from ``<vargroup>`` / ``<dimensiongroup>`` onto their children.
 
@@ -599,26 +674,25 @@ def _propagate_group_attributes(namelist: Element) -> None:
     typeless ``<var>`` children, and ``<dimensiongroup type="REAL" start="1"
     end="3"><dimensionality/><units/>`` carry shared metadata that applies to
     each nested ``<dimension>``. Normalize the tree by copying those attributes
-    (and the shared ``<dimensionality>`` / ``<units>`` elements) onto each child
-    so the rest of the parser doesn't have to know about the group wrapper.
+    (and the shared ``<dimensionality>``, ``<units>``, ``<default>`` and
+    ``<info>`` elements) onto each child so the rest of the parser doesn't have
+    to know about the group wrapper.
     """
     for vargroup in namelist.findall(".//vargroup"):
         group_type = vargroup.attrib.get("type")
-        if group_type is None:
-            continue
+        shared_children = [c for c in vargroup if c.tag in _GROUP_SHARED_CHILD_TAGS]
         for var in vargroup.findall("var"):
-            var.attrib.setdefault("type", group_type)
+            if group_type is not None:
+                var.attrib.setdefault("type", group_type)
+            _copy_shared_children(var, shared_children)
 
     for dimgroup in namelist.findall(".//dimensiongroup"):
         shared_attrs = {k: v for k, v in dimgroup.attrib.items() if k in ("type", "start", "end")}
-        shared_children = [c for c in dimgroup if c.tag in ("dimensionality", "units")]
+        shared_children = [c for c in dimgroup if c.tag in _GROUP_SHARED_CHILD_TAGS]
         for dim in dimgroup.findall("dimension"):
             for key, value in shared_attrs.items():
                 dim.attrib.setdefault(key, value)
-            existing_tags = {c.tag for c in dim}
-            for shared in shared_children:
-                if shared.tag not in existing_tags:
-                    dim.append(shared)
+            _copy_shared_children(dim, shared_children)
 
 
 def camel_case(value: str) -> str:
@@ -972,28 +1046,89 @@ def _format_description(text: str, indent: int, trailing_comma: bool) -> str:
 
     When the single-line form ``description="text"`` fits within ``_MAX_LINE_LEN``
     at column ``indent`` (allowing one column for a trailing comma if requested),
-    it is returned as-is. Otherwise the text is split into space-separated chunks
-    and emitted as ``description=(\n    "chunk1 "\n    "chunk2"\n)`` so adjacent
-    string-literal concatenation reconstructs the original.
+    it is returned as-is. Otherwise the text is emitted as a
+    ``textwrap.dedent``-wrapped triple-quoted string. The leading ``\`` after
+    the opening triple-quote swallows the first newline and there is no trailing
+    newline before the closing triple-quote, so the runtime string starts and
+    ends on a content character. ``dedent()`` strips the uniform indent applied
+    to every line at runtime.
+
+    Real newlines in ``text`` are treated as logical-line boundaries. Each
+    logical line is hard-wrapped at word boundaries within the per-line content
+    budget; bullet lines (those beginning with ``"- "``) carry a 2-space hanging
+    indent on any continuation lines.
     """
-    single = f'description="{text}"'
-    budget = _MAX_LINE_LEN - (1 if trailing_comma else 0)
-    if indent + len(single) <= budget:
-        return single
+    if "\n" not in text:
+        single = f'description="{text}"'
+        budget = _MAX_LINE_LEN - (1 if trailing_comma else 0)
+        if indent + len(single) <= budget:
+            return single
 
-    inner_indent = indent + 4
-    # Each emitted line: ``<inner_indent spaces>"chunk"``. Budget for the bare
-    # chunk text (between the quotes) is the remaining columns.
-    chunk_budget = _MAX_LINE_LEN - inner_indent - 2  # 2 for the surrounding quotes
-    if chunk_budget < 10:
+    content_indent = indent + 4
+    content_budget = _MAX_LINE_LEN - content_indent
+    if content_budget < 10:
         # Pathological case (very deep nesting); fall back to single line.
-        return single
+        return f'description="{text}"'
 
-    chunks = _wrap_string_literal(text, chunk_budget)
-    pad = " " * inner_indent
+    logical_lines = text.split("\n")
+    rendered_lines: list[str] = []
+    for line in logical_lines:
+        hanging = "  " if line.startswith("- ") else ""
+        rendered_lines.extend(_wrap_logical_line(line, content_budget, hanging))
+
+    # The closing ``"""`` is appended directly to the last rendered line, so it
+    # contributes 3 extra source columns. If the last line would exceed the
+    # line-length limit once the closing triple-quote is attached, re-wrap with
+    # a tightened budget on the last logical line.
+    if rendered_lines and len(rendered_lines[-1]) > content_budget - 3:
+        last_hanging = "  " if logical_lines[-1].startswith("- ") else ""
+        # Drop the previously-rendered wrap of the final logical line and redo
+        # it with a content budget that reserves 3 cols for the closing quote.
+        # The simplest way to identify "lines belonging to the final logical
+        # line" is to re-wrap *just* that logical line with the tightened
+        # budget. The earlier lines were unaffected by the tightening because
+        # each logical line is wrapped independently.
+        final_lines = _wrap_logical_line(logical_lines[-1], content_budget - 3, last_hanging)
+        # Remove the lines that originally came from the final logical line.
+        original_final_count = len(
+            _wrap_logical_line(logical_lines[-1], content_budget, last_hanging)
+        )
+        rendered_lines = rendered_lines[:-original_final_count] + final_lines
+
+    pad = " " * content_indent
     close_pad = " " * indent
-    body = "\n".join(f'{pad}"{chunk}"' for chunk in chunks)
-    return "description=(\n" + body + "\n" + close_pad + ")"
+    body = "\n".join(pad + rendered for rendered in rendered_lines)
+    return "description=dedent(\n" + pad + '"""\\\n' + body + '"""\n' + close_pad + ")"
+
+
+def _wrap_logical_line(text: str, content_budget: int, hanging: str) -> list[str]:
+    """Hard-wrap ``text`` at word boundaries to fit ``content_budget`` per line.
+
+    Continuation lines (caused by wrapping a single logical line) are prefixed
+    with ``hanging`` so bullet bodies stay visually aligned in IDE tooltips.
+    Returns a list of rendered content lines (no trailing newline, no leading
+    indent — the caller pads each line to the desired column).
+    """
+    if not text:
+        return [""]
+    words = text.split(" ")
+    if len(words) == 1:
+        return [text]
+    tokens = [w + " " for w in words[:-1]] + [words[-1]]
+    lines: list[str] = []
+    current = ""
+    for token in tokens:
+        if not current:
+            current = token
+            continue
+        if len(current) + len(token) <= content_budget:
+            current += token
+        else:
+            lines.append(current.rstrip(" "))
+            current = hanging + token
+    if current:
+        lines.append(current.rstrip(" "))
+    return lines
 
 
 def _wrap_string_literal(text: str, max_chunk_len: int) -> list[str]:
@@ -1074,6 +1209,7 @@ def _resolve_var_type_and_default(
     python_type: type,
     options: Element | None,
     default: Element | None,
+    in_choose_branch: bool = False,
 ) -> tuple[str, str, str, dict[str, Any] | None, list[str]]:
     """Resolve the annotation, default literal, and extra kwargs for a ``<var>``.
 
@@ -1097,6 +1233,14 @@ def _resolve_var_type_and_default(
             if unquoted in alias_map:
                 default_str = '"' + alias_map[unquoted] + '"'
 
+    # ``<status>REQUIRED</status>`` on a <var> with no <default>, OR a <var>
+    # inside a <choose> branch with no <default> (the upstream convention for
+    # branches that document themselves as REQUIRED): emit a pydantic required
+    # field (``Field(...)``) rather than ``Field(None, ...)``, and keep the
+    # type narrow (no ``| None`` / ``Literal[None, ...]`` widening).
+    if default_str == "None" and _var_is_required(var, in_choose_branch=in_choose_branch):
+        return name, type_str, "...", extra_payload, validator
+
     # If the default is None we need to widen the type accordingly.
     if default_str == "None":
         if options is None:
@@ -1107,7 +1251,7 @@ def _resolve_var_type_and_default(
     return name, type_str, default_str, extra_payload, validator
 
 
-def _parse_var(var: Element) -> tuple[str | None, list[str], bool]:
+def _parse_var(var: Element, in_choose_branch: bool = False) -> tuple[str | None, list[str], bool]:
     """Parse a ``<var>`` element into a ``name: type = Field(...)`` line.
 
     Returns the field-definition string (or ``None`` to skip the var), an
@@ -1130,7 +1274,7 @@ def _parse_var(var: Element) -> tuple[str | None, list[str], bool]:
         return None, [], False
 
     name, type_str, default_str, extra_payload, validator = _resolve_var_type_and_default(
-        name, var, python_type, options, default
+        name, var, python_type, options, default, in_choose_branch=in_choose_branch
     )
 
     # Wrap with Annotated[..., Quantity(...)] iff both units and dimensionality exist
@@ -1150,7 +1294,48 @@ def _parse_var(var: Element) -> tuple[str | None, list[str], bool]:
     )
 
 
-def _parse_dimension(dim: Element) -> tuple[str | None, bool]:
+def _resolve_dimension_default(
+    name: str,
+    dim: Element,
+    python_type: type,
+    length: int | None,
+    type_str: str,
+    in_choose_branch: bool,
+) -> tuple[str, str, dict[str, Any] | None]:
+    """Return ``(default_str, type_str, extra_payload)`` for a dimension's default.
+
+    Handles list-style defaults like ``[0.0, 0.0, 0.0]``, scalar defaults
+    broadcast across the tuple, the REQUIRED-without-default case, and the
+    fallback ``| None`` widening.
+    """
+    default = dim.find("default")
+    list_default = _maybe_list_default(default, python_type)
+    extra_payload: dict[str, Any] | None
+    if list_default is not None:
+        if length is not None and list_default.startswith("["):
+            default_str = "(" + list_default[1:-1] + ")"
+        else:
+            default_str = list_default
+        extra_payload = None
+    else:
+        default_str, extra_payload = _get_default(name, python_type, default)
+
+    if default_str == "None" and _var_is_required(dim, in_choose_branch=in_choose_branch):
+        # REQUIRED dimension with no default: emit a pydantic required field
+        # without widening the annotation with ``| None``.
+        return "...", type_str, extra_payload
+    if default_str == "None":
+        return default_str, type_str + " | None", extra_payload
+    if list_default is not None:
+        return default_str, type_str, extra_payload
+    if length is not None and extra_payload is None:
+        return f"({', '.join([default_str for _ in range(length)])})", type_str, extra_payload
+    if length is None and extra_payload is None:
+        return "default_factory=list", type_str, extra_payload
+    return default_str, type_str, extra_payload
+
+
+def _parse_dimension(dim: Element, in_choose_branch: bool = False) -> tuple[str | None, bool]:
     """Parse a ``<dimension>`` element into a field-definition string."""
     name = dim.attrib["name"]
     python_type = _get_var_type(name, dim)
@@ -1169,31 +1354,9 @@ def _parse_dimension(dim: Element) -> tuple[str | None, bool]:
         type_str = f"list[{python_type.__name__}]"
         description += f" (start = {start}, end = {end})"
 
-    default = dim.find("default")
-
-    # Detect a list-style default like ``[0.0, 0.0, 0.0]`` that already spans the
-    # whole dimension. We splice it into a python tuple literal directly without
-    # going through the scalar-sanitizer. When the dimension has a fixed integer
-    # length we emit a tuple literal so the default matches the ``tuple[...]``
-    # annotation; otherwise we keep the list literal (matches ``list[...]``).
-    list_default = _maybe_list_default(default, python_type)
-    if list_default is not None:
-        if length is not None and list_default.startswith("["):
-            default_str = "(" + list_default[1:-1] + ")"
-        else:
-            default_str = list_default
-        extra_payload: dict[str, Any] | None = None
-    else:
-        default_str, extra_payload = _get_default(name, python_type, default)
-
-    if default_str == "None":
-        type_str += " | None"
-    elif list_default is not None:
-        pass  # already a tuple-of-values literal
-    elif length is not None and extra_payload is None:
-        default_str = f"({', '.join([default_str for _ in range(length)])})"
-    elif length is None and extra_payload is None:
-        default_str = "default_factory=list"
+    default_str, type_str, extra_payload = _resolve_dimension_default(
+        name, dim, python_type, length, type_str, in_choose_branch
+    )
 
     quantity_str = _build_quantity(dim)
     uses_quantity = quantity_str is not None
@@ -1232,21 +1395,66 @@ def _get_var_description(
     """Collect the description text for a variable.
 
     Walks the ``<info>`` element so that any ``<ref>`` children (which we keep
-    intact at parse time) are flattened back into plain text.
+    intact at parse time) are flattened back into plain text. Per-``<opt>``
+    descriptions are emitted as a newline-separated bullet list so the rendered
+    text is readable in IDE tooltips and ``help()``. Real newlines are
+    preserved in the returned string; ``_format_description`` is responsible
+    for deciding how those newlines surface in the emitted python source.
     """
-    description = _element_text(description_element)
+    prose = _collect_prose(name, description_element, options)
+    opt_items = _collect_opt_items(options)
+
+    description = prose
+    if opt_items:
+        if description:
+            description += "\n"
+        description += "\n".join(opt_items)
+
+    return description
+
+
+def _collect_prose(name: str, description_element: Element | None, options: Element | None) -> str:
+    """Concatenate the ``<info>`` text plus any ``<options><info>`` text."""
+    prose = _element_text(description_element)
     if options is not None:
         for info in options.findall("info"):
             text = _element_text(info)
             if not text and info.text is None:
                 raise InvalidXMLStructureError(f"Missing text in <info> field for `{name}`.")
-            description += text
+            prose += text
+    return _normalize_prose(prose)
 
-    description = " ".join(
-        line.strip() for line in description.strip(" \n'" + '"').replace('"', "'").split("\n")
+
+def _collect_opt_items(options: Element | None) -> list[str]:
+    """Build the per-``<opt>`` bullet list for the description text."""
+    opt_items: list[str] = []
+    if options is None:
+        return opt_items
+    for opt in options.findall("opt"):
+        opt_text = _element_text(opt).strip()
+        if not opt_text:
+            continue
+        val = opt.attrib.get("val", "").strip().strip("'\"")
+        if not val:
+            continue
+        opt_text_normalized = _normalize_prose(opt_text)
+        if not opt_text_normalized:
+            continue
+        if not opt_text_normalized.endswith((".", "!", "?")):
+            opt_text_normalized += "."
+        opt_items.append(f"- '{val}': {opt_text_normalized}")
+    return opt_items
+
+
+def _normalize_prose(text: str) -> str:
+    """Collapse whitespace and strip LaTeX-style backslash sigils from prose text."""
+    collapsed = " ".join(
+        line.strip() for line in text.strip(" \n'" + '"').replace('"', "'").split("\n")
     )
-    description = description.replace(r"\p", "p").replace(r"\l", "l")
-    return description
+    # Drop the backslash from any ``\<letter>`` sequence so the emitted string
+    # literal doesn't trip ruff's invalid-escape-sequence rule (W605). Done
+    # before any newline escaping below so we don't strip our own ``\n``s.
+    return re.sub(r"\\([A-Za-z])", r"\1", collapsed)
 
 
 def _element_text(element: Element | None) -> str:
@@ -1254,6 +1462,26 @@ def _element_text(element: Element | None) -> str:
     if element is None:
         return ""
     return "".join(element.itertext())
+
+
+def _var_is_required(var: Element, in_choose_branch: bool = False) -> bool:
+    """Return True if the ``<var>`` / ``<dimension>`` element should be REQUIRED.
+
+    A var/dimension is REQUIRED if either:
+
+    * it carries an explicit ``<status>REQUIRED</status>`` child, or
+    * ``in_choose_branch`` is ``True`` and it has no ``<default>`` child. Inside
+      a ``<when>``/``<elsewhen>``/``<otherwise>`` branch the upstream convention
+      (see PP's "drop misleading defaults from REQUIRED entries" commit) is
+      that the absence of a ``<default>`` element is the structural signal that
+      the value must be supplied by the user for that branch.
+    """
+    status = var.find("status")
+    if status is not None and (status.text or "").strip().upper() == "REQUIRED":
+        return True
+    if in_choose_branch and var.find("default") is None:
+        return True
+    return False
 
 
 # ---------------------------------------------------------------------------
@@ -1705,6 +1933,8 @@ def _build_import_lines(body: str, extra_imports: set[str], needs_quantity: bool
     stdlib: list[str] = []
     if re.search(r"\bPath\b", body):
         stdlib.append("from pathlib import Path")
+    if "dedent(" in body:
+        stdlib.append("from textwrap import dedent")
     typing_syms = _collect_symbols(body, _CONDITIONAL_IMPORTS[1][1])
     if typing_syms:
         stdlib.append("from typing import " + ", ".join(typing_syms))

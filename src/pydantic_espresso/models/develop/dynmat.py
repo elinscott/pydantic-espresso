@@ -3,6 +3,7 @@
 This file has been generated automatically. Do not edit it manually.
 """
 
+from textwrap import dedent
 from typing import Annotated, Literal
 
 from pydantic import Field
@@ -18,21 +19,33 @@ class InputNamelist(Namelist):
     fildyn: str = Field("matdyn", description="input file containing the dynamical matrix")
     asr: Literal["no", "simple", "crystal", "one-dim", "zero-dim"] = Field(
         "no",
-        description=(
-            "Indicates the type of Acoustic Sum Rule imposed.  Allowed values:  Note that in "
-            "certain cases, not all the rotational asr can be applied (e.g. if there are only 2 "
-            "atoms in a molecule or if all the atoms are aligned, etc.).  In these cases the "
-            "supplementary asr are canceled during the orthonormalization procedure (see below).  "
-            "Finally, in all cases except 'no' a simple correction on the effective charges is "
-            "performed (same as in the previous implementation)."
+        description=dedent(
+            """\
+            Indicates the type of Acoustic Sum Rule imposed.  Allowed values:  Note that in certain
+            cases, not all the rotational asr can be applied (e.g. if there are only 2 atoms in a
+            molecule or if all the atoms are aligned, etc.).  In these cases the supplementary asr
+            are canceled during the orthonormalization procedure (see below).  Finally, in all
+            cases except 'no' a simple correction on the effective charges is performed (same as in
+            the previous implementation).
+            - 'no': no Acoustic Sum Rules imposed.
+            - 'simple': previous implementation of the asr used (3 translational asr imposed by
+              correction of the diagonal elements of the dynamical matrix).
+            - 'crystal': 3 translational asr imposed by optimized correction of the dyn. matrix
+              (projection).
+            - 'one-dim': 3 translational asr + 1 rotational asr imposed by optimized correction of
+              the dyn. mat. (the rotation axis is the direction of periodicity; it will work only
+              if this axis considered is one of the Cartesian axis).
+            - 'zero-dim': 3 translational asr + 3 rotational asr imposed by optimized correction of
+              the dyn. mat."""
         ),
     )
     remove_interaction_blocks: bool = Field(
         False,
-        description=(
-            "If .true. lines and rows corresponding to atoms that are not displaced are set to 0. "
-            "This can be used for ph.x calculations with nat_todo set in ph.x, to remove the "
-            "interaction between the diplaced and fixed parts of the system."
+        description=dedent(
+            """\
+            If .true. lines and rows corresponding to atoms that are not displaced are set to 0.
+            This can be used for ph.x calculations with nat_todo set in ph.x, to remove the
+            interaction between the diplaced and fixed parts of the system."""
         ),
     )
     axis: int = Field(
@@ -40,31 +53,35 @@ class InputNamelist(Namelist):
     )
     lperm: bool = Field(
         False,
-        description=(
-            "if .true. then calculate Gamma-point mode contributions to dielectric permittivity "
-            "tensor"
+        description=dedent(
+            """\
+            if .true. then calculate Gamma-point mode contributions to dielectric permittivity
+            tensor"""
         ),
     )
     lplasma: bool = Field(
         False,
-        description=(
-            "if .true. then calculate Gamma-point mode effective plasma frequencies, automatically "
-            "triggers lperm = .true."
+        description=dedent(
+            """\
+            if .true. then calculate Gamma-point mode effective plasma frequencies, automatically
+            triggers lperm = .true."""
         ),
     )
     filout: str = Field(
         "dynmat.out",
-        description=(
-            "output file containing phonon frequencies and normalized phonon displacements (i.e. "
-            "eigenvectors divided by the square root of the mass and then normalized; they are not "
-            "orthogonal)"
+        description=dedent(
+            """\
+            output file containing phonon frequencies and normalized phonon displacements (i.e.
+            eigenvectors divided by the square root of the mass and then normalized; they are not
+            orthogonal)"""
         ),
     )
     fileig: str | None = Field(
         None,
-        description=(
-            "output file containing phonon frequencies and eigenvectors of the dynamical matrix "
-            "(they are orthogonal)"
+        description=dedent(
+            """\
+            output file containing phonon frequencies and eigenvectors of the dynamical matrix
+            (they are orthogonal)"""
         ),
     )
     filmol: str = Field("dynmat.mold", description="as above, in a format suitable for molden")
@@ -74,22 +91,25 @@ class InputNamelist(Namelist):
     )
     el_ph_nsig: int | None = Field(
         None,
-        description=(
-            "The number of double-delta smearing values used in an electron-phonon coupling "
-            "calculation."
+        description=dedent(
+            """\
+            The number of double-delta smearing values used in an electron-phonon coupling
+            calculation."""
         ),
     )
     el_ph_sigma: Annotated[float | None, Quantity(units="Ry", dimensionality="energy")] = Field(
         None,
-        description=(
-            "The spacing of double-delta smearing values used in an electron-phonon coupling "
-            "calculation."
+        description=dedent(
+            """\
+            The spacing of double-delta smearing values used in an electron-phonon coupling
+            calculation."""
         ),
     )
     q: tuple[float, float, float] = Field(
         (0.0, 0.0, 0.0),
-        description=(
-            "calculate LO modes (add non-analytic terms) along the direction q (Cartesian axis)"
+        description=dedent(
+            """\
+            calculate LO modes (add non-analytic terms) along the direction q (Cartesian axis)"""
         ),
     )
     amass: Annotated[list[float] | None, Quantity(units="amu", dimensionality="mass")] = Field(

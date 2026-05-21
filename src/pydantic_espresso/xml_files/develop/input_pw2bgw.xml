@@ -36,10 +36,8 @@ BerkeleyGW package.
    </intro>
    <namelist name="INPUT_PW2BGW" >
       <var name="prefix" type="STRING" >
-         <status> MANDATORY
+         <status> REQUIRED
          </status>
-         <default> &apos;prefix&apos;
-         </default>
          <info>
 prefix of files saved by program pw.x
          </info>
