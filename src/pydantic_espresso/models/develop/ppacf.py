@@ -48,9 +48,24 @@ class PpacfNamelist(Namelist):
             "correlation-potential variations."
         ),
     )
+    ltks: bool = Field(
+        False,
+        description=(
+            "If .True. also print out prefix.tks               the Kohn-Sham kinetic energy "
+            "density. In case of spin-polarized calculations, prefix.tks1 and prefix.tks2 save the "
+            "spin-up and spin-down components."
+        ),
+    )
     lfock: bool = Field(
         False,
         description="If .True. calculate the Fock exchange based on input Kohn-Sham orbitals.",
+    )
+    use_ace: bool = Field(
+        True,
+        description=(
+            "If .True. use Lin Lin's ACE (J. Chem. Theory Comput. 12(5), 2242-2249 (2016), doi: "
+            "10.1021/acs.jctc.6b00092 (https://doi.org/10.1021/acs.jctc.6b00092))."
+        ),
     )
     code_num: Literal[1, 2] = Field(1, description="Select from which code to read output files.")
     vdW_analysis: Literal[0, 1, 2] = Field(  # noqa: N815

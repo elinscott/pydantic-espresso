@@ -72,6 +72,9 @@ class InputppNamelist(Namelist):
             "parameter laying on the xy plane  .FALSE. do not rotate cell"
         ),
     )
+    np1: int | None = Field(None, description="")
+    np2: int | None = Field(None, description="")
+    np3: int | None = Field(None, description="")
     nframes: int = Field(
         1, description="number of MD step to be read to build the trajectory CURRENTLY MUST BE > 1"
     )

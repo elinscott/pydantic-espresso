@@ -106,6 +106,9 @@ class ControlNamelist(Namelist):
             "documentation)."
         ),
     )
+    mp1: int | None = Field(None, description="")
+    mp2: int | None = Field(None, description="")
+    mp3: int | None = Field(None, description="")
     lrpa: bool = Field(
         False,
         description=(

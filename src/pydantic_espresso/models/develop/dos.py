@@ -41,6 +41,8 @@ class DosNamelist(Namelist):
     degauss: Annotated[float, Quantity(units="Ry", dimensionality="energy")] = Field(
         0.0, description="gaussian broadening, Ry (not eV!) (see below)"
     )
+    Emin: float | None = Field(None, description="")
+    Emax: float | None = Field(None, description="")
     DeltaE: Annotated[float, Quantity(units="eV", dimensionality="energy")] = Field(
         0.01, description="energy grid step"
     )

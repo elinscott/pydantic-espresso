@@ -163,6 +163,9 @@ class InputphNamelist(Namelist):
             "works only for 3d systems."
         ),
     )
+    eth_rps: float = Field(1.0e-9, description="Threshold for calculation of  Pc R |psi>.")
+    eth_ns: float = Field(1.0e-12, description="Threshold for non-scf wavefunction calculation.")
+    dek: float = Field(1.0e-3, description="Delta_xk used for wavefunction derivation wrt k.")
     recover: bool = Field(False, description="If .true. restart from an interrupted run.")
     low_directory_check: bool = Field(
         False,
@@ -220,6 +223,29 @@ class InputphNamelist(Namelist):
         description=(
             "The spacing between double-delta smearing values used in an electron-phonon coupling "
             "calculation."
+        ),
+    )
+    ahc_dir: str | None = Field(
+        None,
+        json_schema_extra={"default_expr": "outdir // 'ahc_dir/'"},
+        description="Directory where the output binary files are written.",
+    )
+    ahc_nbnd: int | None = Field(
+        None, description="Number of bands for which the electron self-energy is to be computed."
+    )
+    ahc_nbndskip: int = Field(
+        0,
+        description=(
+            "Number of bands to exclude when computing the self-energy. Self-energy is computed "
+            "for bands with indices from ahc_nbndskip+1 to ahc_nbndskip+ahc_nbnd. "
+            "ahc_nbndskip+ahc_nbnd cannot exceed nbnd of the preceding SCF or NSCF calculation."
+        ),
+    )
+    skip_upper: bool = Field(
+        False,
+        description=(
+            "If .true., skip calculation of the upper Fan self-energy, which involves solving the "
+            "Sternheimer equation."
         ),
     )
     lshift_q: bool = Field(
@@ -300,6 +326,15 @@ class InputphNamelist(Namelist):
     search_sym: bool = Field(
         True, description="Set it to .false. if you want to disable the mode symmetry analysis."
     )
+    nq1: int | None = Field(None, description="")
+    nq2: int | None = Field(None, description="")
+    nq3: int | None = Field(None, description="")
+    nk1: int | None = Field(None, description="")
+    nk2: int | None = Field(None, description="")
+    nk3: int | None = Field(None, description="")
+    k1: int | None = Field(None, description="")
+    k2: int | None = Field(None, description="")
+    k3: int | None = Field(None, description="")
     diagonalization: Literal["david", "cg", "direct"] = Field(
         "david", description="Diagonalization method for the non-SCF calculations."
     )
@@ -321,6 +356,99 @@ class InputphNamelist(Namelist):
             "If .true., use Fourier interpolation of phonon potential to compute the induced part "
             "of phonon potential at each q point. Results of a dvscf_q2r.x run is needed. Requires "
             "trans = .false.."
+        ),
+    )
+    wpot_dir: str | None = Field(
+        None,
+        json_schema_extra={"default_expr": "outdir // 'w_pot/'"},
+        description=(
+            "Directory where the w_pot binary files are written. Must be the same with wpot_dir "
+            "used in dvscf_q2r.x. The real space potential files are stored in wpot_dir with names "
+            "${prefix}.wpot.irc${irc}//'1'."
+        ),
+    )
+    do_long_range: bool = Field(
+        False,
+        description=(
+            "If .true., add the long-range part of the potential to the Fourier interpolated "
+            "potential as in: S. Ponce et al, J. Chem. Phys. 143, 102813 (2015). Reads dielectric "
+            "matrix and Born effective charges from the ${wpot_dir}/tensors.dat file, written in "
+            "dvscf_q2r.x. Currently, only the dipole (Frohlich) part is implemented. The "
+            "quadrupole part is not implemented."
+        ),
+    )
+    do_charge_neutral: bool = Field(
+        False,
+        description=(
+            "If .true., impose charge neutrality on the Born effective charges. Used only if "
+            "do_long_range = .true.."
+        ),
+    )
+    start_irr: int = Field(
+        1,
+        description=(
+            "Perform calculations only from start_irr to last_irr irreducible representations.  "
+            "IMPORTANT: * start_irr must be <= 3*nat * do not specify nat_todo together with "
+            "start_irr, last_irr"
+        ),
+    )
+    last_irr: int | None = Field(
+        None,
+        json_schema_extra={
+            "conditional_default": [
+                {"when": "not specified", "value": "3*nat"},
+                {"when": None, "value": "-1000"},
+            ],
+        },
+        description=(
+            "Perform calculations only from start_irr to last_irr irreducible representations.  "
+            "IMPORTANT: * start_irr must be <= 3*nat * do not specify nat_todo together with "
+            "start_irr, last_irr"
+        ),
+    )
+    nat_todo: int = Field(
+        0,
+        description=(
+            "The default value 0 means that all atoms are displaced. Choose the subset of atoms to "
+            "be used in the linear response calculation: nat_todo atoms, specified in input (see "
+            "below) are displaced. Can be used to estimate modes for a molecule adsorbed over a "
+            "surface without performing a full fledged calculation. Use with care, at your own "
+            "risk, and be aware that this is an approximation and may not work. IMPORTANT: * "
+            "nat_todo <= nat * if linear-response is calculated for a given atom, it should also "
+            "be done for all symmetry-equivalent atoms, or else you will get incorrect results"
+        ),
+    )
+    modenum: int = Field(
+        0,
+        description=(
+            "For single-mode phonon calculation : modenum is the index of the irreducible "
+            "representation (irrep) into which the reducible representation formed by the 3*nat "
+            "atomic displacements are decomposed in order to perform the phonon calculation. Note "
+            "that a single-mode calculation will not give you the frequency of a single phonon "
+            "mode: in general, the selected 'modenum' is not an eigenvector. What you get on "
+            "output is a column of the dynamical matrix."
+        ),
+    )
+    start_q: int = Field(
+        1,
+        description=(
+            "Used only when ldisp=.true.. Computes only the q points from start_q to last_q.  "
+            "IMPORTANT: * start_q must be <= nqs (number of q points found) * do not specify "
+            "nat_todo together with start_q, last_q"
+        ),
+    )
+    last_q: int | None = Field(
+        None,
+        json_schema_extra={
+            "conditional_default": [
+                {"when": "not specified", "value": "number of q points (nqs)"},
+                {"when": None, "value": "-1000"},
+            ],
+        },
+        description=(
+            "Used only when ldisp=.true.. Computes only the q points from start_q to last_q.  "
+            "IMPORTANT * last_q must be <= nqs (number of q points) * do not specify nat_todo "
+            "together with start_q, last_q"
         ),
     )
     amass: Annotated[list[float] | None, Quantity(units="amu", dimensionality="mass")] = Field(

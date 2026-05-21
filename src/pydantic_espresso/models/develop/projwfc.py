@@ -39,6 +39,8 @@ class ProjwfcNamelist(Namelist):
     degauss: Annotated[float, Quantity(units="Ry", dimensionality="energy")] = Field(
         0.0, description="gaussian broadening, Ry (not eV!)"
     )
+    Emin: float | None = Field(None, description="")
+    Emax: float | None = Field(None, description="")
     DeltaE: Annotated[float | None, Quantity(units="eV", dimensionality="energy")] = Field(
         None, description="energy grid step"
     )

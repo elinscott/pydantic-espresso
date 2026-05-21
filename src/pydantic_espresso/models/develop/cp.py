@@ -303,21 +303,27 @@ class SystemNamelist(Namelist):
         mapping = {"m-p": "makov-payne", "mp": "makov-payne"}
         return mapping.get(v, v)
 
-    ibrav: Literal[0, 1, 2, 3, -3, 4, 5, -5, 6, 7, 8, 9, -9, 91, 10, 11, 12, -12, 13, -13, 14] = (
-        Field(
-            0,
-            description=(
-                "Bravais-lattice index. If ibrav /= 0, specify EITHER [ celldm(1)-celldm(6) ] OR [ "
-                "A, B, C, cosAB, cosAC, cosBC ] but NOT both. The lattice parameter 'alat' is set "
-                "to alat = celldm(1) (in a.u.) or alat = A (in Angstrom); see below for the other "
-                "parameters. For ibrav=0 specify the lattice vectors in CELL_PARAMETERS, "
-                "optionally the lattice parameter alat = celldm(1) (in a.u.) or = A (in Angstrom), "
-                "or else it is taken from CELL_PARAMETERS.  The columns 'celldm(2)-celldm(6)' / "
-                "'b,c,cosbc,cosac,cosab' below indicate which additional crystallographic "
-                "constants must be set for each value of ibrav."
-            ),
-        )
+    ibrav: Literal[
+        None, 0, 1, 2, 3, -3, 4, 5, -5, 6, 7, 8, 9, -9, 91, 10, 11, 12, -12, 13, -13, 14
+    ] = Field(
+        None,
+        description=(
+            "Bravais-lattice index. If ibrav /= 0, specify EITHER [ celldm(1)-celldm(6) ] OR [ A, "
+            "B, C, cosAB, cosAC, cosBC ] but NOT both. The lattice parameter 'alat' is set to alat "
+            "= celldm(1) (in a.u.) or alat = A (in Angstrom); see below for the other parameters. "
+            "For ibrav=0 specify the lattice vectors in CELL_PARAMETERS, optionally the lattice "
+            "parameter alat = celldm(1) (in a.u.) or = A (in Angstrom), or else it is taken from "
+            "CELL_PARAMETERS.  The columns 'celldm(2)-celldm(6)' / 'b,c,cosbc,cosac,cosab' below "
+            "indicate which additional crystallographic constants must be set for each value of "
+            "ibrav."
+        ),
     )
+    A: float | None = Field(None, description="")
+    B: float | None = Field(None, description="")
+    C: float | None = Field(None, description="")
+    cosAB: float | None = Field(None, description="")  # noqa: N815
+    cosAC: float | None = Field(None, description="")  # noqa: N815
+    cosBC: float | None = Field(None, description="")  # noqa: N815
     nat: int | None = Field(None, description="number of atoms in the unit cell")
     ntyp: int | None = Field(None, description="number of types of atoms in the unit cell")
     nbnd: int | None = Field(
@@ -367,6 +373,15 @@ class SystemNamelist(Namelist):
             "accurately converged."
         ),
     )
+    nr1: int | None = Field(None, description="")
+    nr2: int | None = Field(None, description="")
+    nr3: int | None = Field(None, description="")
+    nr1s: int | None = Field(None, description="")
+    nr2s: int | None = Field(None, description="")
+    nr3s: int | None = Field(None, description="")
+    nr1b: int | None = Field(None, description="")
+    nr2b: int | None = Field(None, description="")
+    nr3b: int | None = Field(None, description="")
     occupations: Literal["fixed", "ensemble", "from_input"] = Field(
         "fixed",
         description=(
@@ -485,6 +500,18 @@ class SystemNamelist(Namelist):
         description=(
             "Number of activated external ionic force fields. See Doc/ExternalForceFields.tex for "
             "further explanation and parameterizations"
+        ),
+    )
+    celldm: Annotated[
+        tuple[float, float, float, float, float, float] | None,
+        Quantity(units="1:bohr", dimensionality="dimensionless, 1:length"),
+    ] = Field(
+        None,
+        description=(
+            "Crystallographic constants - see the 'ibrav' variable. Specify either these OR "
+            "A,B,C,cosAB,cosBC,cosAC NOT both. Only needed values (depending on 'ibrav') must be "
+            "specified alat = celldm(1) is the lattice parameter 'a' If ibrav=0, only celldm(1) is "
+            "used if present; cell vectors are read from card CELL_PARAMETERS"
         ),
     )
     Hubbard_U: Annotated[list[float], Quantity(units="eV", dimensionality="energy")] = Field(
@@ -1009,6 +1036,12 @@ class WannierNamelist(Namelist):
             "geometry optimization."
         ),
     )
+    efx0: float | None = Field(None, description="")
+    efy0: float | None = Field(None, description="")
+    efz0: float | None = Field(None, description="")
+    efx1: float | None = Field(None, description="")
+    efy1: float | None = Field(None, description="")
+    efz1: float | None = Field(None, description="")
     wfsd: Literal[1, 2, 3] = Field(
         1,
         description=(

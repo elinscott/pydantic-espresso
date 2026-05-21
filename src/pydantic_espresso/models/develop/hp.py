@@ -40,6 +40,9 @@ class InputhpNamelist(Namelist):
     max_seconds: Annotated[float, Quantity(units="s", dimensionality="time")] = Field(
         1.0e7, description="Maximum allowed run time before the job stops smoothly."
     )
+    nq1: int | None = Field(None, description="")
+    nq2: int | None = Field(None, description="")
+    nq3: int | None = Field(None, description="")
     skip_equivalence_q: bool = Field(
         False,
         description=(

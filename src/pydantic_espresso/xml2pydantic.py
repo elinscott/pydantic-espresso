@@ -171,36 +171,20 @@ def _process_namelist(namelist: Element) -> tuple[str, list[str], bool]:
     is the EspressoInput-level field referring to the namelist subclass and
     ``namelist_block`` is the subclass definition lines.
     """
-    namelist_field_definitions: list[str] = []
-    namelist_field_validators: list[list[str]] = []
-    uses_quantity = False
+    _propagate_group_attributes(namelist)
 
-    for var in namelist.findall("var"):
-        field_definition, field_validator, var_uses_quantity = _parse_var(var)
+    # Detect a discriminated ``<choose>`` child: a single ``<choose>`` whose
+    # branches are mutually-exclusive alternatives keyed on the value of one
+    # other variable. PPACF-style ``<choose>``s with a lone ``<when>`` and no
+    # ``<elsewhen>``/``<otherwise>`` are *not* discriminated; they (and any
+    # subsequent ``<choose>``s) fall through to the single-class path.
+    discriminated_choose = _find_discriminated_choose(namelist)
+    if discriminated_choose is not None:
+        return _process_discriminated_namelist(namelist, discriminated_choose)
 
-        if field_definition is None:
-            continue
-        uses_quantity = uses_quantity or var_uses_quantity
-
-        # Manual fixes for duplicate entries from the historical schema.
-        if field_definition.startswith("abivol:") and any(
-            x.startswith("abivol:") for x in namelist_field_definitions
-        ):
-            continue
-        if field_definition.startswith("restart:") and any(
-            x.startswith("restart:") for x in namelist_field_definitions
-        ):
-            field_definition = field_definition.replace("restart:", "restart_step:")
-
-        namelist_field_definitions.append(field_definition)
-
-        if field_validator:
-            namelist_field_validators.append(field_validator)
-
-    for dim in namelist.findall("dimension"):
-        field_definition, dim_uses_quantity = _parse_dimension(dim)
-        uses_quantity = uses_quantity or dim_uses_quantity
-        namelist_field_definitions.append(field_definition)
+    field_definitions, field_validators, uses_quantity = _collect_fields(
+        namelist.findall(".//var"), namelist.findall(".//dimension")
+    )
 
     name = namelist.attrib["name"]
     type_name = f"{camel_case(name)}Namelist"
@@ -209,8 +193,432 @@ def _process_namelist(namelist: Element) -> tuple[str, list[str], bool]:
         type_name,
         f"Field(default_factory=lambda: {type_name}())",
     )
-    namelist_block = _generate_namelist(name, namelist_field_definitions, namelist_field_validators)
+    namelist_block = _generate_namelist(name, field_definitions, field_validators)
     return field_line, namelist_block, uses_quantity
+
+
+def _collect_fields(
+    vars_: list[Element], dims: list[Element]
+) -> tuple[list[str], list[list[str]], bool]:
+    """Collect field definitions and validators from a list of ``<var>`` / ``<dimension>``.
+
+    Encapsulates the duplicate-handling that previously lived inline in
+    ``_process_namelist`` so we can reuse the same logic when partitioning a
+    namelist into a base class plus discriminated variants.
+    """
+    field_definitions: list[str] = []
+    field_validators: list[list[str]] = []
+    uses_quantity = False
+
+    for var in vars_:
+        field_definition, field_validator, var_uses_quantity = _parse_var(var)
+        if field_definition is None:
+            continue
+        uses_quantity = uses_quantity or var_uses_quantity
+
+        # Manual fixes for duplicate entries from the historical schema.
+        if field_definition.startswith("abivol:") and any(
+            x.startswith("abivol:") for x in field_definitions
+        ):
+            continue
+        if field_definition.startswith("restart:") and any(
+            x.startswith("restart:") for x in field_definitions
+        ):
+            field_definition = field_definition.replace("restart:", "restart_step:")
+
+        field_definitions.append(field_definition)
+        if field_validator:
+            field_validators.append(field_validator)
+
+    for dim in dims:
+        field_definition, dim_uses_quantity = _parse_dimension(dim)
+        if field_definition is None:
+            continue
+        uses_quantity = uses_quantity or dim_uses_quantity
+        field_definitions.append(field_definition)
+
+    return field_definitions, field_validators, uses_quantity
+
+
+# ---------------------------------------------------------------------------
+# Discriminated namelist variants (``<choose>`` / ``<when>`` / ``<elsewhen>``)
+# ---------------------------------------------------------------------------
+
+
+def _find_discriminated_choose(namelist: Element) -> Element | None:
+    """Return the namelist's discriminated ``<choose>`` child, if any.
+
+    A ``<choose>`` is "discriminated" when it contains an ``<elsewhen>`` or an
+    ``<otherwise>`` (i.e. there is more than one mutually-exclusive branch).
+    We require there to be *exactly one* ``<choose>`` direct child of the
+    namelist — multi-``<choose>`` namelists (e.g. PPACF) are not modelled as
+    discriminated unions in this pass.
+    """
+    chooses = namelist.findall("choose")
+    if len(chooses) != 1:
+        return None
+    choose = chooses[0]
+    has_alternatives = choose.find("elsewhen") is not None or choose.find("otherwise") is not None
+    if not has_alternatives:
+        return None
+    return choose
+
+
+def _process_discriminated_namelist(
+    namelist: Element, choose: Element
+) -> tuple[str, list[str], bool]:
+    """Emit a base class, one variant per branch, and a discriminated-union alias."""
+    branches = [b for b in choose if b.tag in ("when", "elsewhen", "otherwise")]
+    name = namelist.attrib["name"]
+    base_type_name = f"_{camel_case(name)}NamelistBase"
+
+    discriminator, raw_branch_values = _parse_branch_discriminators(branches, namelist)
+    discr_var = _find_discriminator_var(namelist, discriminator)
+    if discr_var is None:
+        raise InvalidXMLStructureError(
+            f"Namelist {name!r} has a discriminated <choose> on {discriminator!r}"
+            f" but no <var> definition for it."
+        )
+    discr_python_type = _get_var_type(discriminator, discr_var)
+    if discr_python_type not in (int, str):
+        raise InvalidXMLStructureError(
+            f"Discriminator {discriminator!r} in namelist {name!r} has unsupported"
+            f" type {discr_python_type!r}; only INTEGER and CHARACTER are supported."
+        )
+
+    # Resolve catch-all values for any <otherwise> from the discriminator's <options>.
+    branch_values: list[list[str]] = _resolve_otherwise_values(
+        raw_branch_values, discr_var, discr_python_type, name
+    )
+
+    # Partition vars/dimensions into unconditional (outside the <choose>) and
+    # conditional (inside each branch). The discriminator itself is excluded
+    # from the unconditional set; it is re-declared on each variant as a
+    # ``Literal[...]`` with the appropriate value(s).
+    unconditional_vars, unconditional_dims = _partition_unconditional(
+        namelist, choose, discriminator
+    )
+    base_fields, base_validators, base_uses_quantity = _collect_fields(
+        unconditional_vars, unconditional_dims
+    )
+
+    subclasses: list[str] = []
+    subclasses.extend(_render_base_namelist(name, base_type_name, base_fields, base_validators))
+    subclasses.extend(["", ""])
+
+    variant_names: list[str] = []
+    uses_quantity = base_uses_quantity
+    for branch, values in zip(branches, branch_values, strict=True):
+        variant_name = _variant_class_name(name, discriminator, values)
+        variant_names.append(variant_name)
+        variant_block, variant_uses_quantity = _render_variant_namelist(
+            namelist_name=name,
+            variant_name=variant_name,
+            base_name=base_type_name,
+            branch=branch,
+            discriminator=discriminator,
+            discriminator_values=values,
+            discriminator_python_type=discr_python_type,
+        )
+        uses_quantity = uses_quantity or variant_uses_quantity
+        subclasses.extend(variant_block)
+        subclasses.extend(["", ""])
+
+    alias_name = f"{camel_case(name)}Namelist"
+    subclasses.extend(_render_variant_alias(alias_name, variant_names, discriminator))
+    subclasses.extend(["", ""])
+
+    default_variant = variant_names[0]
+    field_line = _format_simple_field(
+        name.lower(),
+        alias_name,
+        f'Field(default_factory=lambda: {default_variant}(), discriminator="{discriminator}")',
+    )
+    return field_line, subclasses, uses_quantity
+
+
+def _parse_branch_discriminators(
+    branches: list[Element], namelist: Element
+) -> tuple[str, list[list[str] | None]]:
+    """Parse the discriminator name and per-branch value list from ``<when>``/``<elsewhen>``.
+
+    Returns ``(discriminator_name, branch_values)`` where ``branch_values[i]``
+    is either a list of raw string values for the i-th branch or ``None`` for
+    an ``<otherwise>`` branch (which is resolved later from the discriminator's
+    ``<options>``).
+    """
+    discriminator: str | None = None
+    values: list[list[str] | None] = []
+    namelist_name = namelist.attrib["name"]
+    for branch in branches:
+        if branch.tag == "otherwise":
+            values.append(None)
+            continue
+        test = branch.attrib.get("test", "")
+        parsed = _parse_when_test(test)
+        if parsed is None:
+            raise InvalidXMLStructureError(
+                f"Could not parse <{branch.tag} test={test!r}> in namelist {namelist_name!r}."
+            )
+        branch_discriminator, branch_values_raw = parsed
+        if discriminator is None:
+            discriminator = branch_discriminator
+        elif branch_discriminator != discriminator:
+            raise InvalidXMLStructureError(
+                f"Namelist {namelist_name!r} has a discriminated <choose> with"
+                f" inconsistent discriminators: {discriminator!r} vs"
+                f" {branch_discriminator!r}."
+            )
+        values.append(branch_values_raw)
+
+    if discriminator is None:
+        raise InvalidXMLStructureError(
+            f"Discriminated <choose> in namelist {namelist_name!r} has no"
+            f" <when>/<elsewhen> branches; cannot infer discriminator."
+        )
+    return discriminator, values
+
+
+_WHEN_TEST_RE = re.compile(r"^\s*([A-Za-z_][A-Za-z_0-9]*)\s*=\s*(.+?)\s*$")
+
+
+def _parse_when_test(test: str) -> tuple[str, list[str]] | None:
+    """Parse a ``<when test="lhs = v1 or v2 or v3">`` expression.
+
+    Recognises forms like ``iflag = 0 or 1``, ``plot_num=1``, and
+    ``iflag = 2``. Returns ``(lhs, [v1, v2, ...])`` or ``None`` if the
+    expression doesn't match the supported shape.
+    """
+    match = _WHEN_TEST_RE.match(test)
+    if match is None:
+        return None
+    lhs = match.group(1)
+    rhs = match.group(2)
+    # Split on ``or`` (case-insensitive) at word boundaries.
+    raw_values = re.split(r"\s+or\s+", rhs, flags=re.IGNORECASE)
+    values = [v.strip() for v in raw_values if v.strip()]
+    if not values:
+        return None
+    return lhs, values
+
+
+def _find_discriminator_var(namelist: Element, discriminator: str) -> Element | None:
+    """Locate the ``<var name="discriminator">`` element (unconditional)."""
+    for var in namelist.findall(".//var"):
+        if var.attrib.get("name") == discriminator:
+            return var
+    return None
+
+
+def _resolve_otherwise_values(
+    branch_values: list[list[str] | None],
+    discr_var: Element,
+    discr_python_type: type,
+    namelist_name: str,
+) -> list[list[str]]:
+    """Replace any ``None`` entry (``<otherwise>``) with the catch-all values."""
+    if all(v is not None for v in branch_values):
+        return [v for v in branch_values if v is not None]
+
+    options = discr_var.find("options")
+    enumerated: list[str] | None = None
+    if options is not None:
+        enumerated = [opt.attrib["val"] for opt in options.findall("opt")]
+
+    # Build the set of already-covered values, comparing as canonical literals.
+    covered: set[str] = set()
+    for v in branch_values:
+        if v is None:
+            continue
+        for item in v:
+            covered.add(_format_literal(item, discr_python_type))
+
+    resolved: list[list[str]] = []
+    for v in branch_values:
+        if v is not None:
+            resolved.append(v)
+            continue
+        if enumerated is None:
+            warnings.warn(
+                f"<otherwise> in namelist {namelist_name!r} cannot be expanded:"
+                f" the discriminator has no <options> enumeration; the branch"
+                f" will accept any value.",
+                stacklevel=2,
+            )
+            resolved.append([])
+            continue
+        catch_all = [
+            opt for opt in enumerated if _format_literal(opt, discr_python_type) not in covered
+        ]
+        resolved.append(catch_all)
+    return resolved
+
+
+def _partition_unconditional(
+    namelist: Element, choose: Element, discriminator: str
+) -> tuple[list[Element], list[Element]]:
+    """Return the vars/dimensions that live *outside* the discriminated ``<choose>``.
+
+    The discriminator ``<var>`` itself is excluded — it is re-declared on each
+    variant as a ``Literal[...]``.
+    """
+    inside_choose = {id(el) for el in choose.iter()}
+    unconditional_vars: list[Element] = []
+    unconditional_dims: list[Element] = []
+    for var in namelist.findall(".//var"):
+        if id(var) in inside_choose:
+            continue
+        if var.attrib.get("name") == discriminator:
+            continue
+        unconditional_vars.append(var)
+    for dim in namelist.findall(".//dimension"):
+        if id(dim) in inside_choose:
+            continue
+        unconditional_dims.append(dim)
+    return unconditional_vars, unconditional_dims
+
+
+def _variant_class_name(namelist_name: str, discriminator: str, values: list[str]) -> str:
+    """Build a CamelCase variant class name like ``PlotIflag0Or1Namelist``."""
+    if not values:
+        suffix = "Other"
+    else:
+        suffix = "Or".join(_sanitize_value_suffix(v) for v in values)
+    discr_part = camel_case(discriminator)
+    return f"{camel_case(namelist_name)}{discr_part}{suffix}Namelist"
+
+
+def _sanitize_value_suffix(value: str) -> str:
+    """Sanitize a discriminator value for use in a class-name suffix."""
+    text = value.strip().strip("'\"")
+    text = text.replace("-", "Neg")
+    # Keep only alphanumerics.
+    cleaned = "".join(ch for ch in text if ch.isalnum())
+    return cleaned or "Empty"
+
+
+def _render_base_namelist(
+    name: str, base_type_name: str, fields: list[str], validators: list[list[str]]
+) -> list[str]:
+    """Render the ``_<Name>NamelistBase`` class holding the unconditional fields."""
+    docstring = INDENT + '"""' + f"Shared fields for the `{name}` namelist (all variants)." + '"""'
+    body: list[str] = [f"class {base_type_name}(Namelist):", docstring, ""]
+    body += [(INDENT + row) if row else "" for v in validators for row in v]
+    if not fields:
+        # Avoid an empty class body.
+        body.append(INDENT + "pass")
+    else:
+        body += fields
+    return body
+
+
+def _render_variant_namelist(
+    namelist_name: str,
+    variant_name: str,
+    base_name: str,
+    branch: Element,
+    discriminator: str,
+    discriminator_values: list[str],
+    discriminator_python_type: type,
+) -> tuple[list[str], bool]:
+    """Render one variant class inheriting from the base, with branch-specific fields."""
+    _propagate_group_attributes(branch)
+    field_definitions, field_validators, uses_quantity = _collect_fields(
+        branch.findall(".//var"), branch.findall(".//dimension")
+    )
+
+    # Render the discriminator field. Use Literal[...] keyed on the branch's
+    # value set; default to the first value so the variant can be constructed
+    # with no arguments.
+    literal_entries = [_format_literal(v, discriminator_python_type) for v in discriminator_values]
+    if literal_entries:
+        type_str = f"Literal[{', '.join(literal_entries)}]"
+        default_str = literal_entries[0]
+    else:
+        # Catch-all <otherwise> with no enumerable values: fall back to the
+        # raw python type with no default-on-the-variant restriction.
+        type_str = discriminator_python_type.__name__
+        default_str = "None"
+        type_str += " | None"
+    discr_field = _format_field(
+        discriminator, type_str, default_str, None, f"Discriminator: {discriminator}"
+    )
+
+    branch_summary = _branch_summary(branch, discriminator, discriminator_values)
+    docstring = INDENT + '"""' + f"`{namelist_name}` namelist when {branch_summary}." + '"""'
+    body: list[str] = [
+        f"class {variant_name}({base_name}):",
+        docstring,
+        "",
+    ]
+    body += [(INDENT + row) if row else "" for v in field_validators for row in v]
+    body.append(discr_field)
+    body += field_definitions
+    return body, uses_quantity
+
+
+def _branch_summary(branch: Element, discriminator: str, values: list[str]) -> str:
+    """Render a short human-readable summary of which discriminator values apply."""
+    if branch.tag == "otherwise" or not values:
+        return f"`{discriminator}` is not covered by any other branch"
+    if len(values) == 1:
+        return f"`{discriminator}` == {values[0]}"
+    joined = ", ".join(values)
+    return f"`{discriminator}` in ({joined})"
+
+
+def _render_variant_alias(
+    alias_name: str, variant_names: list[str], discriminator: str
+) -> list[str]:
+    """Render the ``<Name>Namelist = Annotated[V1 | V2 | ..., Field(discriminator=...)]`` line."""
+    if len(variant_names) == 1:
+        # Degenerate case: a discriminated <choose> with a single branch.
+        # Emit a simple alias so callers can still reference ``<Name>Namelist``.
+        return [f"{alias_name} = {variant_names[0]}"]
+    union_str = " | ".join(variant_names)
+    single = f'{alias_name} = Annotated[{union_str}, Field(discriminator="{discriminator}")]'
+    if len(single) <= _MAX_LINE_LEN:
+        return [single]
+    # Wrap onto multiple lines, one variant per line, matching ruff format.
+    lines = [f"{alias_name} = Annotated["]
+    for i, variant in enumerate(variant_names):
+        suffix = "," if i == len(variant_names) - 1 else ""
+        if i == 0:
+            lines.append(INDENT + variant + suffix)
+        else:
+            lines.append(INDENT + "| " + variant + suffix)
+    lines.append(INDENT + f'Field(discriminator="{discriminator}"),')
+    lines.append("]")
+    return lines
+
+
+def _propagate_group_attributes(namelist: Element) -> None:
+    """Push shared attributes from ``<vargroup>`` / ``<dimensiongroup>`` onto their children.
+
+    The new schema lets a single ``<vargroup type="INTEGER">`` cover multiple
+    typeless ``<var>`` children, and ``<dimensiongroup type="REAL" start="1"
+    end="3"><dimensionality/><units/>`` carry shared metadata that applies to
+    each nested ``<dimension>``. Normalize the tree by copying those attributes
+    (and the shared ``<dimensionality>`` / ``<units>`` elements) onto each child
+    so the rest of the parser doesn't have to know about the group wrapper.
+    """
+    for vargroup in namelist.findall(".//vargroup"):
+        group_type = vargroup.attrib.get("type")
+        if group_type is None:
+            continue
+        for var in vargroup.findall("var"):
+            var.attrib.setdefault("type", group_type)
+
+    for dimgroup in namelist.findall(".//dimensiongroup"):
+        shared_attrs = {k: v for k, v in dimgroup.attrib.items() if k in ("type", "start", "end")}
+        shared_children = [c for c in dimgroup if c.tag in ("dimensionality", "units")]
+        for dim in dimgroup.findall("dimension"):
+            for key, value in shared_attrs.items():
+                dim.attrib.setdefault(key, value)
+            existing_tags = {c.tag for c in dim}
+            for shared in shared_children:
+                if shared.tag not in existing_tags:
+                    dim.append(shared)
 
 
 def camel_case(value: str) -> str:
@@ -709,6 +1117,9 @@ def _parse_var(var: Element) -> tuple[str | None, list[str], bool]:
     name = var.attrib["name"]
     description_element = var.find("info")
     python_type = _get_var_type(name, var)
+    if python_type is None:
+        # STRUCTURE-typed vars have no atomic pydantic representation.
+        return None, [], False
 
     # Pydantic does not support float literals
     options = None if python_type is float else var.find("options")
@@ -739,10 +1150,12 @@ def _parse_var(var: Element) -> tuple[str | None, list[str], bool]:
     )
 
 
-def _parse_dimension(dim: Element) -> tuple[str, bool]:
+def _parse_dimension(dim: Element) -> tuple[str | None, bool]:
     """Parse a ``<dimension>`` element into a field-definition string."""
     name = dim.attrib["name"]
     python_type = _get_var_type(name, dim)
+    if python_type is None:
+        return None, False
     start = dim.attrib["start"]
     end = dim.attrib["end"]
     description = _get_var_description(name, dim.find("info"), None)
@@ -760,10 +1173,15 @@ def _parse_dimension(dim: Element) -> tuple[str, bool]:
 
     # Detect a list-style default like ``[0.0, 0.0, 0.0]`` that already spans the
     # whole dimension. We splice it into a python tuple literal directly without
-    # going through the scalar-sanitizer.
+    # going through the scalar-sanitizer. When the dimension has a fixed integer
+    # length we emit a tuple literal so the default matches the ``tuple[...]``
+    # annotation; otherwise we keep the list literal (matches ``list[...]``).
     list_default = _maybe_list_default(default, python_type)
     if list_default is not None:
-        default_str = list_default
+        if length is not None and list_default.startswith("["):
+            default_str = "(" + list_default[1:-1] + ")"
+        else:
+            default_str = list_default
         extra_payload: dict[str, Any] | None = None
     else:
         default_str, extra_payload = _get_default(name, python_type, default)
@@ -788,11 +1206,20 @@ def _parse_dimension(dim: Element) -> tuple[str, bool]:
     )
 
 
-def _get_var_type(name: str, var: Element) -> type:
+def _get_var_type(name: str, var: Element) -> type | None:
+    """Map an XML ``type=`` attribute to a python type.
+
+    Returns ``None`` for ``type="STRUCTURE"`` — a meta-type used in QE's schema
+    for variables that are records with sub-fields documented only in prose
+    (e.g. ``dvscf_star%open``). Those aren't representable as a single pydantic
+    field, so callers should skip them.
+    """
     xml_type_str = var.attrib.get("type", None)
     if xml_type_str is None:
         name = var.attrib["name"]
         raise InvalidXMLStructureError(f"`{name}` is missing the `type` field.")
+    if xml_type_str == "STRUCTURE":
+        return None
     python_type = type_mapping[xml_type_str]
     if name in ["pseudo_dir", "outdir", "wfcdir", "atom_proj_dir"]:
         python_type = Path
@@ -840,11 +1267,6 @@ def _get_type_str(
     """Determine the python annotation string, validator lines, and alias mapping."""
     if options is not None:
         type_str, mapping = _get_options_str_and_mapping(options, python_type)
-    elif name == "ibrav":
-        type_str = (
-            "Literal[0, 1, 2, 3, -3, 4, 5, -5, 6, 7, 8, 9, -9, 91, 10, 11, 12, -12, 13, -13, 14]"
-        )
-        mapping = {}
     else:
         type_str = python_type.__name__
         mapping = {}
@@ -950,8 +1372,6 @@ def _get_default(
     can decide on indentation).
     """
     if default is None:
-        if name == "ibrav":
-            return "0", None
         return "None", None
 
     kind = default.attrib.get("kind")
@@ -1091,7 +1511,8 @@ def _py_literal_list(
     pad = " " * inner_indent
     close_pad = " " * line_indent
     items = ",\n".join(
-        pad + _py_literal(v, start_col=inner_indent, line_indent=inner_indent) for v in value
+        pad + _py_literal(v, start_col=inner_indent, line_indent=inner_indent, trailing_comma=True)
+        for v in value
     )
     return "[\n" + items + ",\n" + close_pad + "]"
 
@@ -1124,8 +1545,9 @@ def _py_literal_dict(
 def _maybe_list_default(default: Element | None, python_type: type) -> str | None:
     """Recognize list-literal defaults like ``[0.0, 0.0, 0.0]`` on ``<dimension>``s.
 
-    Returns a python tuple-literal string if the default text parses as a list of
-    values of ``python_type``, else ``None``.
+    Returns a python list-literal string if the default text parses as a list of
+    values of ``python_type``, else ``None``. Strings are re-quoted with double
+    quotes so the emitted literal is valid python.
     """
     if default is None or default.attrib.get("kind") is not None:
         return None
@@ -1140,12 +1562,19 @@ def _maybe_list_default(default: Element | None, python_type: type) -> str | Non
     for piece in pieces:
         if not piece:
             return None
-        try:
-            python_type(piece)
-        except ValueError:
-            return None
-        formatted.append(piece)
-    return "(" + ", ".join(formatted) + ")"
+        if python_type is str:
+            # Strip the surrounding single quotes that QE uses in its XML, then
+            # re-emit with double quotes to keep the generated python literal
+            # ruff-clean.
+            stripped = piece.strip("'\"")
+            formatted.append(f'"{stripped}"')
+        else:
+            try:
+                python_type(piece)
+            except ValueError:
+                return None
+            formatted.append(piece)
+    return "[" + ", ".join(formatted) + "]"
 
 
 def _literal_default(text: str, python_type: type) -> str:

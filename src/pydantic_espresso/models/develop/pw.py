@@ -344,27 +344,38 @@ class SystemNamelist(Namelist):
         }
         return mapping.get(v, v)
 
-    ibrav: Literal[0, 1, 2, 3, -3, 4, 5, -5, 6, 7, 8, 9, -9, 91, 10, 11, 12, -12, 13, -13, 14] = (
-        Field(
-            0,
-            description=(
-                "Bravais-lattice index. Optional only if space_group is set. If ibrav /= 0, "
-                "specify EITHER [ celldm(1)-celldm(6) ] OR [ A, B, C, cosAB, cosAC, cosBC ] but "
-                "NOT both. The lattice parameter 'alat' is set to alat = celldm(1) (in a.u.) or "
-                "alat = A (in Angstrom); see below for the other parameters. For ibrav=0 specify "
-                "the lattice vectors in CELL_PARAMETERS, optionally the lattice parameter alat = "
-                "celldm(1) (in a.u.) or = A (in Angstrom). If not specified, the lattice parameter "
-                "is taken from CELL_PARAMETERS IMPORTANT NOTICE 1: with ibrav=0 lattice vectors "
-                "must be given with a sufficiently large number of digits and with the correct "
-                "symmetry, or else symmetry detection may fail and strange problems may arise in "
-                "symmetrization. IMPORTANT NOTICE 2: do not use celldm(1) or A as a.u. to Ang "
-                "conversion factor, use the true lattice parameters or nothing, specify units in "
-                "CELL_PARAMETERS and ATOMIC_POSITIONS  The accepted values of ibrav and the "
-                "corresponding lattices (with the required celldm(2)-celldm(6), or equivalently "
-                "b,c,cosbc,cosac,cosab) are listed below."
-            ),
-        )
+    ibrav: Literal[
+        None, 0, 1, 2, 3, -3, 4, 5, -5, 6, 7, 8, 9, -9, 91, 10, 11, 12, -12, 13, -13, 14
+    ] = Field(
+        None,
+        description=(
+            "Bravais-lattice index. Optional only if space_group is set. If ibrav /= 0, specify "
+            "EITHER [ celldm(1)-celldm(6) ] OR [ A, B, C, cosAB, cosAC, cosBC ] but NOT both. The "
+            "lattice parameter 'alat' is set to alat = celldm(1) (in a.u.) or alat = A (in "
+            "Angstrom); see below for the other parameters. For ibrav=0 specify the lattice "
+            "vectors in CELL_PARAMETERS, optionally the lattice parameter alat = celldm(1) (in "
+            "a.u.) or = A (in Angstrom). If not specified, the lattice parameter is taken from "
+            "CELL_PARAMETERS IMPORTANT NOTICE 1: with ibrav=0 lattice vectors must be given with a "
+            "sufficiently large number of digits and with the correct symmetry, or else symmetry "
+            "detection may fail and strange problems may arise in symmetrization. IMPORTANT NOTICE "
+            "2: do not use celldm(1) or A as a.u. to Ang conversion factor, use the true lattice "
+            "parameters or nothing, specify units in CELL_PARAMETERS and ATOMIC_POSITIONS  The "
+            "accepted values of ibrav and the corresponding lattices (with the required "
+            "celldm(2)-celldm(6), or equivalently b,c,cosbc,cosac,cosab) are listed below."
+        ),
     )
+    A: Annotated[float, Quantity(units="angstrom", dimensionality="length")] = Field(
+        0.0, description=""
+    )
+    B: Annotated[float, Quantity(units="angstrom", dimensionality="length")] = Field(
+        0.0, description=""
+    )
+    C: Annotated[float, Quantity(units="angstrom", dimensionality="length")] = Field(
+        0.0, description=""
+    )
+    cosAB: float = Field(0.0, description="")  # noqa: N815
+    cosAC: float = Field(0.0, description="")  # noqa: N815
+    cosBC: float = Field(0.0, description="")  # noqa: N815
     nat: int | None = Field(
         None,
         description=(
@@ -443,6 +454,12 @@ class SystemNamelist(Namelist):
             "to instabilities."
         ),
     )
+    nr1: int = Field(0, description="")
+    nr2: int = Field(0, description="")
+    nr3: int = Field(0, description="")
+    nr1s: int = Field(0, description="")
+    nr2s: int = Field(0, description="")
+    nr3s: int = Field(0, description="")
     nosym: bool = Field(
         False,
         description=(
@@ -678,6 +695,9 @@ class SystemNamelist(Namelist):
             "vectors."
         ),
     )
+    nqx1: int | None = Field(None, json_schema_extra={"computed_default": True}, description="")
+    nqx2: int | None = Field(None, json_schema_extra={"computed_default": True}, description="")
+    nqx3: int | None = Field(None, json_schema_extra={"computed_default": True}, description="")
     localization_thr: float = Field(
         0.0,
         description=(
@@ -966,11 +986,73 @@ class SystemNamelist(Namelist):
             "cases."
         ),
     )
+    zgate: float = Field(
+        0.5,
+        description=(
+            "used only if gate = .TRUE. Specifies the position of the charged plate which "
+            "represents the counter charge in doped systems (tot_charge .ne. 0). In units of the "
+            "unit cell length in z direction, zgate in ]0,1[ Details of the gate potential can be "
+            "found in T. Brumme, M. Calandra, F. Mauri; PRB 89, 245406 (2014) "
+            "(https://journals.aps.org/prb/abstract/10.1103/PhysRevB.89.245406)."
+        ),
+    )
+    relaxz: bool = Field(
+        False,
+        description=(
+            "used only if gate = .TRUE. Allows the relaxation of the system towards the charged "
+            "plate. Use carefully and utilize either a layer of fixed atoms or a potential barrier "
+            "(block=.TRUE.) to avoid the atoms moving to the position of the plate or the dipole "
+            "of the dipole correction (dipfield=.TRUE.)."
+        ),
+    )
+    block: bool = Field(
+        False,
+        description=(
+            "used only if gate = .TRUE. Adds a potential barrier to the total potential seen by "
+            "the electrons to mimic a dielectric in field effect configuration and/or to avoid "
+            "electrons spilling into the vacuum region for electron doping. Potential barrier is "
+            "from block_1 to block_2 and has a height of block_height. If dipfield = .TRUE. then "
+            "eopreg is used for a smooth increase and decrease of the potential barrier."
+        ),
+    )
+    block_1: float = Field(
+        0.45,
+        description=(
+            "used only if gate = .TRUE. and block = .TRUE. lower beginning of the potential "
+            "barrier, in units of the unit cell size along z, block_1 in ]0,1["
+        ),
+    )
+    block_2: float = Field(
+        0.55,
+        description=(
+            "used only if gate = .TRUE. and block = .TRUE. upper beginning of the potential "
+            "barrier, in units of the unit cell size along z, block_2 in ]0,1["
+        ),
+    )
+    block_height: float = Field(
+        0.0,
+        description=(
+            "used only if gate = .TRUE. and block = .TRUE. Height of the potential barrier in "
+            "Rydberg."
+        ),
+    )
     nextffield: int = Field(
         0,
         description=(
             "Number of activated external ionic force fields. See Doc/ExternalForceFields.tex for "
             "further explanation and parameterizations"
+        ),
+    )
+    celldm: Annotated[
+        tuple[float, float, float, float, float, float],
+        Quantity(units="1:bohr", dimensionality="dimensionless, 1:length"),
+    ] = Field(
+        (0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+        description=(
+            "Crystallographic constants - see the ibrav variable. Specify either these OR "
+            "A,B,C,cosAB,cosBC,cosAC NOT both. Only needed values (depending on 'ibrav') must be "
+            "specified alat = celldm(1) is the lattice parameter 'a' If ibrav==0, only celldm(1) "
+            "is used if present; cell vectors are read from card CELL_PARAMETERS"
         ),
     )
     starting_charge: Annotated[list[float], Quantity(units="e", dimensionality="charge")] = Field(
@@ -1297,6 +1379,179 @@ class IonsNamelist(Namelist):
             "will be higher, but the relaxation itself should be faster."
         ),
     )
+    ion_temperature: Literal[
+        "rescaling",
+        "rescale-v",
+        "rescale-T",
+        "reduce-T",
+        "nose",
+        "berendsen",
+        "andersen",
+        "svr",
+        "initial",
+        "not_controlled",
+    ] = Field("not_controlled", description="Available options are:")
+    tempw: Annotated[float, Quantity(units="K", dimensionality="temperature")] = Field(
+        300.0,
+        description="Starting temperature in MD runs target temperature for most thermostats.",
+    )
+    fnosep: Annotated[float, Quantity(units="THz", dimensionality="time^-1")] = Field(
+        1.0,
+        description=(
+            "oscillation frequency of the Nose thermorstat [note that 3 THz = 100 cm^-1], "
+            "meaningful only with 'ion_temperature = 'nose'' for Nose-Hoover chain one can ser "
+            "frequncies for all nhpcl thermostats ( fnosep = X Y Z etc.) If only first is set, the "
+            "defaults for the others will be the same."
+        ),
+    )
+    nhpcl: int = Field(
+        0,
+        description=(
+            "number of thermostats in the Nose-Hoover chain; currently maximum allowed is 4"
+        ),
+    )
+    nhptyp: Literal[0, 1, 2, 3] = Field(
+        0, description="type of the 'massive' Nose-Hoover chain thermostat."
+    )
+    ndega: int = Field(
+        0,
+        description=(
+            "number of degrees of freedom used for temperature calculation ndega <= 0 sets the "
+            "number of degrees of freedom to [3*nat-abs(ndega)], ndega > 0 is used as the target "
+            "number"
+        ),
+    )
+    tolp: Annotated[float, Quantity(units="K", dimensionality="temperature")] = Field(
+        100.0,
+        description=(
+            "Tolerance for velocity rescaling. Velocities are rescaled if the run-averaged and "
+            "target temperature differ more than tolp."
+        ),
+    )
+    delta_t: float = Field(
+        1.0,
+        description=(
+            "if ion_temperature == 'rescale-T' : at each step the instantaneous temperature is "
+            "multiplied by delta_t; this is done rescaling all the velocities.  if ion_temperature "
+            "== 'reduce-T' : every 'nraise' steps the instantaneous temperature is reduced by "
+            "-delta_t (i.e. delta_t < 0 is added to T)  The instantaneous temperature is "
+            "calculated at the end of every ionic move and BEFORE rescaling. This is the "
+            "temperature reported in the main output.  For delta_t < 0, the actual average rate of "
+            "heating or cooling should be roughly C*delta_t/(nraise*dt) (C=1 for an ideal gas, "
+            "C=0.5 for a harmonic solid, theorem of energy equipartition between all quadratic "
+            "degrees of freedom)."
+        ),
+    )
+    nraise: int = Field(
+        1,
+        description=(
+            "if ion_temperature == 'reduce-T' : every nraise steps the instantaneous temperature "
+            "is reduced by -delta_t (i.e. delta_t is added to the temperature)  if ion_temperature "
+            "== 'rescale-v' : every nraise steps the average temperature, computed from the last "
+            "nraise steps, is rescaled to tempw  if ion_temperature == 'rescaling' and calculation "
+            "== 'vc-md' : every nraise steps the instantaneous temperature is rescaled to tempw  "
+            "if ion_temperature == 'berendsen' : the 'rise time' parameter is given in units of "
+            "the time step: tau = nraise*dt, so dt/tau = 1/nraise  if ion_temperature == "
+            "'andersen' : the 'collision frequency' parameter is given as nu=1/tau defined above, "
+            "so nu*dt = 1/nraise  if ion_temperature == 'svr' : the 'characteristic time' of the "
+            "thermostat is set to tau = nraise*dt"
+        ),
+    )
+    refold_pos: bool = Field(
+        False,
+        description=(
+            "This keyword applies only in the case of molecular dynamics or damped dynamics. If "
+            "true the ions are refolded at each step into the supercell."
+        ),
+    )
+    upscale: float = Field(
+        100.0,
+        description=(
+            "Max reduction factor for conv_thr during structural optimization conv_thr is "
+            "automatically reduced when the relaxation approaches convergence so that forces are "
+            "still accurate, but conv_thr will not be reduced to less that conv_thr / upscale."
+        ),
+    )
+    bfgs_ndim: int = Field(
+        1,
+        description=(
+            "Number of old forces and displacements vectors used in the PULAY (GDIIS) mixing of "
+            "the residual vectors obtained on the basis of the inverse hessian matrix given by the "
+            "BFGS algorithm. The variable  tgdiis_step in this case sets whether to use to full "
+            "GDIIS step or the BFGS trust_radius. When bfgs_ndim = 1, the standard quasi-Newton "
+            "BFGS method is used. (bfgs only)"
+        ),
+    )
+    tgdiis_step: bool = Field(
+        True,
+        description=(
+            "When G-DIIS (bfgs_ndim > 1) is used for the structural relaxation this variable "
+            "selects whether to use to full gdiis step or the BFGS trus radius. (bfgs only)"
+        ),
+    )
+    trust_radius_max: Annotated[float, Quantity(units="bohr", dimensionality="length")] = Field(
+        0.8, description="Maximum ionic displacement in the structural relaxation. (bfgs only)"
+    )
+    trust_radius_min: Annotated[float, Quantity(units="bohr", dimensionality="length")] = Field(
+        0.0001,
+        description=(
+            "Minimum ionic displacement in the structural relaxation BFGS is reset when "
+            "trust_radius < trust_radius_min. (bfgs only)"
+        ),
+    )
+    trust_radius_ini: Annotated[float, Quantity(units="bohr", dimensionality="length")] = Field(
+        0.5, description="Initial ionic displacement in the structural relaxation. (bfgs only)"
+    )
+    w_1: float = Field(0.01, description="")
+    w_2: float = Field(
+        0.5, description="Parameters used in line search based on the Wolfe conditions. (bfgs only)"
+    )
+    fire_alpha_init: float = Field(
+        0.2,
+        description=(
+            "Initial value of the alpha mixing factor in the FIRE minimization scheme; recommended "
+            "values are between 0.1 and 0.3"
+        ),
+    )
+    fire_falpha: float = Field(
+        0.99, description="Scaling of the alpha mixing parameter for steps with P > 0;"
+    )
+    fire_nmin: int = Field(
+        5, description="Minimum number of steps with P > 0 before increase of dt"
+    )
+    fire_f_inc: float = Field(1.1, description="Factor for increasing dt")
+    fire_f_dec: float = Field(0.5, description="Factor for decreasing dt")
+    fire_dtmax: float = Field(
+        10.0,
+        description=(
+            "Determines the maximum value of dt in the FIRE minimization; dtmax = fire_dtmax*dt"
+        ),
+    )
+    nhgrp: list[int] = Field(
+        default_factory=list,
+        description=(
+            "specifies which thermostat group to use for given atomic type when >0 assigns all the "
+            "atoms in this type to thermostat labeled nhgrp(i), when =0 each atom in the type gets "
+            "its own thermostat. Finally, when <0, then this atomic type will have temperature "
+            "'not controlled'. Example: HCOOLi, with types H (1), C(2), O(3), Li(4); setting "
+            "nhgrp={2 2 0 -1} will add a common thermostat for both H & C, one thermostat per each "
+            "O (2 in total), and a non-updated thermostat for Li which will effectively make "
+            "temperature for Li 'not controlled (start = 1, end = ntyp)"
+        ),
+    )
+    fnhscl: list[float] | None = Field(
+        None,
+        json_schema_extra={"default_expr": "(Nat-1)/Nat"},
+        description=(
+            "these are the scaling factors to be used together with nhptyp=3 and nhgrp(i) in order "
+            "to take care of possible reduction in the degrees of freedom due to constraints. "
+            "Suppose that with the previous example HCOOLi, C-H bond is constrained. Then, these 2 "
+            "atoms will have 5 degrees of freedom in total instead of 6, and one can set "
+            "fnhscl={5/6 5/6 1. 1.}. This way the target kinetic energy for H&C will become "
+            "6(kT/2)*5/6 = 5(kT/2). This option is to be used for simulations with many "
+            "constraints, such as rigid water with something else in there (start = 1, end = ntyp)"
+        ),
+    )
 
 
 class CellNamelist(Namelist):
@@ -1404,6 +1659,82 @@ class FcpNamelist(Namelist):
     )
     fcp_ndiis: int = Field(
         4, description="Size of DIIS for FCP relaxation, used only if fcp_dynamics = 'newton'."
+    )
+    fcp_mass: float | None = Field(
+        None,
+        json_schema_extra={
+            "conditional_default": [
+                {"when": "esm_bc=='bc2' || esm_bc=='bc3'", "value": "5.D+6 / xy_area"},
+                {"when": None, "value": "5.D+4 / xy_area"},
+            ],
+        },
+        description="Mass of the FCP.",
+    )
+    fcp_velocity: float | None = Field(
+        None,
+        json_schema_extra={"computed_default": True},
+        description=(
+            "Initial velocity of the FCP. If not specified, it is determined by fcp_temperature."
+        ),
+    )
+    fcp_temperature: Literal[
+        None,
+        "rescaling",
+        "rescale-v",
+        "rescale-T",
+        "reduce-T",
+        "berendsen",
+        "andersen",
+        "initial",
+        "not_controlled",
+    ] = Field(
+        None,
+        json_schema_extra={"default_ref": "ion_temperature"},
+        description="Available options are:",
+    )
+    fcp_tempw: Annotated[float | None, Quantity(units="K", dimensionality="temperature")] = Field(
+        None,
+        json_schema_extra={"default_ref": "tempw"},
+        description=(
+            "Starting temperature in FCP dynamics runs target temperature for most thermostats."
+        ),
+    )
+    fcp_tolp: Annotated[float | None, Quantity(units="K", dimensionality="temperature")] = Field(
+        None,
+        json_schema_extra={"default_ref": "tolp"},
+        description=(
+            "Tolerance for velocity rescaling. Velocities are rescaled if the run-averaged and "
+            "target temperature differ more than tolp."
+        ),
+    )
+    fcp_delta_t: float | None = Field(
+        None,
+        json_schema_extra={"default_ref": "delta_t"},
+        description=(
+            "if fcp_temperature == 'rescale-T' : at each step the instantaneous temperature is "
+            "multiplied by fcp_delta_t; this is done rescaling all the velocities.  if "
+            "fcp_temperature == 'reduce-T' : every fcp_nraise steps the instantaneous temperature "
+            "is reduced by -fcp_delta_t (i.e. fcp_delta_t < 0 is added to T)  The instantaneous "
+            "temperature is calculated at the end of FCP's move and BEFORE rescaling. This is the "
+            "temperature reported in the main output.  For fcp_delta_t < 0, the actual average "
+            "rate of heating or cooling should be roughly C*fcp_delta_t/(fcp_nraise*dt) (C=1 for "
+            "an ideal gas, C=0.5 for a harmonic solid, theorem of energy equipartition between all "
+            "quadratic degrees of freedom)."
+        ),
+    )
+    fcp_nraise: int | None = Field(
+        None,
+        json_schema_extra={"default_ref": "nraise"},
+        description=(
+            "if fcp_temperature == 'reduce-T' : every fcp_nraise steps the instantaneous "
+            "temperature is reduced by -fcp_delta_t (i.e. fcp_delta_t is added to the temperature) "
+            " if fcp_temperature == 'rescale-v' : every fcp_nraise steps the average temperature, "
+            "computed from the last fcp_nraise steps, is rescaled to fcp_tempw  if fcp_temperature "
+            "== 'berendsen' : the 'rise time' parameter is given in units of the time step: tau = "
+            "fcp_nraise*dt, so dt/tau = 1/fcp_nraise  if fcp_temperature == 'andersen' : the "
+            "'collision frequency' parameter is given as nu=1/tau defined above, so nu*dt = "
+            "1/fcp_nraise"
+        ),
     )
     freeze_all_atoms: bool = Field(
         False,

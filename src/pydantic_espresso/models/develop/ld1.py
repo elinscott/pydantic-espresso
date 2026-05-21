@@ -23,6 +23,42 @@ class InputNamelist(Namelist):
         return mapping.get(v, v)
 
     title: str | None = Field(None, description="A string describing the job.")
+    zed: Annotated[float, Quantity(units="e", dimensionality="charge")] = Field(
+        0.0,
+        description=(
+            "The nuclear charge (1 < zed < 100).  IMPORTANT: Specify either zed OR atom, not both!"
+        ),
+    )
+    atom: str | None = Field(
+        None,
+        description=(
+            "Atomic symbol: atom='H', 'He', 'Be', etc.  IMPORTANT: Specify either atom OR zed, not "
+            "both!"
+        ),
+    )
+    xmin: float | None = Field(
+        None,
+        json_schema_extra={
+            "conditional_default": [
+                {"when": "iswitch==1 .and. .not.@ref vdw .and. rel>0", "value": "-8.0"},
+                {"when": None, "value": "-7.0"},
+            ],
+        },
+        description="Radial grid parameter.",
+    )
+    dx: float | None = Field(
+        None,
+        json_schema_extra={
+            "conditional_default": [
+                {"when": "iswitch==1 .and. .not.@ref vdw", "value": "0.008"},
+                {"when": None, "value": "0.0125"},
+            ],
+        },
+        description="Radial grid parameter.  The radial grid is: r(i+1) = exp(xmin+i*dx)/zed  a.u.",
+    )
+    rmax: Annotated[float, Quantity(units="bohr", dimensionality="length")] = Field(
+        100.0, description="Outermost grid point."
+    )
     beta: float = Field(0.2, description="parameter for potential mixing")
     tr2: float = Field(1e-14, description="convergence threshold for scf")
     iswitch: int = Field(
@@ -31,6 +67,25 @@ class InputNamelist(Namelist):
             "1    all-electron calculation 2    PP test calculation 3    PP generation 4    "
             "LDA-1/2 correction, needs a previously generated PP file"
         ),
+    )
+    nld: int = Field(0, description="the number of logarithmic derivatives to be calculated")
+    rlderiv: Annotated[float, Quantity(units="bohr", dimensionality="length")] = Field(
+        4.0, description="radius at which logarithmic derivatives are calculated"
+    )
+    eminld: float | None = Field(None, description="")
+    emaxld: float | None = Field(None, description="")
+    deld: Annotated[float, Quantity(units="Ry", dimensionality="energy")] = Field(
+        0.03, description="Delta e of energy for logarithmic derivatives."
+    )
+    rpwe: Annotated[float | None, Quantity(units="bohr", dimensionality="length")] = Field(
+        None,
+        json_schema_extra={
+            "conditional_default": [
+                {"when": "nld>0", "value": "rlderiv"},
+                {"when": None, "value": "0.0"},
+            ],
+        },
+        description="radius at which partial wave expansions are calculated",
     )
     rel: int | None = Field(
         None,
@@ -259,6 +314,36 @@ class InputpNamelist(Namelist):
         False,
         description="If .true. produce a PAW dataset, experimental feature only for pseudotype=3",
     )
+    which_augfun: Literal[None, "AE", "PSQ", "BESSEL", "GAUSS", "BG"] = Field(
+        None,
+        json_schema_extra={
+            "conditional_default": [
+                {"when": "(@ref lpaw .and. lnc2paw) .or. (.not. lpaw)", "value": "'AE'"},
+                {"when": None, "value": "'BESSEL'"},
+            ],
+        },
+        description=(
+            "If different from 'AE' the augmentation functions are pseudized before rmatch_augfun. "
+            "The pseudization options are:  The following options are available only for PAW "
+            "(lpaw=.true.):"
+        ),
+    )
+    rmatch_augfun: Annotated[float | None, Quantity(units="bohr", dimensionality="length")] = Field(
+        None,
+        json_schema_extra={"computed_default": True},
+        description=(
+            "Pseudization radius for the augmentation functions. Presently it has the same value "
+            "for all L. If not specified, the largest ultrasoft core radius is used."
+        ),
+    )
+    rmatch_augfun_nc: float | None = Field(
+        None,
+        description=(
+            "If .true. the augmentation functions are pseudized from the origin to "
+            "min(rcut(ns),rcut(ns1)) where ns and ns1 are the two channels for that Q. In this "
+            "case rmatch_augfun is not used."
+        ),
+    )
     lsave_wfc: bool | None = Field(
         None,
         json_schema_extra={
@@ -334,6 +419,9 @@ class TestNamelist(Namelist):
             "form!"
         ),
     )
+    ecutmin: float | None = Field(None, description="")
+    ecutmax: float | None = Field(None, description="")
+    decut: float | None = Field(None, description="")
     rm: Annotated[float, Quantity(units="bohr", dimensionality="length")] = Field(
         30.0, description="Radius of the box used with spherical Bessel functions."
     )

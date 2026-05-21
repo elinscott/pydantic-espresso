@@ -46,6 +46,9 @@ class InputNamelist(Namelist):
             "calculate phonon bands from the list of q-points supplied in input"
         ),
     )
+    nk1: int | None = Field(None, description="")
+    nk2: int | None = Field(None, description="")
+    nk3: int | None = Field(None, description="")
     deltaE: Annotated[float, Quantity(units="cm-1", dimensionality="energy")] = Field(  # noqa: N815
         1.0,
         description=(
@@ -89,6 +92,9 @@ class InputNamelist(Namelist):
     fldyn: str | None = Field(
         None, description="output file for dynamical matrix (' ' means it is not written)"
     )
+    l1: int | None = Field(None, description="")
+    l2: int | None = Field(None, description="")
+    l3: int | None = Field(None, description="")
     ntyp: int | None = Field(
         None,
         json_schema_extra={

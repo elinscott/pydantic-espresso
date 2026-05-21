@@ -69,6 +69,9 @@ class LrControlNamelist(Namelist):
     approximation: Literal["TDDFT", "IPA", "RPA_with_CLFE"] = Field(
         "TDDFT", description="A string describing a level of theory:"
     )
+    q1: float | None = Field(None, description="")
+    q2: float | None = Field(None, description="")
+    q3: float | None = Field(None, description="")
     calculator: Literal["lanczos", "sternheimer"] = Field(
         "lanczos",
         description="Variable that controls which algorithm is used to compute EELS spectra.",

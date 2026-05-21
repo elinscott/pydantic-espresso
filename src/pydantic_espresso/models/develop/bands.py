@@ -70,6 +70,8 @@ class BandsNamelist(Namelist):
             "are written in eV and xk in units 2pi/a."
         ),
     )
+    firstk: int | None = Field(None, description="")
+    lastk: int | None = Field(None, description="")
     lsigma: tuple[bool, bool, bool] = Field(
         (False, False, False),
         description=(

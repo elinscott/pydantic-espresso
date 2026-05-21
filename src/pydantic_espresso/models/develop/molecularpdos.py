@@ -15,6 +15,8 @@ from pydantic_espresso.quantity import Quantity
 class InputmopdosNamelist(Namelist):
     """Pydantic model for the `INPUTMOPDOS` namelist."""
 
+    xmlfile_full: str | None = Field(None, description="")
+    xmlfile_part: str | None = Field(None, description="")
     i_atmwfc_beg_full: int = Field(
         1, description="first atomic wavefunction of the full system considered for the projection"
     )
@@ -97,6 +99,8 @@ class InputmopdosNamelist(Namelist):
     degauss: Annotated[float, Quantity(units="Ry", dimensionality="energy")] = Field(
         0.0, description="gaussian broadening (not eV!)"
     )
+    Emin: float | None = Field(None, description="")
+    Emax: float | None = Field(None, description="")
     DeltaE: Annotated[float, Quantity(units="eV", dimensionality="energy")] = Field(
         0.01, description="energy grid step"
     )

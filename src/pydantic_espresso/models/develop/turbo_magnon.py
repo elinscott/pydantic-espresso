@@ -89,6 +89,9 @@ class LrControlNamelist(Namelist):
             "performed and the full susceptibility tensor is computed."
         ),
     )
+    q1: float | None = Field(None, description="")
+    q2: float | None = Field(None, description="")
+    q3: float | None = Field(None, description="")
 
 
 class TURBOMAGNONEspressoInput(EspressoInput):
