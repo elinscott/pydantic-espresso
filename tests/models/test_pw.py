@@ -25,14 +25,14 @@ from pydantic_espresso.models import get_module, versions
     ],
 )
 def test_pw_espresso_input(version: Version, k_points: dict[str, Any]) -> None:
-    """Test if the PWEspressoInput model can be instantiated."""
-    # Import the model dynamically from pydantic_espresso.models.<version>.pw
+    """Test if the PWInput model can be instantiated."""
+    # Import the model dynamically from pydantic_espresso.models.pw.<version>
     try:
         module = get_module(version, "pw")
     except ModuleNotFoundError:
         pytest.skip(f"Module for version {version} not found.")
         return
-    model = module.PWEspressoInput
+    model = module.PWInput
 
     # Instantiate the model
     inp = model(

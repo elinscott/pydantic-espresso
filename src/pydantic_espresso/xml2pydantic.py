@@ -16,8 +16,9 @@ from xml.etree.ElementTree import Element, ParseError
 
 from defusedxml.ElementTree import parse
 
-from pydantic_espresso.models import directory as model_directory
 from pydantic_espresso.xml_files import directory as xml_directory
+
+_PACKAGE_ROOT = Path(__file__).parent
 
 # Matches pep8-naming's notion of ``mixedCase``: name starts with a lowercase
 # letter or underscore and contains at least one uppercase letter elsewhere.
@@ -100,19 +101,13 @@ def convert_all_xml_files_to_models() -> None:
             warnings.warn(f"Processing {xml_path} failed: {e}", stacklevel=2)
             continue
 
-        model_file = (
-            model_directory
-            / xml_path.parent.name.replace(".", "_").replace("-", "_")
-            / f"{executable_str}.py"
-        )
-        model_dir = Path(model_file).parent
+        version_module = xml_path.parent.name.replace(".", "_").replace("-", "_")
+        model_dir = _PACKAGE_ROOT / "models" / executable_str
         if not model_dir.exists():
             model_dir.mkdir(parents=True, exist_ok=True)
             with open(model_dir / "__init__.py", "w") as f:
-                f.write(
-                    '"""Pydantic models for Quantum ESPRESSO executables.\n\nThis file is '
-                    'automatically generated; do not edit.\n"""'
-                )
+                f.write(f'"""Pydantic models for `{executable_str}.x` inputs."""\n')
+        model_file = model_dir / f"{version_module}.py"
         with open(model_file, "w") as f:
             f.write(model_str)
 
@@ -756,7 +751,7 @@ def camel_case(value: str) -> str:
 def load_prebuilt_card(card: Element, program: str) -> tuple[str, str]:
     """Load a prebuilt card."""
     name = card.attrib["name"].lower()
-    card_module = __import__(f"pydantic_espresso.card.{program}", fromlist=[program])
+    card_module = __import__(f"pydantic_espresso.models.{program}.cards", fromlist=[program])
     prebuilt_cards = getattr(card_module, "prebuilt_cards", None)
     if prebuilt_cards is None:
         raise ImportError(f"No prebuilt cards found for {program}.")
@@ -1997,7 +1992,7 @@ def _build_import_lines(body: str, extra_imports: set[str], needs_quantity: bool
     if pydantic_syms:
         third_party.append("from pydantic import " + ", ".join(pydantic_syms))
 
-    first_party: list[str] = ["from pydantic_espresso.models.template import EspressoInput"]
+    first_party: list[str] = ["from pydantic_espresso.base import EspressoInput"]
     if re.search(r"\bNamelist\b", body):
         first_party.append("from pydantic_espresso.namelist import Namelist")
     if needs_quantity:
@@ -2031,7 +2026,7 @@ def _generate_model_string(
         executable_str = executable_str.replace(char, "")
 
     input_header = [
-        f"class {executable_str}EspressoInput(EspressoInput):",
+        f"class {executable_str}Input(EspressoInput):",
         INDENT + f'"""Pydantic model for the input of `{executable}`."""',
         "",
         "",

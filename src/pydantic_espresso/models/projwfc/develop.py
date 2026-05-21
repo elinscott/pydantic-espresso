@@ -1,0 +1,146 @@
+"""Pydantic model for the input of `projwfc.x` version `develop`.
+
+This file has been generated automatically. Do not edit it manually.
+"""
+
+from pathlib import Path
+from textwrap import dedent
+from typing import Annotated
+
+from pydantic import Field
+
+from pydantic_espresso.base import EspressoInput
+from pydantic_espresso.namelist import Namelist
+from pydantic_espresso.quantity import Quantity
+
+
+class ProjwfcNamelist(Namelist):
+    """Pydantic model for the `PROJWFC` namelist."""
+
+    prefix: str = Field(
+        "pwscf", description="prefix of input file produced by pw.x (wavefunctions are needed)"
+    )
+    outdir: Path | None = Field(
+        None,
+        json_schema_extra={
+            "conditional_default": [
+                {"when": "ESPRESSO_TMPDIR is set", "value": "from_environment"},
+                {"when": None, "value": "'./'"},
+            ],
+        },
+        description="directory containing the input data, i.e. the same as in pw.x",
+    )
+    ngauss: int = Field(
+        0,
+        description=dedent(
+            """\
+            Type of gaussian broadening: 0 ... Simple Gaussian 1 ... Methfessel-Paxton of order 1
+            -1 ... 'cold smearing' (Marzari-Vanderbilt-DeVita-Payne) -99 ... Fermi-Dirac function"""
+        ),
+    )
+    degauss: Annotated[float, Quantity(units="Ry", dimensionality="energy")] = Field(
+        0.0, description="gaussian broadening, Ry (not eV!)"
+    )
+    Emin: Annotated[float | None, Quantity(units="eV", dimensionality="energy")] = Field(
+        None,
+        json_schema_extra={"computed_default": True},
+        description="min & max energy for DOS plot. Default: band extrema (computed at runtime).",
+    )
+    Emax: Annotated[float | None, Quantity(units="eV", dimensionality="energy")] = Field(
+        None,
+        json_schema_extra={"computed_default": True},
+        description="min & max energy for DOS plot. Default: band extrema (computed at runtime).",
+    )
+    DeltaE: Annotated[float | None, Quantity(units="eV", dimensionality="energy")] = Field(
+        None, description="energy grid step"
+    )
+    lsym: bool = Field(
+        True,
+        description=dedent(
+            """\
+            if .true.  the projections are symmetrized, the partial density of states are computed
+            if .false. the projections are not symmetrized, the partial DOS can be computed only in
+            the k-resolved case"""
+        ),
+    )
+    diag_basis: bool = Field(
+        False,
+        description=dedent(
+            """\
+            if .false. the projections of Kohn-Sham states are done on the orthogonalized atomic
+            orbitals in the global XYZ coordinate frame. if .true. the projections of Kohn-Sham
+            states are done on the orthogonalized atomic orbitals that are rotated to the basis in
+            which the atomic occupation matrix is diagonal (i.e. local XYZ coordinate frame)."""
+        ),
+    )
+    pawproj: bool = Field(
+        False,
+        description=dedent(
+            """\
+            if .true. use PAW projectors and all-electron PAW basis functions to calculate weight
+            factors for the partial densities of states. Following Bloechl, PRB 50, 17953 (1994)
+            (https://journals.aps.org/prb/abstract/10.1103/PhysRevB.50.17953), Eq. (4 & 6), the
+            weight factors thus approximate the real charge within the augmentation sphere of each
+            atom. Only for PAW, not implemented in the noncolinear case."""
+        ),
+    )
+    filpdos: str | None = Field(
+        None,
+        json_schema_extra={"default_ref": "prefix"},
+        description="prefix for output files containing PDOS(E)",
+    )
+    filproj: str | None = Field(
+        None,
+        json_schema_extra={"computed_default": True},
+        description=dedent(
+            """\
+            File containing the projections. If unset, projections are written to standard
+            output."""
+        ),
+    )
+    lwrite_overlaps: bool = Field(
+        False,
+        description=dedent(
+            """\
+            if .true., the overlap matrix of the atomic orbitals prior to orthogonalization is
+            written to 'atomic_proj.xml'. Does not work together with parallel diagonalization: for
+            parallel runs, use 'mpirun -np N projwfc.x -nd 1 ..."""
+        ),
+    )
+    lbinary_data: bool = Field(
+        False,
+        description="CURRENTLY DISABLED. if .true., write atomic projections to a binary file.",
+    )
+    kresolveddos: bool = Field(
+        False,
+        description=dedent(
+            """\
+            if .true. the k-resolved DOS is computed: not summed over all k-points but written as a
+            function of the k-point index. In this case all k-point weights are set to unity"""
+        ),
+    )
+    tdosinboxes: bool = Field(
+        False,
+        description=dedent(
+            """\
+            if .true. compute the local DOS integrated in volumes  Volumes are defined as boxes
+            with edges parallel to the unit cell, containing the points of the (charge density) FFT
+            grid included within irmin and irmax, in the three dimensions:  from irmin(j,n) to
+            irmax(j,n) for j=1,2,3 (n=1,n_proj_boxes)."""
+        ),
+    )
+    n_proj_boxes: int = Field(1, description="number of boxes where the local DOS is computed")
+    plotboxes: bool = Field(
+        False,
+        description=dedent(
+            """\
+            if .true., the boxes are written in output as xsf files with 3D datagrids, valued 1.0
+            inside the box volume and 0 outside (visualize them as isosurfaces with isovalue 0.5)"""
+        ),
+    )
+
+
+class PROJWFCInput(EspressoInput):
+    """Pydantic model for the input of `projwfc.x`."""
+
+    projwfc: ProjwfcNamelist = Field(default_factory=lambda: ProjwfcNamelist())

@@ -24,14 +24,14 @@ from pydantic_espresso.models import get_module, versions
     ],
 )
 def test_kcw_espresso_input(version: Version, k_points: dict[str, Any]) -> None:
-    """Test if the KCWEspressoInput model can be instantiated."""
-    # Import the model dynamically from pydantic_espresso.models.<version>.kcw
+    """Test if the KCWInput model can be instantiated."""
+    # Import the model dynamically from pydantic_espresso.models.kcw.<version>
     try:
         module = get_module(version, "kcw")
     except ModuleNotFoundError:
         pytest.skip(f"Module for version {version} not found.")
         return
-    model = module.KCWEspressoInput
+    model = module.KCWInput
 
     # Instantiate the model
     inp = model(
