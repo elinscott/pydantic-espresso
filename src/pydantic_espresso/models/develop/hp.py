@@ -54,24 +54,24 @@ class InputhpNamelist(Namelist):
     max_seconds: Annotated[float, Quantity(units="s", dimensionality="time")] = Field(
         1.0e7, description="Maximum allowed run time before the job stops smoothly."
     )
-    nq1: int | None = Field(
-        None,
+    nq1: int = Field(
+        1,
         description=dedent(
             """\
             Parameters of the Monkhorst-Pack grid (no offset). Same meaning as for nk1, nk2, nk3 in
             the input of pw.x."""
         ),
     )
-    nq2: int | None = Field(
-        None,
+    nq2: int = Field(
+        1,
         description=dedent(
             """\
             Parameters of the Monkhorst-Pack grid (no offset). Same meaning as for nk1, nk2, nk3 in
             the input of pw.x."""
         ),
     )
-    nq3: int | None = Field(
-        None,
+    nq3: int = Field(
+        1,
         description=dedent(
             """\
             Parameters of the Monkhorst-Pack grid (no offset). Same meaning as for nk1, nk2, nk3 in

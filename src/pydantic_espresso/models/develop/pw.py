@@ -265,14 +265,18 @@ class ControlNamelist(Namelist):
             for documentation."""
         ),
     )
-    gdir: int = Field(
+    gdir: Literal[0, 1, 2, 3] = Field(
         0,
         description=dedent(
             """\
-            For Berry phase calculation: direction of the k-point strings in reciprocal space.
-            Allowed values: 1, 2, 3 1=first, 2=second, 3=third reciprocal lattice vector For
-            calculations with finite electric fields (lelfield==.true.) 'gdir' is the direction of
-            the field."""
+            For Berry phase calculation: direction of the k-point strings in reciprocal space. For
+            calculations with finite electric fields (lelfield == .true.) this is the direction of
+            the field. A value of 1, 2 or 3 is required when lberry == .true. or lelfield ==
+            .true.; PW/src/setup.f90 raises an error otherwise.
+            - '0': No Berry-phase or finite-field calculation requested (the value is unused).
+            - '1': first reciprocal lattice vector.
+            - '2': second reciprocal lattice vector.
+            - '3': third reciprocal lattice vector."""
         ),
     )
     nppstr: int = Field(

@@ -507,7 +507,7 @@ input_description -distribution {Quantum ESPRESSO} -package PHonon -program ph.x
 	    var nq1
 	    var nq2
 	    var nq3
-	    default { 0,0,0 }
+	    default { 0 }
 	    info {
 		Parameters of the Monkhorst-Pack grid (no offset) used
 		when @ref ldisp=.true. Same meaning as for nk1, nk2, nk3
@@ -523,7 +523,7 @@ input_description -distribution {Quantum ESPRESSO} -package PHonon -program ph.x
             var k1
             var k2
             var k3
-            default { 0,0,0,0,0,0 }
+            default { 0 }
             info {
                 When these parameters are specified the phonon program
                 runs a pw non-self consistent calculation with a different

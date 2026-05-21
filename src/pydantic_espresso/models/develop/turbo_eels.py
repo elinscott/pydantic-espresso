@@ -91,24 +91,24 @@ class LrControlNamelist(Namelist):
               (CLFE)."""
         ),
     )
-    q1: float | None = Field(
-        None,
+    q1: float = Field(
+        1.0,
         description=dedent(
             """\
             The values of the transferred momentum q = (q1, q2, q3) in Cartesian coordinates in
             units of 2pi/a, where 'a' is the lattice parameter."""
         ),
     )
-    q2: float | None = Field(
-        None,
+    q2: float = Field(
+        1.0,
         description=dedent(
             """\
             The values of the transferred momentum q = (q1, q2, q3) in Cartesian coordinates in
             units of 2pi/a, where 'a' is the lattice parameter."""
         ),
     )
-    q3: float | None = Field(
-        None,
+    q3: float = Field(
+        1.0,
         description=dedent(
             """\
             The values of the transferred momentum q = (q1, q2, q3) in Cartesian coordinates in
@@ -160,13 +160,15 @@ class LrControlNamelist(Namelist):
             term."""
         ),
     )
-    units: int = Field(
+    units: Literal[0, 1, 2] = Field(
         0,
         description=dedent(
             """\
             This variable is used only when calculator = 'sternheimer'. The unit system used for
-            the output, for start, end, and increment input parameters. 0 = Rydbergs, 1 = Electron
-            volts."""
+            the output, for start, end, and increment input parameters.
+            - '0': Rydbergs.
+            - '1': Electron volts.
+            - '2': Nanometres (wavelength)."""
         ),
     )
     start: Annotated[float, Quantity(units="Ry", dimensionality="energy")] = Field(

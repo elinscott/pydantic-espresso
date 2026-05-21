@@ -659,11 +659,45 @@ def _render_variant_alias(
 _GROUP_SHARED_CHILD_TAGS = ("dimensionality", "units", "default", "info")
 
 
-def _copy_shared_children(child: Element, shared_children: list[Element]) -> None:
-    """Copy each ``shared`` child onto ``child`` when ``child`` doesn't already have one."""
+def _distribute_list_default(default_elem: Element, n_children: int) -> list[Element] | None:
+    """Return one ``<default>`` element per child if ``default_elem`` is a positional list.
+
+    The new schema lets a ``<vargroup>`` share a single ``<default>`` whose text
+    is a python-style list literal (``[1.0, 1.0, 1.0]``) one value per child.
+    When the list length matches ``n_children``, distribute; otherwise return
+    ``None`` and let the caller copy verbatim.
+    """
+    if default_elem.attrib.get("kind") is not None:
+        return None
+    text = (default_elem.text or "").strip()
+    if not (text.startswith("[") and text.endswith("]")):
+        return None
+    pieces = [p.strip() for p in _split_top_level(text[1:-1].strip())]
+    if not pieces or len(pieces) != n_children:
+        return None
+    per_child: list[Element] = []
+    for piece in pieces:
+        clone = Element("default")
+        clone.text = piece
+        per_child.append(clone)
+    return per_child
+
+
+def _copy_shared_children(
+    child: Element, shared_children: list[Element], distributed_defaults: list[Element] | None
+) -> None:
+    """Copy each ``shared`` child onto ``child`` when ``child`` doesn't already have one.
+
+    When ``distributed_defaults`` is non-empty, the ``<default>`` for this child
+    is taken from that list (positional) instead of the shared one.
+    """
     existing_tags = {c.tag for c in child}
     for shared in shared_children:
-        if shared.tag not in existing_tags:
+        if shared.tag in existing_tags:
+            continue
+        if shared.tag == "default" and distributed_defaults is not None:
+            child.append(distributed_defaults.pop(0))
+        else:
             child.append(shared)
 
 
@@ -676,23 +710,42 @@ def _propagate_group_attributes(namelist: Element) -> None:
     each nested ``<dimension>``. Normalize the tree by copying those attributes
     (and the shared ``<dimensionality>``, ``<units>``, ``<default>`` and
     ``<info>`` elements) onto each child so the rest of the parser doesn't have
-    to know about the group wrapper.
+    to know about the group wrapper. A shared ``<default>`` whose text is a
+    positional list of the right length is distributed one value per child.
     """
     for vargroup in namelist.findall(".//vargroup"):
         group_type = vargroup.attrib.get("type")
         shared_children = [c for c in vargroup if c.tag in _GROUP_SHARED_CHILD_TAGS]
-        for var in vargroup.findall("var"):
+        vars_ = vargroup.findall("var")
+        per_child_defaults = _shared_default_per_child(shared_children, len(vars_))
+        for var in vars_:
             if group_type is not None:
                 var.attrib.setdefault("type", group_type)
-            _copy_shared_children(var, shared_children)
+            _copy_shared_children(var, shared_children, per_child_defaults)
 
     for dimgroup in namelist.findall(".//dimensiongroup"):
         shared_attrs = {k: v for k, v in dimgroup.attrib.items() if k in ("type", "start", "end")}
         shared_children = [c for c in dimgroup if c.tag in _GROUP_SHARED_CHILD_TAGS]
-        for dim in dimgroup.findall("dimension"):
+        dims_ = dimgroup.findall("dimension")
+        per_child_defaults = _shared_default_per_child(shared_children, len(dims_))
+        for dim in dims_:
             for key, value in shared_attrs.items():
                 dim.attrib.setdefault(key, value)
-            _copy_shared_children(dim, shared_children)
+            _copy_shared_children(dim, shared_children, per_child_defaults)
+
+
+def _shared_default_per_child(
+    shared_children: list[Element], n_children: int
+) -> list[Element] | None:
+    """Return the distributed defaults if exactly one ``<default>`` lives in ``shared_children``.
+
+    Returns ``None`` when there is no shared default or when the shared default
+    is not a list literal of length ``n_children`` (i.e. nothing to distribute).
+    """
+    defaults = [c for c in shared_children if c.tag == "default"]
+    if len(defaults) != 1:
+        return None
+    return _distribute_list_default(defaults[0], n_children)
 
 
 def camel_case(value: str) -> str:

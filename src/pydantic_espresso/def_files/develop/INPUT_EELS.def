@@ -118,7 +118,7 @@ input_description -distribution {Quantum ESPRESSO} -package turboEELS -program t
             var q1
             var q2
             var q3
-            default { 1.0, 1.0, 1.0 }
+            default { [1.0, 1.0, 1.0] }
             dimensionality { dimensionless }
             info {
                 The values of the transferred momentum q = (q1, q2, q3)
@@ -188,11 +188,15 @@ input_description -distribution {Quantum ESPRESSO} -package turboEELS -program t
 
         var units -type INTEGER {
             default { 0 }
-            info {
-                This variable is used only when @ref calculator = 'sternheimer'.
-                The unit system used for the output, for @ref start, @ref end,
-                and @ref increment input parameters.
-                0 = Rydbergs, 1 = Electron volts.
+            options {
+                info {
+                    This variable is used only when @ref calculator = 'sternheimer'.
+                    The unit system used for the output, for @ref start, @ref end,
+                    and @ref increment input parameters.
+                }
+                opt -val 0 { Rydbergs. }
+                opt -val 1 { Electron volts. }
+                opt -val 2 { Nanometres (wavelength). }
                  }
         }
 

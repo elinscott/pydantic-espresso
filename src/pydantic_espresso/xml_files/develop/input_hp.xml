@@ -76,7 +76,7 @@ Maximum allowed run time before the job stops smoothly.
          </var>
          <var name="nq3" >
          </var>
-         <default> 1,1,1
+         <default> 1
          </default>
          <info>
 Parameters of the Monkhorst-Pack grid (no offset).

@@ -150,7 +150,7 @@ full susceptibility tensor is computed.
          </var>
          <var name="q3" >
          </var>
-         <default> 1.0, 1.0, 1.0
+         <default> [1.0, 1.0, 1.0]
          </default>
          <dimensionality> length^-1
          </dimensionality>

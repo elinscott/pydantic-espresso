@@ -542,7 +542,7 @@ symmetry analysis.
          </var>
          <var name="nq3" >
          </var>
-         <default> 0,0,0
+         <default> 0
          </default>
          <info>
 Parameters of the Monkhorst-Pack grid (no offset) used
@@ -563,7 +563,7 @@ in the input of pw.x.
          </var>
          <var name="k3" >
          </var>
-         <default> 0,0,0,0,0,0
+         <default> 0
          </default>
          <info>
 When these parameters are specified the phonon program

@@ -216,12 +216,15 @@ class LrPostNamelist(Namelist):
             prefix.beta gamma z.x (where x=1-3) must exist. If not specified, prefix is used."""
         ),
     )
-    w_T_npol: int = Field(  # noqa: N815
+    w_T_npol: Literal[1, 3] = Field(  # noqa: N815
         1,
         description=dedent(
             """\
-            Number of polarization directions considered in the previous calculation. It must be
-            set to 3 if in the previous calculation ipol=4, it must be set to 1 otherwise."""
+            Number of polarization directions considered in the previous calculation. Must match
+            ipol from that calculation.
+            - '1': Use when the previous calculation had ipol = 1, 2, or 3 (single direction).
+            - '3': Use when the previous calculation had ipol = 4 (all three Cartesian
+              directions)."""
         ),
     )
     plot_type: int = Field(

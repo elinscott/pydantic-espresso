@@ -266,11 +266,14 @@ input_description -distribution {Quantum ESPRESSO} -package turboTDDFPT -program
 
 	var w_T_npol -type INTEGER {
 	    default { 1 }
-	    info {
-		Number of polarization directions considered in the previous
-		calculation. It must be set to 3 if in the previous calculation
-		 ipol=4, it must be set to 1 otherwise.
-		 }
+	    options {
+		info {
+		    Number of polarization directions considered in the previous
+		    calculation. Must match @ref ipol from that calculation.
+		}
+		opt -val 1 { Use when the previous calculation had @ref ipol = 1, 2, or 3 (single direction). }
+		opt -val 3 { Use when the previous calculation had @ref ipol = 4 (all three Cartesian directions). }
+	    }
 	}
 
 	var plot_type -type INTEGER {

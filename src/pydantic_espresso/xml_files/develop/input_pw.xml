@@ -485,13 +485,30 @@ See the header of PW/src/bp_c_phase.f90 for documentation.
       <var name="gdir" type="INTEGER" >
          <default> 0
          </default>
-         <info>
+         <options>
+            <info>
 For Berry phase calculation: direction of the k-point
-strings in reciprocal space. Allowed values: 1, 2, 3
-1=first, 2=second, 3=third reciprocal lattice vector
+strings in reciprocal space.
 For calculations with finite electric fields
-(<ref>lelfield</ref>==.true.) &quot;gdir&quot; is the direction of the field.
-         </info>
+(<ref>lelfield</ref> == .true.) this is the direction of the field.
+A value of 1, 2 or 3 is required when <ref>lberry</ref> == .true.
+or <ref>lelfield</ref> == .true.; PW/src/setup.f90 raises an
+error otherwise.
+            </info>
+            <opt val="0" >
+No Berry-phase or finite-field calculation requested
+(the value is unused).
+            </opt>
+            <opt val="1" >
+first reciprocal lattice vector.
+            </opt>
+            <opt val="2" >
+second reciprocal lattice vector.
+            </opt>
+            <opt val="3" >
+third reciprocal lattice vector.
+            </opt>
+         </options>
       </var>
       <var name="nppstr" type="INTEGER" >
          <default> 0

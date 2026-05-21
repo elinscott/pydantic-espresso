@@ -390,8 +390,8 @@ class InputpNamelist(Namelist):
             all L. If not specified, the largest ultrasoft core radius is used."""
         ),
     )
-    rmatch_augfun_nc: float | None = Field(
-        None,
+    rmatch_augfun_nc: bool = Field(
+        False,
         description=dedent(
             """\
             If .true. the augmentation functions are pseudized from the origin to
@@ -478,37 +478,43 @@ class TestNamelist(Namelist):
             separable form!"""
         ),
     )
-    ecutmin: Annotated[float | None, Quantity(units="Ry", dimensionality="energy")] = Field(
-        None,
+    ecutmin: Annotated[float, Quantity(units="Ry", dimensionality="energy")] = Field(
+        0,
         description=dedent(
             """\
-            Parameters used for test with a basis set of spherical Bessel functions j_l(qr) . The
+            Parameters used for test with a basis set of spherical Bessel functions j_l(qr). The
             hamiltonian at fixed scf potential is diagonalized for various values of ecut: ecutmin,
             ecutmin+decut, ecutmin+2*decut ... up to ecutmax. This yields an indication of
             convergence with the corresponding plane-wave cutoff in solids, and shows in an
-            unambiguous way if there are 'ghost' states"""
+            unambiguous way if there are 'ghost' states.  The bracketed default list maps
+            positionally onto the variables in declaration order: ecutmin = 0, ecutmax = 0, decut =
+            5.0."""
         ),
     )
-    ecutmax: Annotated[float | None, Quantity(units="Ry", dimensionality="energy")] = Field(
-        None,
+    ecutmax: Annotated[float, Quantity(units="Ry", dimensionality="energy")] = Field(
+        0,
         description=dedent(
             """\
-            Parameters used for test with a basis set of spherical Bessel functions j_l(qr) . The
+            Parameters used for test with a basis set of spherical Bessel functions j_l(qr). The
             hamiltonian at fixed scf potential is diagonalized for various values of ecut: ecutmin,
             ecutmin+decut, ecutmin+2*decut ... up to ecutmax. This yields an indication of
             convergence with the corresponding plane-wave cutoff in solids, and shows in an
-            unambiguous way if there are 'ghost' states"""
+            unambiguous way if there are 'ghost' states.  The bracketed default list maps
+            positionally onto the variables in declaration order: ecutmin = 0, ecutmax = 0, decut =
+            5.0."""
         ),
     )
-    decut: Annotated[float | None, Quantity(units="Ry", dimensionality="energy")] = Field(
-        None,
+    decut: Annotated[float, Quantity(units="Ry", dimensionality="energy")] = Field(
+        5.0,
         description=dedent(
             """\
-            Parameters used for test with a basis set of spherical Bessel functions j_l(qr) . The
+            Parameters used for test with a basis set of spherical Bessel functions j_l(qr). The
             hamiltonian at fixed scf potential is diagonalized for various values of ecut: ecutmin,
             ecutmin+decut, ecutmin+2*decut ... up to ecutmax. This yields an indication of
             convergence with the corresponding plane-wave cutoff in solids, and shows in an
-            unambiguous way if there are 'ghost' states"""
+            unambiguous way if there are 'ghost' states.  The bracketed default list maps
+            positionally onto the variables in declaration order: ecutmin = 0, ecutmax = 0, decut =
+            5.0."""
         ),
     )
     rm: Annotated[float, Quantity(units="bohr", dimensionality="length")] = Field(

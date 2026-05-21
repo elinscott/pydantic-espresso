@@ -385,32 +385,32 @@ class InputphNamelist(Namelist):
     search_sym: bool = Field(
         True, description="Set it to .false. if you want to disable the mode symmetry analysis."
     )
-    nq1: int | None = Field(
-        None,
+    nq1: int = Field(
+        0,
         description=dedent(
             """\
             Parameters of the Monkhorst-Pack grid (no offset) used when ldisp=.true. Same meaning
             as for nk1, nk2, nk3 in the input of pw.x."""
         ),
     )
-    nq2: int | None = Field(
-        None,
+    nq2: int = Field(
+        0,
         description=dedent(
             """\
             Parameters of the Monkhorst-Pack grid (no offset) used when ldisp=.true. Same meaning
             as for nk1, nk2, nk3 in the input of pw.x."""
         ),
     )
-    nq3: int | None = Field(
-        None,
+    nq3: int = Field(
+        0,
         description=dedent(
             """\
             Parameters of the Monkhorst-Pack grid (no offset) used when ldisp=.true. Same meaning
             as for nk1, nk2, nk3 in the input of pw.x."""
         ),
     )
-    nk1: int | None = Field(
-        None,
+    nk1: int = Field(
+        0,
         description=dedent(
             """\
             When these parameters are specified the phonon program runs a pw non-self consistent
@@ -419,8 +419,8 @@ class InputphNamelist(Namelist):
             grid with offset determined by k1, k2, k3."""
         ),
     )
-    nk2: int | None = Field(
-        None,
+    nk2: int = Field(
+        0,
         description=dedent(
             """\
             When these parameters are specified the phonon program runs a pw non-self consistent
@@ -429,8 +429,8 @@ class InputphNamelist(Namelist):
             grid with offset determined by k1, k2, k3."""
         ),
     )
-    nk3: int | None = Field(
-        None,
+    nk3: int = Field(
+        0,
         description=dedent(
             """\
             When these parameters are specified the phonon program runs a pw non-self consistent
@@ -439,8 +439,8 @@ class InputphNamelist(Namelist):
             grid with offset determined by k1, k2, k3."""
         ),
     )
-    k1: int | None = Field(
-        None,
+    k1: int = Field(
+        0,
         description=dedent(
             """\
             When these parameters are specified the phonon program runs a pw non-self consistent
@@ -449,8 +449,8 @@ class InputphNamelist(Namelist):
             grid with offset determined by k1, k2, k3."""
         ),
     )
-    k2: int | None = Field(
-        None,
+    k2: int = Field(
+        0,
         description=dedent(
             """\
             When these parameters are specified the phonon program runs a pw non-self consistent
@@ -459,8 +459,8 @@ class InputphNamelist(Namelist):
             grid with offset determined by k1, k2, k3."""
         ),
     )
-    k3: int | None = Field(
-        None,
+    k3: int = Field(
+        0,
         description=dedent(
             """\
             When these parameters are specified the phonon program runs a pw non-self consistent

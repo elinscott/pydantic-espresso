@@ -728,11 +728,9 @@ it has the same value for all L. If not specified, the
 largest ultrasoft core radius is used.
             </info>
          </var>
-         <var name="rmatch_augfun_nc" type="REAL" >
+         <var name="rmatch_augfun_nc" type="LOGICAL" >
             <default> .false.
             </default>
-            <dimensionality> dimensionless
-            </dimensionality>
             <status> Used only if which_augfun is &apos;PSQ&apos;.
             </status>
             <info>
@@ -1010,17 +1008,7 @@ Use the UPF format if you want to test the separable form!
          </var>
          <var name="decut" >
          </var>
-         <info>
-Parameters used for test with a basis set of spherical
-Bessel functions j_l(qr) . The hamiltonian at fixed scf
-potential is diagonalized for various values of ecut:
-<ref>ecutmin</ref>, <ref>ecutmin</ref>+<ref>decut</ref>, <ref>ecutmin</ref>+2*<ref>decut</ref> ... up to <ref>ecutmax</ref>.
-This yields an indication of convergence with the
-corresponding plane-wave cutoff in solids, and shows
-in an unambiguous way if there are &quot;ghost&quot; states
-         </info>
-         <default>
-decut=5.0 Ry; ecutmin=ecutmax=0Ry
+         <default> [0, 0, 5.0]
          </default>
          <dimensionality> energy
          </dimensionality>
@@ -1028,6 +1016,19 @@ decut=5.0 Ry; ecutmin=ecutmax=0Ry
          </units>
          <status> specify <ref>ecutmin</ref> and <ref>ecutmax</ref> if you want to perform this test
          </status>
+         <info>
+Parameters used for test with a basis set of spherical
+Bessel functions j_l(qr). The hamiltonian at fixed scf
+potential is diagonalized for various values of ecut:
+<ref>ecutmin</ref>, <ref>ecutmin</ref>+<ref>decut</ref>, <ref>ecutmin</ref>+2*<ref>decut</ref> ... up to <ref>ecutmax</ref>.
+This yields an indication of convergence with the
+corresponding plane-wave cutoff in solids, and shows
+in an unambiguous way if there are &quot;ghost&quot; states.
+
+The bracketed default list maps positionally onto the
+variables in declaration order: ecutmin = 0, ecutmax = 0,
+decut = 5.0.
+         </info>
       </vargroup>
       <var name="rm" type="REAL" >
          <info> Radius of the box used with spherical Bessel functions.

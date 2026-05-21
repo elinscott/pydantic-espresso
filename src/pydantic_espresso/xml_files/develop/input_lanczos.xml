@@ -280,11 +280,16 @@ parameter. The file outdir/beta gamma z prefix.beta gamma z.x
       <var name="w_T_npol" type="INTEGER" >
          <default> 1
          </default>
-         <info>
+         <options>
+            <info>
 Number of polarization directions considered in the previous
-calculation. It must be set to 3 if in the previous calculation
- ipol=4, it must be set to 1 otherwise.
-         </info>
+calculation. Must match <ref>ipol</ref> from that calculation.
+            </info>
+            <opt val="1" > Use when the previous calculation had <ref>ipol</ref> = 1, 2, or 3 (single direction).
+            </opt>
+            <opt val="3" > Use when the previous calculation had <ref>ipol</ref> = 4 (all three Cartesian directions).
+            </opt>
+         </options>
       </var>
       <var name="plot_type" type="INTEGER" >
          <default> 1

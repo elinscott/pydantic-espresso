@@ -112,24 +112,24 @@ class LrControlNamelist(Namelist):
             performed and the full susceptibility tensor is computed."""
         ),
     )
-    q1: Annotated[float | None, Quantity(units="tpiba", dimensionality="length^-1")] = Field(
-        None,
+    q1: Annotated[float, Quantity(units="tpiba", dimensionality="length^-1")] = Field(
+        1.0,
         description=dedent(
             """\
             The values of the transferred momentum q = (q1, q2, q3) in Cartesian coordinates in
             units of 2pi/a, where 'a' is the lattice parameter."""
         ),
     )
-    q2: Annotated[float | None, Quantity(units="tpiba", dimensionality="length^-1")] = Field(
-        None,
+    q2: Annotated[float, Quantity(units="tpiba", dimensionality="length^-1")] = Field(
+        1.0,
         description=dedent(
             """\
             The values of the transferred momentum q = (q1, q2, q3) in Cartesian coordinates in
             units of 2pi/a, where 'a' is the lattice parameter."""
         ),
     )
-    q3: Annotated[float | None, Quantity(units="tpiba", dimensionality="length^-1")] = Field(
-        None,
+    q3: Annotated[float, Quantity(units="tpiba", dimensionality="length^-1")] = Field(
+        1.0,
         description=dedent(
             """\
             The values of the transferred momentum q = (q1, q2, q3) in Cartesian coordinates in

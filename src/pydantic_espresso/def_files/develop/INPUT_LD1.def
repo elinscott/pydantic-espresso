@@ -663,9 +663,8 @@ input_description -distribution {Quantum ESPRESSO} -program ld1.x {
 		    largest ultrasoft core radius is used.
 		}
 	    }
-	    var rmatch_augfun_nc  -type REAL {
+	    var rmatch_augfun_nc  -type LOGICAL {
 		default { .false. }
-		dimensionality { dimensionless }
 		status { Used only if which_augfun is 'PSQ'. }
 		info {
                   If .true. the augmentation functions are pseudized
@@ -895,21 +894,23 @@ input_description -distribution {Quantum ESPRESSO} -program ld1.x {
 	    var ecutmin
 	    var ecutmax
 	    var decut
+	    default { [0, 0, 5.0] }
+	    dimensionality { energy }
+	    units { Ry }
+	    status { specify @ref ecutmin and @ref ecutmax if you want to perform this test }
 	    info {
 		Parameters used for test with a basis set of spherical
-		Bessel functions j_l(qr) . The hamiltonian at fixed scf
+		Bessel functions j_l(qr). The hamiltonian at fixed scf
 		potential is diagonalized for various values of ecut:
 		@ref ecutmin, @ref ecutmin+@ref decut, @ref ecutmin+2*@ref decut ... up to @ref ecutmax.
 		This yields an indication of convergence with the
 		corresponding plane-wave cutoff in solids, and shows
-		in an unambiguous way if there are "ghost" states
+		in an unambiguous way if there are "ghost" states.
+
+		The bracketed default list maps positionally onto the
+		variables in declaration order: ecutmin = 0, ecutmax = 0,
+		decut = 5.0.
 	    }
-	    default {
-		decut=5.0 Ry; ecutmin=ecutmax=0Ry
-	    }
-	    dimensionality { energy }
-	    units { Ry }
-	    status { specify @ref ecutmin and @ref ecutmax if you want to perform this test }
 	}
 
 	var rm  -type REAL {

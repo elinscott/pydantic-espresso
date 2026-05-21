@@ -124,7 +124,7 @@ Crystal Local Field Effects (CLFE)
          </var>
          <var name="q3" >
          </var>
-         <default> 1.0, 1.0, 1.0
+         <default> [1.0, 1.0, 1.0]
          </default>
          <dimensionality> dimensionless
          </dimensionality>
@@ -200,12 +200,19 @@ The broadening/damping term.
       <var name="units" type="INTEGER" >
          <default> 0
          </default>
-         <info>
+         <options>
+            <info>
 This variable is used only when <ref>calculator</ref> = &apos;sternheimer&apos;.
 The unit system used for the output, for <ref>start</ref>, <ref>end</ref>,
 and <ref>increment</ref> input parameters.
-0 = Rydbergs, 1 = Electron volts.
-         </info>
+            </info>
+            <opt val="0" > Rydbergs.
+            </opt>
+            <opt val="1" > Electron volts.
+            </opt>
+            <opt val="2" > Nanometres (wavelength).
+            </opt>
+         </options>
       </var>
       <var name="start" type="REAL" >
          <default> 0.0

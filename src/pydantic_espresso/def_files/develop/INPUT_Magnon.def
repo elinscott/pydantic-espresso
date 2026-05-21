@@ -144,7 +144,7 @@ input_description -distribution {Quantum ESPRESSO} -package turboMAGNON -program
             var q1
             var q2
             var q3
-            default { 1.0, 1.0, 1.0 }
+            default { [1.0, 1.0, 1.0] }
             dimensionality { length^-1 }
             units { tpiba }
             info {
