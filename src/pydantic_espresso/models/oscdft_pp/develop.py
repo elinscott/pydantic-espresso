@@ -23,4 +23,4 @@ class OscdftPpNamelistNamelist(Namelist):
 class OSCDFTPPInput(EspressoInput):
     """Pydantic model for the input of `oscdft_pp.x`."""
 
-    oscdft_pp_namelist: OscdftPpNamelistNamelist | None = Field(None)
+    oscdft_pp_namelist: OscdftPpNamelistNamelist = Field(...)

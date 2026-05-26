@@ -40,4 +40,4 @@ class OscdftEtNamelistNamelist(Namelist):
 class OSCDFTETInput(EspressoInput):
     """Pydantic model for the input of `oscdft_et.x`."""
 
-    oscdft_et_namelist: OscdftEtNamelistNamelist | None = Field(None)
+    oscdft_et_namelist: OscdftEtNamelistNamelist = Field(...)

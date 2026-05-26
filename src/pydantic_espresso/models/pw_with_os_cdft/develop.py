@@ -236,4 +236,4 @@ class OscdftNamelist(Namelist):
 class PWWITHOSCDFTInput(EspressoInput):
     """Pydantic model for the input of `pw.x with OS-CDFT`."""
 
-    oscdft: OscdftNamelist | None = Field(None)
+    oscdft: OscdftNamelist = Field(...)

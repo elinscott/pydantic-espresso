@@ -545,4 +545,4 @@ class PPInput(EspressoInput):
     inputpp: InputppNamelist = Field(
         default_factory=lambda: InputppPlotNum0Or9Namelist(), discriminator="plot_num"
     )
-    plot: PlotNamelist | None = Field(None, discriminator="iflag")
+    plot: PlotNamelist = Field(..., discriminator="iflag")

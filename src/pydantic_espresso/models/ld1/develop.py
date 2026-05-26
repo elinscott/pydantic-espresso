@@ -562,5 +562,5 @@ class LD1Input(EspressoInput):
     """Pydantic model for the input of `ld1.x`."""
 
     input: InputNamelist = Field(default_factory=lambda: InputNamelist())
-    inputp: InputpNamelist | None = Field(None)
+    inputp: InputpNamelist = Field(...)
     test: TestNamelist = Field(default_factory=lambda: TestNamelist())

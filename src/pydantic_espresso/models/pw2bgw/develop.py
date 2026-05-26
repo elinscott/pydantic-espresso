@@ -301,4 +301,4 @@ class InputPw2bgwNamelist(Namelist):
 class PW2BGWInput(EspressoInput):
     """Pydantic model for the input of `pw2bgw.x`."""
 
-    input_pw2bgw: InputPw2bgwNamelist | None = Field(None)
+    input_pw2bgw: InputPw2bgwNamelist = Field(...)
