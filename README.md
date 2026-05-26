@@ -110,7 +110,8 @@ PWInput is missing required inputs:
       - ntyp (int): number of types of atoms in the unit cell
   atomic_positions: required — choose 'unit': ['alat', 'bohr', 'angstrom', 'crystal', 'crystal_sg']
   k_points [kind='automatic']:
-      - grid (tuple)
+      - grid (tuple[int, int, int]): Monkhorst-Pack mesh dimensions (nk1, nk2, nk3): number of
+        k-points along each reciprocal-lattice direction of the uniform grid.
   cell_parameters: missing discriminator 'unit' (one of ['alat', 'bohr', 'angstrom'])
 ```
 
