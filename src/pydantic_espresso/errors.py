@@ -91,14 +91,20 @@ def _discriminator_options(field: FieldInfo) -> list[Any]:
 
 
 def _annotation_str(annotation: Any) -> str:
-    """Render a field annotation compactly (basic type name, or a trimmed Literal)."""
-    if get_origin(annotation) is Literal:
+    """Render a field annotation compactly (basic type, container, or trimmed Literal)."""
+    if hasattr(annotation, "__metadata__"):  # Annotated[X, ...] -> X
+        annotation = annotation.__origin__
+    origin = get_origin(annotation)
+    if origin is Literal:
         values = get_args(annotation)
         shown = ", ".join(repr(v) for v in values[:6])
         if len(values) > 6:
             shown += f", … ({len(values)} options)"
         return f"Literal[{shown}]"
-    if isinstance(annotation, type):
+    if origin in (tuple, list, set, frozenset):
+        inner = ", ".join(_annotation_str(arg) for arg in get_args(annotation))
+        return f"{origin.__name__}[{inner}]" if inner else origin.__name__
+    if origin is None and isinstance(annotation, type):
         return annotation.__name__
     return str(annotation).replace("typing.", "")
 

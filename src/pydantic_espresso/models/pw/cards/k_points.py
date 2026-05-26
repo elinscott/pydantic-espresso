@@ -25,14 +25,25 @@ class KPointsListCard(KPointsCardABC):
     class KPoint(BaseModel):
         """Pydantic model for a single k-point"""
 
-        coordinate: tuple[float, float, float] = Field(..., description="")
-        weight: float = Field(1, description="")
+        coordinate: tuple[float, float, float] = Field(
+            ...,
+            description="k-point coordinates (xk_x, xk_y, xk_z) in the units set by the card kind.",
+        )
+        weight: float = Field(1, description="k-point weight (wk).")
 
         def __str__(self) -> str:
             return f"{' '.join([str(x) for x in self.coordinate])} {self.weight}"
 
-    k_points: list[KPoint] = Field(default_factory=list)
-    kind: Literal["tpiba", "crystal", "tpiba_b", "crystal_b", "tpiba_c", "crystal_c"] = "tpiba"
+    k_points: list[KPoint] = Field(
+        default_factory=list, description="Explicit list of k-points and their weights."
+    )
+    kind: Literal["tpiba", "crystal", "tpiba_b", "crystal_b", "tpiba_c", "crystal_c"] = Field(
+        "tpiba",
+        description=(
+            "Units/mode for the explicit k-point list: 'tpiba' (2pi/a, default), 'crystal' "
+            "(crystal/reciprocal-lattice coordinates), or the '_b' band-path variants."
+        ),
+    )
 
     @field_validator("kind", mode="after")
     @classmethod
@@ -57,7 +68,9 @@ class KPointsListCard(KPointsCardABC):
 class KPointsGammaCard(KPointsCardABC):
     """Pydantic model for the K_POINTS card with kind == gamma."""
 
-    kind: Literal["gamma"] = Field("gamma", description="")
+    kind: Literal["gamma"] = Field(
+        "gamma", description="Use only the Gamma point, with Gamma-specific algorithms."
+    )
 
     def to_kpoints_list(self) -> KPointsListCard:
         """Convert to KPointsListCard."""
@@ -69,9 +82,23 @@ class KPointsGammaCard(KPointsCardABC):
 class KPointsGridCard(KPointsCardABC):
     """Pydantic model for the K_POINTS card with kind == automatic."""
 
-    grid: tuple[PositiveInt, PositiveInt, PositiveInt] = Field(..., description="")
-    offset: tuple[Literal[0, 1], Literal[0, 1], Literal[0, 1]] = Field((0, 0, 0), description="")
-    kind: Literal["automatic"] = Field("automatic", description="")
+    grid: tuple[PositiveInt, PositiveInt, PositiveInt] = Field(
+        ...,
+        description=(
+            "Monkhorst-Pack mesh dimensions (nk1, nk2, nk3): number of k-points along each "
+            "reciprocal-lattice direction of the uniform grid."
+        ),
+    )
+    offset: tuple[Literal[0, 1], Literal[0, 1], Literal[0, 1]] = Field(
+        (0, 0, 0),
+        description=(
+            "Grid offset (k1, k2, k3), each 0 or 1; a 1 shifts the grid by half a step along "
+            "that direction."
+        ),
+    )
+    kind: Literal["automatic"] = Field(
+        "automatic", description="Automatically generate a uniform Monkhorst-Pack k-point grid."
+    )
 
     def to_kpoints_list(self) -> KPointsListCard:
         """Convert to KPointsListCard."""
