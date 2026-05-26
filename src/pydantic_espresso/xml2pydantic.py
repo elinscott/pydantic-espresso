@@ -12,7 +12,7 @@ import re
 import warnings
 from pathlib import Path
 from typing import Any
-from xml.etree.ElementTree import Element, ParseError
+from xml.etree.ElementTree import Element
 
 from defusedxml.ElementTree import parse
 
@@ -88,19 +88,18 @@ def sanitize_xml(xml_path: Path) -> Path:
 
 
 def convert_all_xml_files_to_models() -> None:
-    """Convert all XML files in the xml_files directory to Pydantic models."""
-    for xml_path in xml_directory.rglob("*.xml"):
-        try:
-            model_str, executable_str = convert_xml_file_to_model(
-                xml_path, version=xml_path.parent.name
-            )
-        except ParseError as e:
-            warnings.warn(f"Processing {xml_path} failed: {e}", stacklevel=2)
-            continue
-        except InvalidXMLStructureError as e:
-            warnings.warn(f"Processing {xml_path} failed: {e}", stacklevel=2)
-            continue
+    """Convert all XML files in the xml_files directory to Pydantic models.
 
+    A malformed XML file (``ParseError``) or a non-compliant schema
+    (``InvalidXMLStructureError``) aborts the whole run rather than being
+    skipped: now that the upstream ``.def`` files are well-formed, such a
+    failure indicates a real regression that should be surfaced loudly.
+    Missing prebuilt cards are still tolerated (see ``load_prebuilt_card``).
+    """
+    for xml_path in xml_directory.rglob("*.xml"):
+        model_str, executable_str = convert_xml_file_to_model(
+            xml_path, version=xml_path.parent.name
+        )
         version_module = xml_path.parent.name.replace(".", "_").replace("-", "_")
         model_dir = _PACKAGE_ROOT / "models" / executable_str
         if not model_dir.exists():
@@ -403,12 +402,7 @@ def _parse_branch_discriminators(
             values.append(None)
             continue
         test = branch.attrib.get("test", "")
-        parsed = _parse_when_test(test)
-        if parsed is None:
-            raise InvalidXMLStructureError(
-                f"Could not parse <{branch.tag} test={test!r}> in namelist {namelist_name!r}."
-            )
-        branch_discriminator, branch_values_raw = parsed
+        branch_discriminator, branch_values_raw = _parse_when_test(test)
         if discriminator is None:
             discriminator = branch_discriminator
         elif branch_discriminator != discriminator:
@@ -430,24 +424,26 @@ def _parse_branch_discriminators(
 _WHEN_TEST_RE = re.compile(r"^\s*([A-Za-z_][A-Za-z_0-9]*)\s*=\s*(.+?)\s*$")
 
 
-def _parse_when_test(test: str) -> tuple[str, list[str]] | None:
+def _parse_when_test(test: str) -> tuple[str, list[str]]:
     """Parse a ``<when test="lhs = v1 or v2 or v3">`` expression.
 
-    Recognises forms like ``iflag = 0 or 1``, ``plot_num=1``, and
-    ``iflag = 2``. Returns ``(lhs, [v1, v2, ...])`` or ``None`` if the
-    expression doesn't match the supported shape.
+    Recognises forms like ``iflag = 0 or 1``, ``plot_num=1``, and ``iflag = 2``,
+    returning ``(lhs, [v1, v2, ...])``. A test that doesn't match this shape is
+    non-compliant and raises ``InvalidXMLStructureError`` — we never silently
+    treat an unparseable branch test as "not discriminated".
     """
     match = _WHEN_TEST_RE.match(test)
-    if match is None:
-        return None
-    lhs = match.group(1)
-    rhs = match.group(2)
-    # Split on ``or`` (case-insensitive) at word boundaries.
-    raw_values = re.split(r"\s+or\s+", rhs, flags=re.IGNORECASE)
-    values = [v.strip() for v in raw_values if v.strip()]
-    if not values:
-        return None
-    return lhs, values
+    if match is not None:
+        lhs = match.group(1)
+        rhs = match.group(2)
+        # Split on ``or`` (case-insensitive) at word boundaries.
+        raw_values = re.split(r"\s+or\s+", rhs, flags=re.IGNORECASE)
+        values = [v.strip() for v in raw_values if v.strip()]
+        if values:
+            return lhs, values
+    raise InvalidXMLStructureError(
+        f"Unsupported <when test={test!r}>; expected 'lhs = v1 [or v2 ...]'."
+    )
 
 
 def _find_discriminator_var(namelist: Element, discriminator: str) -> Element | None:
@@ -655,27 +651,41 @@ _GROUP_SHARED_CHILD_TAGS = ("dimensionality", "units", "default", "info")
 
 
 def _distribute_list_default(default_elem: Element, n_children: int) -> list[Element] | None:
-    """Return one ``<default>`` element per child if ``default_elem`` is a positional list.
+    """Return one ``<default>`` element per child for a shared ``<vargroup>`` default.
 
-    The new schema lets a ``<vargroup>`` share a single ``<default>`` whose text
-    is a python-style list literal (``[1.0, 1.0, 1.0]``) one value per child.
-    When the list length matches ``n_children``, distribute; otherwise return
-    ``None`` and let the caller copy verbatim.
+    The new schema lets a ``<vargroup>`` / ``<dimensiongroup>`` share a single
+    ``<default>``. Two shapes are supported:
+
+    - A python-style list literal (``[1.0, 2.0, 3.0]``) is distributed
+      positionally; its length **must** equal ``n_children`` or an
+      ``InvalidXMLStructureError`` is raised (we don't silently truncate or pad).
+    - A non-bracketed scalar (``0.0``) is broadcast to every child — i.e.
+      ``[default for _ in range(n_children)]``.
+
+    Returns ``None`` only for structured defaults (those carrying a ``kind=``
+    attribute), which are copied verbatim by the caller.
     """
     if default_elem.attrib.get("kind") is not None:
         return None
     text = (default_elem.text or "").strip()
-    if not (text.startswith("[") and text.endswith("]")):
-        return None
-    pieces = [p.strip() for p in _split_top_level(text[1:-1].strip())]
-    if not pieces or len(pieces) != n_children:
-        return None
-    per_child: list[Element] = []
-    for piece in pieces:
-        clone = Element("default")
-        clone.text = piece
-        per_child.append(clone)
-    return per_child
+    if text.startswith("[") and text.endswith("]"):
+        pieces = [p.strip() for p in _split_top_level(text[1:-1].strip())]
+        if len(pieces) != n_children:
+            raise InvalidXMLStructureError(
+                f"Shared list default {text!r} has {len(pieces)} entries but the group "
+                f"has {n_children} children."
+            )
+    else:
+        # Non-bracketed scalar: broadcast the same value to every child.
+        pieces = [text for _ in range(n_children)]
+    return [_make_default(piece) for piece in pieces]
+
+
+def _make_default(text: str) -> Element:
+    """Build a bare ``<default>`` element carrying ``text``."""
+    elem = Element("default")
+    elem.text = text
+    return elem
 
 
 def _copy_shared_children(
@@ -1679,10 +1689,7 @@ def _get_default(
         expr_text = _element_text(default).strip()
         return "None", {"default_expr": expr_text}
 
-    warnings.warn(
-        f"Unknown <default kind={kind!r}> for `{name}`; falling back to None.", stacklevel=2
-    )
-    return "None", None
+    raise InvalidXMLStructureError(f"Unknown <default kind={kind!r}> for `{name}`.")
 
 
 def _strip_ref_prefix(test: str) -> str:
@@ -1871,7 +1878,9 @@ def _sanitize_bool(text: str) -> str:
         return "False"
     if lowered == "true":
         return "True"
-    return "None"
+    raise InvalidXMLStructureError(
+        f"Cannot parse default {text!r} as a LOGICAL; expected '.true.' or '.false.'."
+    )
 
 
 def _sanitize_path(text: str) -> str:
@@ -1906,12 +1915,12 @@ def _sanitize_numeric(text: str, python_type: type) -> str:
         sanitized = text
     try:
         python_type(sanitized)
-    except ValueError:
-        warnings.warn(
-            f'Failed to convert "{text}" to a {python_type.__name__}; defaulting to None.',
-            stacklevel=2,
-        )
-        return "None"
+    except ValueError as exc:
+        raise InvalidXMLStructureError(
+            f"Cannot parse default {text!r} as {python_type.__name__}. The <default> "
+            "is not a compliant literal (e.g. a leftover conditional expression "
+            'such as "iflag = 0 or 1").'
+        ) from exc
     if python_type is float:
         # Ruff format prefers ``1.0e-11`` over ``1.e-11``: a bare trailing dot
         # immediately followed by the exponent is rewritten as ``.0e``.
@@ -1928,25 +1937,38 @@ def _sanitize_numeric(text: str, python_type: type) -> str:
 
 
 def _build_quantity(element: Element) -> str | None:
-    """Return ``"Quantity(units=..., dimensionality=...)"`` if both are present.
+    """Return ``"Quantity(units=..., dimensionality=...)"`` for a dimensioned field.
 
     Only literal (non-``kind="conditional"``) ``<units>`` and ``<dimensionality>``
-    children are wrapped. In namelist ``<var>``/``<dimension>`` elements the
-    schema is always literal; conditional ones only appear inside ``<card>``
-    column definitions (which we don't generate code for).
+    children are wrapped. In namelist ``<var>``/``<dimension>`` elements the schema
+    is always literal; conditional ones only appear inside ``<card>`` column
+    definitions (which we don't generate code for).
+
+    The only valid dimensionality without units is ``dimensionless`` — every
+    *dimensioned* quantity must carry units, and units require a dimensionality.
+    A non-compliant pairing (units without dimensionality, or a dimensioned
+    quantity without units) raises rather than silently dropping the metadata.
     """
     units_el = element.find("units")
     dim_el = element.find("dimensionality")
-    if units_el is None or dim_el is None:
+    if (units_el is not None and units_el.attrib.get("kind") == "conditional") or (
+        dim_el is not None and dim_el.attrib.get("kind") == "conditional"
+    ):
         return None
-    if units_el.attrib.get("kind") == "conditional":
+
+    units = (units_el.text or "").strip() if units_el is not None else ""
+    dim = (dim_el.text or "").strip() if dim_el is not None else ""
+    name = element.attrib.get("name", "?")
+
+    if not units and not dim:
         return None
-    if dim_el.attrib.get("kind") == "conditional":
+    if dim == "dimensionless":
+        # A dimensionless quantity legitimately carries no units.
         return None
-    units = (units_el.text or "").strip()
-    dim = (dim_el.text or "").strip()
-    if not units or not dim:
-        return None
+    if not units:
+        raise InvalidXMLStructureError(f"`{name}` has dimensionality {dim!r} but no <units>.")
+    if not dim:
+        raise InvalidXMLStructureError(f"`{name}` has <units> {units!r} but no <dimensionality>.")
     return f'Quantity(units="{units}", dimensionality="{dim}")'
 
 

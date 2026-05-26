@@ -176,7 +176,7 @@ as above, in axsf format suitable for xcrysden
          <info>
 set to .true. to activate two-dimensional treatment of LO-TO splitting.
          </info>
-         <default> &apos;.false.&apos;
+         <default> .false.
          </default>
       </var>
       <var name="el_ph_nsig" type="INTEGER" >

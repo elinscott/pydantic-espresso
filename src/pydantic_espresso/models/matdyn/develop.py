@@ -50,8 +50,8 @@ class InputNamelist(Namelist):
               the dyn. mat."""
         ),
     )
-    huang: bool | None = Field(
-        None,
+    huang: bool = Field(
+        True,
         description=dedent(
             """\
             if .true. 15 Huang conditions for vanishing stress tensor are included in asr =
@@ -227,16 +227,16 @@ class InputNamelist(Namelist):
         False, description="set to .true. to activate two-dimensional treatment of LO-TO splitting"
     )
     loto_disable: bool = Field(False, description="if .true. do not apply LO-TO splitting for q=0")
-    read_lr: bool | None = Field(
-        None,
+    read_lr: bool = Field(
+        False,
         description=dedent(
             """\
             if .true. read also long-range force constants when they exist in force constant file.
             This is required when enforcing asr = 'all' for infrared-active solids."""
         ),
     )
-    write_frc: bool | None = Field(
-        None,
+    write_frc: bool = Field(
+        False,
         description=dedent(
             """\
             if .true. write force constants with asr imposed into file. The filename would be

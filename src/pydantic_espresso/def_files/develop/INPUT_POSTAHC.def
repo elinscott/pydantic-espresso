@@ -30,12 +30,8 @@ input_description -distribution {Quantum ESPRESSO} -package PHonon -program post
     }
     var outdir -type CHARACTER {
         default -kind conditional {
-            case -test {ESPRESSO_TMPDIR environment variable is set} {
-                value of the @tt ESPRESSO_TMPDIR environment variable
-            }
-            case {
-                current directory ('./')
-            }
+            case -test {ESPRESSO_TMPDIR is set} { from_environment }
+            case { ./ }
         }
         info {
             Directory containing input, output, and scratch files;

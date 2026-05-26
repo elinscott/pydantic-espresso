@@ -46,8 +46,8 @@ input_description -distribution {Quantum ESPRESSO} -package PWscf -program d3hes
 		directory containing the input data, i.e. the same as in pw.x
 	    }
             default -kind conditional {
-                case -test {ESPRESSO_TMPDIR is set and non-blank} { value of the @tt ESPRESSO_TMPDIR environment variable }
-                case { current directory ('./') }
+                case -test {ESPRESSO_TMPDIR is set} { from_environment }
+                case { ./ }
             }
         }
 

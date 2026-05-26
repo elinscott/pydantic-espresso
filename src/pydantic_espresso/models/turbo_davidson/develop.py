@@ -29,11 +29,8 @@ class LrInputNamelist(Namelist):
         None,
         json_schema_extra={
             "conditional_default": [
-                {
-                    "when": "ESPRESSO_TMPDIR environment variable is set and non-blank",
-                    "value": "value of the ESPRESSO_TMPDIR environment variable",
-                },
-                {"when": None, "value": "'./'"},
+                {"when": "ESPRESSO_TMPDIR is set", "value": "from_environment"},
+                {"when": None, "value": "./"},
             ],
         },
         description=dedent(

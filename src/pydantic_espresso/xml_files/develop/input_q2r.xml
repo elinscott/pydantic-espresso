@@ -108,7 +108,7 @@ of LO-TO splitting.
          </default>
       </var>
       <var name="write_lr" type="LOGICAL" >
-         <default> <tt>.false.</tt>
+         <default> .false.
          </default>
          <info>
 set to <b>.true.</b> to write long-range IFC into q2r IFC file.

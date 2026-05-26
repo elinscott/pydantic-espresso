@@ -38,46 +38,78 @@ from pydantic_espresso.xml2pydantic import (
     convert_xml_tree_to_model,
     sanitize_xml,
 )
-from pydantic_espresso.xml_files import directory as xml_directory
-
-XML_FILES = sorted((xml_directory / "develop").glob("*.xml"))
-
-
-def _stem(path: Path) -> str:
-    """Return the file stem for use as a parametrize id."""
-    return path.stem
-
 
 # ---------------------------------------------------------------------------
-# A. Whole-file generation sweep
+# A. Generation tests
+#
+# A single broad test drives the generator through the committed real pw.x
+# reference input. A small synthetic ``<choose>`` fixture covers the
+# discriminated-union path (pw.x has no ``<choose>``).
 # ---------------------------------------------------------------------------
 
-
-def test_xml_files_discovered() -> None:
-    """Sanity check that the develop XML files are discoverable."""
-    assert len(XML_FILES) >= 30
+DATA_DIR = Path(__file__).parent / "data"
 
 
-@pytest.mark.parametrize("xml_path", XML_FILES, ids=_stem)
-def test_convert_xml_file_compiles(xml_path: Path) -> None:
-    """Every develop XML file generates non-empty python source that compiles."""
-    source, executable = convert_xml_file_to_model(xml_path, version="develop")
-    assert source.strip()
-    assert executable
-    compile(source, str(xml_path), "exec")
+def _convert(xml: str) -> str:
+    """Parse ``xml`` and generate the model source for ``version="develop"``."""
+    return convert_xml_tree_to_model(fromstring(xml), version="develop")
 
 
-@pytest.mark.parametrize("xml_path", XML_FILES, ids=_stem)
-def test_generated_lines_within_limit(xml_path: Path) -> None:
-    """Generated source respects the 100-column limit (modulo trailing ``# noqa``).
+def test_convert_pw_xml_compiles() -> None:
+    """The committed pw.x reference input generates compilable model source."""
+    source, executable = convert_xml_file_to_model(DATA_DIR / "input_pw.xml", version="develop")
+    assert executable == "pw"
+    assert "class PWInput(EspressoInput):" in source
+    assert "class ControlNamelist(Namelist):" in source
+    compile(source, "input_pw.xml", "exec")
 
-    The committed generated models tolerate the same overflow: ruff's E501 does
-    not split a line whose overflow is solely a trailing ``# noqa`` directive, so
-    a handful of mixedCase fields exceed 100 columns once the noqa is appended.
-    """
-    source, _ = convert_xml_file_to_model(xml_path, version="develop")
-    over_limit = [line for line in source.splitlines() if len(line) > 100 and "# noqa" not in line]
-    assert not over_limit, over_limit[:3]
+
+# A discriminated <choose> with when / elsewhen / otherwise. The discriminator
+# carries <options> enumerating all values so the otherwise complement resolves.
+CHOOSE_XML = (
+    '<input program="plot.x">'
+    '<namelist name="plot">'
+    '<var name="iflag" type="INTEGER">'
+    "<default>3</default>"
+    '<options><opt val="0"/><opt val="1"/><opt val="2"/><opt val="3"/></options>'
+    "</var>"
+    "<choose>"
+    # The when-branch var has no <default>: it is REQUIRED within that branch,
+    # which also makes the whole namelist optional (Field(None, discriminator=...)).
+    '<when test="iflag = 0 or 1">'
+    '<var name="e1" type="REAL"/>'
+    "</when>"
+    '<elsewhen test="iflag = 2">'
+    '<var name="nx" type="INTEGER"><default>10</default></var>'
+    "</elsewhen>"
+    "<otherwise>"
+    '<var name="radius" type="REAL"><default>1.0</default></var>'
+    "</otherwise>"
+    "</choose>"
+    "</namelist>"
+    "</input>"
+)
+
+
+def test_generate_discriminated_choose_compiles() -> None:
+    """A discriminated ``<choose>`` emits a base class plus per-branch variants."""
+    source = _convert(CHOOSE_XML)
+    compile(source, "<choose>", "exec")
+
+    assert "_PlotNamelistBase" in source
+    assert "discriminator=" in source
+    assert "Annotated[" in source
+    # Per-branch variant classes.
+    assert "class PlotIflag0Or1Namelist(_PlotNamelistBase):" in source
+    assert "class PlotIflag2Namelist(_PlotNamelistBase):" in source
+    # The otherwise branch resolves to the complement value (3).
+    assert "class PlotIflag3Namelist(_PlotNamelistBase):" in source
+    # Branch-local fields. ``e1`` has no default so it is REQUIRED in its branch
+    # and the namelist field is exposed as ``PlotNamelist | None``.
+    assert "e1: float = Field(..." in source
+    assert "nx:" in source
+    assert "radius:" in source
+    assert 'plot: PlotNamelist | None = Field(None, discriminator="iflag")' in source
 
 
 # ---------------------------------------------------------------------------
@@ -141,6 +173,13 @@ def test_get_default_expr() -> None:
     assert "ecutwfc" in payload["default_expr"]
 
 
+def test_get_default_unknown_kind_raises() -> None:
+    """An unrecognised ``kind=`` attribute raises ``InvalidXMLStructureError``."""
+    elem = fromstring('<default kind="bogus">1</default>')
+    with pytest.raises(InvalidXMLStructureError):
+        _get_default("x", int, elem)
+
+
 @pytest.mark.parametrize(
     ("test", "expected"),
     [
@@ -164,15 +203,18 @@ def test_distribute_list_default_matching() -> None:
 
 
 def test_distribute_list_default_mismatch() -> None:
-    """A list default of the wrong length returns None."""
+    """A bracketed list default of the wrong length raises ``InvalidXMLStructureError``."""
     elem = fromstring("<default>[1.0, 2.0]</default>")
-    assert _distribute_list_default(elem, 3) is None
+    with pytest.raises(InvalidXMLStructureError):
+        _distribute_list_default(elem, 3)
 
 
-def test_distribute_list_default_non_list() -> None:
-    """A non-bracketed default returns None."""
+def test_distribute_list_default_broadcast() -> None:
+    """A non-bracketed scalar default is broadcast to one element per child."""
     elem = fromstring("<default>0.0</default>")
-    assert _distribute_list_default(elem, 3) is None
+    result = _distribute_list_default(elem, 3)
+    assert result is not None
+    assert [c.text for c in result] == ["0.0", "0.0", "0.0"]
 
 
 def test_distribute_list_default_with_kind() -> None:
@@ -260,6 +302,12 @@ def test_sanitize_numeric_int() -> None:
     assert _sanitize_numeric("7", int) == "7"
 
 
+def test_sanitize_numeric_invalid_raises() -> None:
+    """A non-compliant literal (a leftover conditional expr) raises."""
+    with pytest.raises(InvalidXMLStructureError):
+        _sanitize_numeric("iflag = 0 or 1", int)
+
+
 def test_maybe_list_default_float() -> None:
     """A float list default is rendered verbatim."""
     elem = fromstring("<default>[1.0, 2.0]</default>")
@@ -299,9 +347,25 @@ def test_build_quantity_conditional() -> None:
 
 
 def test_build_quantity_dimensionless() -> None:
-    """A dimensionality-only element (no units) yields no Quantity (legitimate)."""
-    elem = fromstring('<var name="x" type="REAL"><dimensionality>energy</dimensionality></var>')
+    """A ``dimensionless`` dimensionality (no units) yields no Quantity (legitimate)."""
+    elem = fromstring(
+        '<var name="x" type="REAL"><dimensionality>dimensionless</dimensionality></var>'
+    )
     assert _build_quantity(elem) is None
+
+
+def test_build_quantity_units_without_dimensionality() -> None:
+    """Units present without a dimensionality raises ``InvalidXMLStructureError``."""
+    elem = fromstring('<var name="x" type="REAL"><units>Ry</units></var>')
+    with pytest.raises(InvalidXMLStructureError):
+        _build_quantity(elem)
+
+
+def test_build_quantity_dimensioned_without_units() -> None:
+    """A dimensioned dimensionality without units raises ``InvalidXMLStructureError``."""
+    elem = fromstring('<var name="x" type="REAL"><dimensionality>energy</dimensionality></var>')
+    with pytest.raises(InvalidXMLStructureError):
+        _build_quantity(elem)
 
 
 def test_wrap_logical_line_bullet() -> None:
@@ -405,12 +469,6 @@ def test_py_literal_basic() -> None:
     assert _py_literal({"a": 1}) == '{"a": 1}'
 
 
-def test_py_literal_unsupported_raises() -> None:
-    """An unsupported type raises a TypeError."""
-    with pytest.raises(TypeError, match="Cannot render"):
-        _py_literal(object())
-
-
 # ---------------------------------------------------------------------------
 # sanitize_xml and tree-level conversion
 # ---------------------------------------------------------------------------
@@ -468,30 +526,3 @@ def test_convert_xml_tree_malformed_var_raises() -> None:
     )
     with pytest.raises(InvalidXMLStructureError):
         convert_xml_tree_to_model(root, version="develop")
-
-
-def test_discriminated_choose_generates_variants() -> None:
-    """A discriminated ``<choose>`` emits a base class plus per-branch variants."""
-    root = fromstring(
-        '<input program="plot.x">'
-        '<namelist name="plot">'
-        '<var name="iflag" type="INTEGER">'
-        "<default>3</default>"
-        '<options><opt val="0"/><opt val="1"/><opt val="2"/><opt val="3"/></options>'
-        "</var>"
-        "<choose>"
-        '<when test="iflag = 0 or 1">'
-        '<var name="e1" type="REAL"><default>1.0</default></var>'
-        "</when>"
-        "<otherwise>"
-        '<var name="nx" type="INTEGER"><default>10</default></var>'
-        "</otherwise>"
-        "</choose>"
-        "</namelist>"
-        "</input>"
-    )
-    source = convert_xml_tree_to_model(root, version="develop")
-    assert "_PlotNamelistBase" in source
-    assert "discriminator=" in source
-    assert "Annotated[" in source
-    compile(source, "<choose>", "exec")

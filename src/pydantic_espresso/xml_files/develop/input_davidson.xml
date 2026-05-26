@@ -42,10 +42,9 @@ same prefix.
       </var>
       <var name="outdir" type="CHARACTER" >
          <default kind="conditional" >
-            <case test="ESPRESSO_TMPDIR environment variable is set and non-blank" >
-value of the <tt>ESPRESSO_TMPDIR</tt> environment variable
+            <case test="ESPRESSO_TMPDIR is set" > from_environment
             </case>
-            <case> &apos;./&apos;
+            <case> ./
             </case>
          </default>
          <info>

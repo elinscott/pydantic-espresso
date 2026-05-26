@@ -106,7 +106,7 @@ input_description -distribution {Quantum ESPRESSO} -package PHonon -program q2r.
             default { .false. }
         }
         var write_lr -type LOGICAL {
-            default { @tt .false. }
+            default { .false. }
             info {
                 set to @b .true. to write long-range IFC into q2r IFC file.
                 This is required when enforcing asr='all' for infrared-

@@ -97,7 +97,7 @@ during the orthonormalization procedure (see below).
          </options>
       </var>
       <var name="huang" type="LOGICAL" >
-         <default> <tt>.true.</tt>
+         <default> .true.
          </default>
          <info>
 if <b>.true.</b> 15 Huang conditions for vanishing stress
@@ -354,7 +354,7 @@ if <b>.true.</b> do not apply LO-TO splitting for q=0
          </default>
       </var>
       <var name="read_lr" type="LOGICAL" >
-         <default> <tt>.false.</tt>
+         <default> .false.
          </default>
          <info>
 if <b>.true.</b> read also long-range force constants when they exist in
@@ -363,7 +363,7 @@ for infrared-active solids.
          </info>
       </var>
       <var name="write_frc" type="LOGICAL" >
-         <default> <tt>.false.</tt>
+         <default> .false.
          </default>
          <info>
 if <b>.true.</b> write force constants with <ref>asr</ref> imposed into file.

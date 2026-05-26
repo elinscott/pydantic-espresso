@@ -54,8 +54,8 @@ class InputNamelist(Namelist):
     loto_2d: bool = Field(
         False, description="set to .true. to activate two-dimensional treatment of LO-TO splitting."
     )
-    write_lr: bool | None = Field(
-        None,
+    write_lr: bool = Field(
+        False,
         description=dedent(
             """\
             set to .true. to write long-range IFC into q2r IFC file. This is required when

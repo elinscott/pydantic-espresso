@@ -86,8 +86,8 @@ class InputNamelist(Namelist):
     )
     filmol: str = Field("dynmat.mold", description="as above, in a format suitable for molden")
     filxsf: str = Field("dynmat.axsf", description="as above, in axsf format suitable for xcrysden")
-    loto_2d: bool | None = Field(
-        None, description="set to .true. to activate two-dimensional treatment of LO-TO splitting."
+    loto_2d: bool = Field(
+        False, description="set to .true. to activate two-dimensional treatment of LO-TO splitting."
     )
     el_ph_nsig: int | None = Field(
         None,

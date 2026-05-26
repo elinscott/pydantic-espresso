@@ -170,7 +170,7 @@ input_description -distribution {Quantum ESPRESSO} -package PHonon -program dynm
             info {
                 set to .true. to activate two-dimensional treatment of LO-TO splitting.
             }
-            default { '.false.' }
+            default { .false. }
         }
         var el_ph_nsig -type INTEGER {
             info {

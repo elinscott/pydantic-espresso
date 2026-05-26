@@ -42,10 +42,8 @@ input_description -distribution {Quantum ESPRESSO} -package turboTDDFPT -program
 
 	var outdir -type CHARACTER {
 	    default -kind conditional {
-		case -test {ESPRESSO_TMPDIR environment variable is set and non-blank} {
-		    value of the @tt ESPRESSO_TMPDIR environment variable
-		}
-		case { './' }
+		case -test {ESPRESSO_TMPDIR is set} { from_environment }
+		case { ./ }
 	    }
 	    info {
 		The directory that contains the run critical files, which
