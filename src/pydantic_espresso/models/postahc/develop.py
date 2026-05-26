@@ -127,4 +127,4 @@ class InputNamelist(Namelist):
 class POSTAHCInput(EspressoInput):
     """Pydantic model for the input of `postahc.x`."""
 
-    input: InputNamelist | None = Field(None)
+    input: InputNamelist = Field(...)

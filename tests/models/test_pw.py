@@ -36,6 +36,7 @@ def test_pw_espresso_input(version: Version, k_points: dict[str, Any]) -> None:
 
     # Instantiate the model
     inp = model(
+        system={"ibrav": 0, "nat": 1, "ntyp": 1, "ecutwfc": 30.0},
         cell_parameters={"unit": "alat", "vectors": np.identity(3)},
         atomic_positions={
             "unit": "alat",

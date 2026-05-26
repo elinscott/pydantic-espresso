@@ -620,4 +620,4 @@ class InputphNamelist(Namelist):
 class PHInput(EspressoInput):
     """Pydantic model for the input of `ph.x`."""
 
-    inputph: InputphNamelist | None = Field(None)
+    inputph: InputphNamelist = Field(...)

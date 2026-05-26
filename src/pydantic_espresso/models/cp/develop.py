@@ -1711,7 +1711,7 @@ class CPInput(EspressoInput):
     """Pydantic model for the input of `cp.x`."""
 
     control: ControlNamelist = Field(default_factory=lambda: ControlNamelist())
-    system: SystemNamelist | None = Field(None)
+    system: SystemNamelist = Field(...)
     electrons: ElectronsNamelist = Field(default_factory=lambda: ElectronsNamelist())
     ions: IonsNamelist = Field(default_factory=lambda: IonsNamelist())
     cell: CellNamelist = Field(default_factory=lambda: CellNamelist())

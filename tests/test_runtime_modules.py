@@ -39,6 +39,7 @@ def test_namelist_str_renders_numeric() -> None:
 def test_espresso_input_str_includes_namelists_and_cards() -> None:
     """``EspressoInput.__str__`` renders set namelists and card text."""
     inp = PWInput(
+        system={"ibrav": 0, "nat": 1, "ntyp": 1, "ecutwfc": 30.0},
         cell_parameters={"unit": "alat", "vectors": np.identity(3)},
         atomic_positions={
             "unit": "alat",

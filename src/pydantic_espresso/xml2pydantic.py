@@ -134,8 +134,10 @@ def convert_xml_tree_to_model(root: Element, version: str = "develop") -> str:
     imports: set[str] = set()
     needs_quantity = False
 
+    mandatory = _mandatory_namelists(root)
     for namelist in root.findall("namelist"):
-        field_line, namelist_block, uses_quantity = _process_namelist(namelist)
+        is_mandatory = namelist.attrib["name"] in mandatory
+        field_line, namelist_block, uses_quantity = _process_namelist(namelist, is_mandatory)
         needs_quantity = needs_quantity or uses_quantity
         fields.append(field_line)
         subclasses += namelist_block
@@ -158,12 +160,14 @@ def convert_xml_tree_to_model(root: Element, version: str = "develop") -> str:
     )
 
 
-def _process_namelist(namelist: Element) -> tuple[str, list[str], bool]:
+def _process_namelist(namelist: Element, is_mandatory: bool) -> tuple[str, list[str], bool]:
     """Process one ``<namelist>`` element.
 
     Returns ``(field_line, namelist_block, uses_quantity)`` where ``field_line``
     is the EspressoInput-level field referring to the namelist subclass and
-    ``namelist_block`` is the subclass definition lines.
+    ``namelist_block`` is the subclass definition lines. ``is_mandatory`` says
+    whether the namelist is required by the executable (unbracketed in the input
+    structure block); see ``_mandatory_namelists``.
     """
     _propagate_group_attributes(namelist)
 
@@ -174,7 +178,7 @@ def _process_namelist(namelist: Element) -> tuple[str, list[str], bool]:
     # subsequent ``<choose>``s) fall through to the single-class path.
     discriminated_choose = _find_discriminated_choose(namelist)
     if discriminated_choose is not None:
-        return _process_discriminated_namelist(namelist, discriminated_choose)
+        return _process_discriminated_namelist(namelist, discriminated_choose, is_mandatory)
 
     field_definitions, field_validators, uses_quantity = _collect_fields(
         namelist.findall(".//var"), namelist.findall(".//dimension")
@@ -182,24 +186,67 @@ def _process_namelist(namelist: Element) -> tuple[str, list[str], bool]:
 
     name = namelist.attrib["name"]
     type_name = f"{camel_case(name)}Namelist"
-    # If any ``<var>`` in this namelist is REQUIRED (and has no default) the
-    # namelist cannot be auto-constructed with zero args; expose it as
-    # ``Optional[...]`` defaulting to None so the user must supply it (or omit
-    # it entirely when not needed).
-    if _namelist_has_required_var(namelist):
-        field_line = _format_simple_field(
-            name.lower(),
-            f"{type_name} | None",
-            "Field(None)",
-        )
-    else:
-        field_line = _format_simple_field(
-            name.lower(),
-            type_name,
-            f"Field(default_factory=lambda: {type_name}())",
-        )
+    field_line = _namelist_field_line(
+        name, type_name, namelist, is_mandatory, factory_expr=f"{type_name}()"
+    )
     namelist_block = _generate_namelist(name, field_definitions, field_validators)
     return field_line, namelist_block, uses_quantity
+
+
+def _namelist_field_line(
+    name: str,
+    type_name: str,
+    namelist: Element,
+    is_mandatory: bool,
+    *,
+    factory_expr: str,
+    discriminator: str = "",
+) -> str:
+    """Render the EspressoInput-level field declaration for a namelist.
+
+    Three cases:
+
+    - no REQUIRED-without-default var -> ``Field(default_factory=...)`` (the
+      namelist can be auto-built from defaults).
+    - has a REQUIRED var and the namelist is *mandatory* -> ``Field(...)`` so
+      that omitting it raises (and pydantic then reports the missing fields).
+    - has a REQUIRED var but the namelist is *optional* -> ``Type | None =
+      Field(None)`` so it can be omitted when not needed.
+    """
+    discr_kwarg = f', discriminator="{discriminator}"' if discriminator else ""
+    if not _namelist_has_required_var(namelist):
+        return _format_simple_field(
+            name.lower(), type_name, f"Field(default_factory=lambda: {factory_expr}{discr_kwarg})"
+        )
+    if is_mandatory:
+        return _format_simple_field(name.lower(), type_name, f"Field(...{discr_kwarg})")
+    return _format_simple_field(name.lower(), f"{type_name} | None", f"Field(None{discr_kwarg})")
+
+
+def _mandatory_namelists(root: Element) -> set[str]:
+    """Return the names of namelists the executable requires (always present).
+
+    The ``<intro>`` text carries a "Structure of the input data" diagram in
+    which each namelist appears as ``&NAME``; optional namelists are wrapped in
+    square brackets, e.g. ``[ &CELL ... ]``. A namelist whose ``&NAME`` marker
+    is *not* bracketed is mandatory. A namelist not mentioned in the diagram is
+    treated as optional (conservative — we don't force-require it).
+    """
+    intro_el = root.find("intro")
+    if intro_el is None:
+        return set()
+    intro = "".join(intro_el.itertext())
+    # Search the structure diagram if present, else the whole intro.
+    anchor = re.search(r"Structure of the input data", intro, re.IGNORECASE)
+    structure = intro[anchor.end() :] if anchor else intro
+
+    mandatory: set[str] = set()
+    for namelist in root.findall("namelist"):
+        name = namelist.attrib["name"]
+        match = re.search(rf"(\[\s*)?&{re.escape(name)}\b", structure, re.IGNORECASE)
+        if match is not None and match.group(1) is None:
+            mandatory.add(name)
+    return mandatory
 
 
 def _namelist_has_required_var(namelist: Element) -> bool:
@@ -302,7 +349,7 @@ def _find_discriminated_choose(namelist: Element) -> Element | None:
 
 
 def _process_discriminated_namelist(
-    namelist: Element, choose: Element
+    namelist: Element, choose: Element, is_mandatory: bool
 ) -> tuple[str, list[str], bool]:
     """Emit a base class, one variant per branch, and a discriminated-union alias."""
     branches = [b for b in choose if b.tag in ("when", "elsewhen", "otherwise")]
@@ -366,21 +413,14 @@ def _process_discriminated_namelist(
     subclasses.extend(["", ""])
 
     default_variant = variant_names[0]
-    # If any variant has a REQUIRED-without-default ``<var>`` (unconditional or
-    # branch-local), the namelist can't be auto-constructed; expose it as
-    # ``Optional[...]`` defaulting to None.
-    if _namelist_has_required_var(namelist):
-        field_line = _format_simple_field(
-            name.lower(),
-            f"{alias_name} | None",
-            f'Field(None, discriminator="{discriminator}")',
-        )
-    else:
-        field_line = _format_simple_field(
-            name.lower(),
-            alias_name,
-            f'Field(default_factory=lambda: {default_variant}(), discriminator="{discriminator}")',
-        )
+    field_line = _namelist_field_line(
+        name,
+        alias_name,
+        namelist,
+        is_mandatory,
+        factory_expr=f"{default_variant}()",
+        discriminator=discriminator,
+    )
     return field_line, subclasses, uses_quantity
 
 

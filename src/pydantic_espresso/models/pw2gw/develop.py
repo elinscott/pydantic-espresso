@@ -84,4 +84,4 @@ class InputppNamelist(Namelist):
 class PW2GWInput(EspressoInput):
     """Pydantic model for the input of `pw2gw.x`."""
 
-    inputpp: InputppNamelist | None = Field(None)
+    inputpp: InputppNamelist = Field(...)

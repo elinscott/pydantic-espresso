@@ -69,4 +69,4 @@ class InputNamelist(Namelist):
 class Q2RInput(EspressoInput):
     """Pydantic model for the input of `q2r.x`."""
 
-    input: InputNamelist | None = Field(None)
+    input: InputNamelist = Field(...)

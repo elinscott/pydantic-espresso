@@ -5,7 +5,12 @@ from pydantic_espresso.utils import INDENT, BaseModel
 
 
 class EspressoInput(BaseModel):
-    """Template pydantic model for the input of a Quantum ESPRESSO executable."""
+    """Template pydantic model for the input of a Quantum ESPRESSO executable.
+
+    Construction raises the usual :class:`pydantic.ValidationError` when inputs
+    are missing or invalid; pass the caught error to
+    :func:`pydantic_espresso.errors.explain` for a readable, recursive summary.
+    """
 
     def __str__(self) -> str:
         out = ""

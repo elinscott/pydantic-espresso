@@ -282,4 +282,4 @@ class PPRISMInput(EspressoInput):
     """Pydantic model for the input of `pprism.x`."""
 
     inputpp: InputppNamelist = Field(default_factory=lambda: InputppNamelist())
-    plot: PlotNamelist | None = Field(None, discriminator="iflag")
+    plot: PlotNamelist = Field(..., discriminator="iflag")

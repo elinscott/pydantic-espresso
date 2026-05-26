@@ -3,6 +3,7 @@
 import pytest
 from pydantic import ValidationError
 
+from pydantic_espresso.errors import explain
 from pydantic_espresso.models.pp.develop import (
     PlotIflag0Or1Namelist,
     PlotIflag2Namelist,
@@ -67,3 +68,13 @@ def test_pp_plot_iflag2_omitting_required_raises() -> None:
     with pytest.raises(ValidationError) as exc:
         PPInput(plot={"iflag": 2})
     assert "nx" in str(exc.value)
+
+
+def test_explain_renders_missing_plot_fields() -> None:
+    """``explain`` summarises the missing iflag=2 branch fields with annotations."""
+    with pytest.raises(ValidationError) as exc:
+        PPInput(plot={"iflag": 2})
+    report = explain(exc.value, PPInput)
+    assert "PPInput is missing required inputs:" in report
+    for name in ("nx", "ny", "e1", "e2", "x0"):
+        assert name in report
