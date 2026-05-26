@@ -1,6 +1,12 @@
 # Created by https://www.toptal.com/developers/gitignore/api/macos,linux,windows,python,jupyternotebooks,jetbrains,pycharm,vim,emacs,visualstudiocode,visualstudio
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,linux,windows,python,jupyternotebooks,jetbrains,pycharm,vim,emacs,visualstudiocode,visualstudio
 
+# Generated intermediates: helpdoc output, regenerated from def_files via
+# `pydantic_espresso def2xml`. Not committed (the committed models capture the
+# result); the committed def_files are the source of truth.
+src/pydantic_espresso/xml_files/**/*.xml
+src/pydantic_espresso/xml_files/**/*.xsl
+
 ### Emacs ###
 # -*- mode: gitignore; -*-
 *~

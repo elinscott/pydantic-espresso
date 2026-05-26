@@ -2,6 +2,24 @@
 requires = ["uv_build>=0.6.6,<0.7"]
 build-backend = "uv_build"
 
+[tool.uv.build-backend]
+# The .def / .xml input descriptions are dev-time inputs to the model generator;
+# only the generated `models/` package is needed at runtime. Exclude the data
+# from both the sdist and the wheel (source-exclude is applied to wheels too),
+# while keeping the package __init__.py files so the subpackages still import.
+# uv_build does not read MANIFEST.in (that is setuptools-only).
+source-exclude = [
+    "src/pydantic_espresso/def_files/**/*.def",
+    "src/pydantic_espresso/def_files/**/*.xsl",
+    "src/pydantic_espresso/xml_files/**/*.xml",
+    "src/pydantic_espresso/xml_files/**/*.xsl",
+    # Dev caches that can appear under src/ and otherwise get swept into the
+    # build (uv_build only excludes __pycache__/*.pyc by default).
+    "**/.mypy_cache/**",
+    "**/.ruff_cache/**",
+    "**/.pytest_cache/**",
+]
+
 [project]
 name = "pydantic_espresso"
 version = "0.0.1-dev"
