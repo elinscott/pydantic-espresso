@@ -94,11 +94,9 @@ def schema(executable: str, version: str) -> None:
 
     try:
         # Try to import the model class
-        model_class = getattr(module, f"{executable.upper()}EspressoInput")
+        model_class = getattr(module, f"{executable.upper()}Input")
     except AttributeError:
-        click.echo(
-            f"Model class {executable.upper()}EspressoInput not found for version {version}."
-        )
+        click.echo(f"Model class {executable.upper()}Input not found for version {version}.")
         return
 
     click.echo(json.dumps(model_class.model_json_schema(), indent=2))
