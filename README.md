@@ -80,6 +80,40 @@ QE namelist branches with mutually-exclusive layouts (e.g. PP's `PLOT`
 namelist discriminated on `iflag`) are exposed as pydantic discriminated
 unions, so the right variant is picked automatically from the input data.
 
+### Readable error reports
+
+Construction raises a standard `pydantic.ValidationError`. Pass the caught
+error to `pydantic_espresso.errors.explain` for a grouped, recursive summary
+that names each missing input together with its type, units, and help text:
+
+```python
+from pydantic import ValidationError
+from pydantic_espresso.errors import explain
+from pydantic_espresso.models.pw.develop import PWInput
+
+try:
+    inp = PWInput(
+        system={"ibrav": 0, "ecutwfc": 30.0},                     # missing nat, ntyp
+        cell_parameters={"vectors": [[1, 0, 0], [0, 1, 0], [0, 0, 1]]},  # missing 'unit'
+        k_points={"kind": "automatic"},                           # missing grid
+        # atomic_positions omitted entirely
+    )
+except ValidationError as exc:
+    print(explain(exc, PWInput))
+```
+
+```text
+PWInput is missing required inputs:
+  system:
+      - nat (int): number of atoms in the unit cell (ALL atoms, except if space_group is set, in
+        which case, INEQUIVALENT atoms)
+      - ntyp (int): number of types of atoms in the unit cell
+  atomic_positions: required — choose 'unit': ['alat', 'bohr', 'angstrom', 'crystal', 'crystal_sg']
+  k_points [kind='automatic']:
+      - grid (tuple)
+  cell_parameters: missing discriminator 'unit' (one of ['alat', 'bohr', 'angstrom'])
+```
+
 ### Command Line Interface
 
 The `pydantic_espresso` command line tool ships with the package but requires
