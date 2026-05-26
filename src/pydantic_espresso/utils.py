@@ -2,13 +2,13 @@
 
 import os
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, TypeAlias
 
 from pydantic import BaseModel as _BaseModel
 from pydantic import ConfigDict, Field
 
-type PositiveFloat = Annotated[float, Field(gt=0)]
-type PositiveInt = Annotated[int, Field(gt=0)]
+PositiveFloat: TypeAlias = Annotated[float, Field(gt=0)]
+PositiveInt: TypeAlias = Annotated[int, Field(gt=0)]
 INDENT = " " * 2
 
 
